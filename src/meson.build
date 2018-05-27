@@ -1,4 +1,5 @@
 sources = files(
+    'gw-application.c',
     'gw-main.c'
 )
 

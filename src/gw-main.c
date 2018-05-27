@@ -18,15 +18,7 @@
 
 #include <gtk/gtk.h>
 
-static void
-on_activate (GApplication *app,
-             gpointer user_data)
-{
-    GtkWidget *window;
-
-    window = gtk_application_window_new (GTK_APPLICATION (app));
-    gtk_widget_show (window);
-}
+#include "gw-application.h"
 
 int
 main (int argc, char **argv)
@@ -34,14 +26,8 @@ main (int argc, char **argv)
     GtkApplication *application;
     int status;
 
-    application = gtk_application_new ("org.gnome.Weibo",
-                                       G_APPLICATION_FLAGS_NONE);
-    g_signal_connect (application, "activate",
-                      G_CALLBACK (on_activate), NULL);
-
+    application = gw_application_new ();
     status = g_application_run (G_APPLICATION (application), argc, argv);
-
-    g_object_unref (application);
 
     return status;
 }
