@@ -1,6 +1,7 @@
 sources = files(
     'gw-application.c',
-    'gw-main.c'
+    'gw-main.c',
+    'gw-window.c'
 )
 
 executable(

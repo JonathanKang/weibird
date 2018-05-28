@@ -18,43 +18,29 @@
 
 #include <gtk/gtk.h>
 
-#include "gw-application.h"
 #include "gw-window.h"
 
-struct _GwApplication
+struct _GwWindow
 {
     /*< private >*/
-    GtkApplication parent_instance;
+    GtkApplicationWindow parent_instance;
 };
 
-G_DEFINE_TYPE (GwApplication, gw_application, GTK_TYPE_APPLICATION)
+G_DEFINE_TYPE (GwWindow, gw_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static void
-gw_application_activate (GApplication *application)
-{
-    GtkWidget *window;
-
-    window = gw_window_new (GTK_APPLICATION (application));
-    gtk_widget_show (window);
-}
-
-static void
-gw_application_init (GwApplication *application)
+gw_window_init (GwWindow *window)
 {
 }
 
 static void
-gw_application_class_init (GwApplicationClass *klass)
+gw_window_class_init (GwWindowClass *klass)
 {
-    GApplicationClass *app_class;
-
-    app_class = G_APPLICATION_CLASS (klass);
-    app_class->activate = gw_application_activate;
 }
 
-GtkApplication *
-gw_application_new (void)
+GtkWidget *
+gw_window_new (GtkApplication *application)
 {
-    return g_object_new (GW_TYPE_APPLICATION,
-                         "application-id", "org.gnome.Weibo", NULL);
+    return g_object_new (GTK_TYPE_WINDOW,
+                         "application", application, NULL);
 }
