@@ -41,6 +41,6 @@ gw_window_class_init (GwWindowClass *klass)
 GtkWidget *
 gw_window_new (GtkApplication *application)
 {
-    return g_object_new (GTK_TYPE_WINDOW,
+    return g_object_new (GW_TYPE_WINDOW,
                          "application", application, NULL);
 }
