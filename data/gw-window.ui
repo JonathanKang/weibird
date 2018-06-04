@@ -1,0 +1,15 @@
+<interface domain="gnome-weibo">
+    <template class="GwWindow" parent="GtkApplicationWindow">
+        <property name="height-request">800</property>
+        <property name="width-request">640</property>
+        <child type="titlebar">
+            <object class="GtkHeaderBar" id="toolbar">
+                <property name="visible">True</property>
+                <property name="show-close-button">True</property>
+                <style>
+                    <class name="titlebar"/>
+                </style>
+            </object>
+        </child>
+    </template>
+</interface>

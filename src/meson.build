@@ -4,6 +4,15 @@ sources = files(
     'gw-window.c'
 )
 
+sources += gnome.compile_resources(
+    'gw-resources',
+    gresource,
+    c_name: 'gw',
+    source_dir: data_dir,
+    dependencies: resource_data,
+    export: true
+)
+
 executable(
     gw_name,
     sources,

@@ -21,9 +21,14 @@ c_compiler = meson.get_compiler('c')
 supported_warning_cflags = c_compiler.get_supported_arguments(warning_cflags)
 add_global_arguments(supported_warning_cflags, language : 'c')
 
+gnome = import('gnome')
+
 #dependencies
 gl_deps = [
     dependency('gtk+-3.0')
 ]
 
+data_dir = join_paths(meson.source_root(), 'data')
+
+subdir('data')
 subdir('src')

@@ -1,0 +1,5 @@
+<gresources>
+    <gresource prefix='/org/gnome/Weibo'>
+        <file preprocess='xml-stripblanks'>gw-window.ui</file>
+    </gresource>
+</gresources>
