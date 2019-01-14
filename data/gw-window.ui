@@ -12,5 +12,21 @@
                 </style>
             </object>
         </child>
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="visible">True</property>
+                <child>
+                    <object class="GtkStack" id="main_stack">
+                        <property name="expand">True</property>
+                        <property name="visible">True</property>
+                        <child>
+                            <object class="GwTimelineList" id="timeline">
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
     </template>
 </interface>

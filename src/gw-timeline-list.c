@@ -19,46 +19,48 @@
 #include <gtk/gtk.h>
 
 #include "gw-timeline-list.h"
-#include "gw-window.h"
 
-struct _GwWindow
+struct _GwTimelineList
 {
     /*< private >*/
-    GtkApplicationWindow parent_instance;
+    GtkBox parent_instance;
 };
 
 typedef struct
 {
-    GtkWidget *timeline;
-} GwWindowPrivate;
+    GtkListBox *timeline_list;
+} GwTimelineListPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (GwWindow, gw_window, GTK_TYPE_APPLICATION_WINDOW)
-
-static void
-gw_window_init (GwWindow *window)
-{
-    /* Ensure GTK+ private types used by the template definition
-     * before calling gtk_widget_init_template()
-     */
-    g_type_ensure (GW_TYPE_TIMELINE_LIST);
-
-    gtk_widget_init_template (GTK_WIDGET (window));
-}
+G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineList, gw_timeline_list, GTK_TYPE_BOX)
 
 static void
-gw_window_class_init (GwWindowClass *klass)
+gw_timeline_list_class_init (GwTimelineListClass *klass)
 {
-    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+    GtkWidgetClass *widget_class;
+
+    widget_class = GTK_WIDGET_CLASS (klass);
 
     gtk_widget_class_set_template_from_resource (widget_class,
-                                                 "/org/gnome/Weibo/gw-window.ui");
+                                                 "/org/gnome/Weibo/gw-timeline-list.ui");
     gtk_widget_class_bind_template_child_private (widget_class,
-                                                  GwWindow, timeline);
+                                                  GwTimelineList, timeline_list);
 }
 
-GtkWidget *
-gw_window_new (GtkApplication *application)
+static void
+gw_timeline_list_init (GwTimelineList *self)
 {
-    return g_object_new (GW_TYPE_WINDOW,
-                         "application", application, NULL);
+    gtk_widget_init_template (GTK_WIDGET (self));
+}
+
+/**
+ * gw_timeline_list_new:
+ *
+ * Create a new #GwTimelineList.
+ *
+ * Returns: (transfer full): a newly created #GwTimelineList
+ */
+GwTimelineList *
+gw_timeline_list_new (void)
+{
+    return g_object_new (GW_TYPE_TIMELINE_LIST, NULL);
 }

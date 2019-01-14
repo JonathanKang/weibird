@@ -1,4 +1,5 @@
 resource_data = files(
+    'gw-timeline-list.ui',
     'gw-window.ui'
 )
 
