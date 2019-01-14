@@ -25,7 +25,11 @@ gnome = import('gnome')
 
 #dependencies
 gl_deps = [
-    dependency('gtk+-3.0')
+    dependency('gtk+-3.0'),
+    dependency('json-glib-1.0'),
+    dependency('libsoup-2.4'),
+    dependency('rest-0.7'),
+    dependency('webkit2gtk-4.0')
 ]
 
 data_dir = join_paths(meson.source_root(), 'data')
