@@ -27,6 +27,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (GwTimelineList, gw_timeline_list, GW, TIMELINE_LIST, GtkBox)
 
 GwTimelineList *gw_timeline_list_new (void);
+GtkWidget *gw_timeline_list_get_login_button (GwTimelineList *list);
 
 G_END_DECLS
 

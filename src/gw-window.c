@@ -17,6 +17,10 @@
  */
 
 #include <gtk/gtk.h>
+#include <json-glib/json-glib.h>
+#include <libsoup/soup.h>
+#include <rest/oauth2-proxy.h>
+#include <webkit2/webkit2.h>
 
 #include "gw-timeline-list.h"
 #include "gw-window.h"
@@ -34,15 +38,216 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (GwWindow, gw_window, GTK_TYPE_APPLICATION_WINDOW)
 
+static gboolean
+on_web_view_decide_policy (WebKitWebView *web_view,
+                           WebKitPolicyDecision *decision,
+                           WebKitPolicyDecisionType decision_type,
+                           gpointer user_data)
+{
+    const gchar *requested_uri;
+    const gchar *fragment;
+    const gchar *payload;
+    const gchar *query;
+    gchar *access_token = NULL;
+    gchar *code = NULL;
+    GError *error = NULL;
+    GHashTable *key_value_pairs;
+    gsize payload_length;
+    guint status_code;
+    OAuth2Proxy *proxy = OAUTH2_PROXY (user_data);
+    RestProxy *token_proxy;
+    RestProxyCall *token_call;
+    SoupURI *uri;
+    WebKitNavigationAction *action;
+    WebKitURIRequest *request;
+
+    if (decision_type != WEBKIT_POLICY_DECISION_TYPE_NAVIGATION_ACTION)
+    {
+        goto default_behaviour;
+    }
+
+    action = webkit_navigation_policy_decision_get_navigation_action (WEBKIT_NAVIGATION_POLICY_DECISION (decision));
+    request = webkit_navigation_action_get_request (action);
+    requested_uri = webkit_uri_request_get_uri (request);
+    if (!g_str_has_prefix (requested_uri, "https://api.weibo.com/oauth2/default.html"))
+    {
+        goto default_behaviour;
+    }
+
+    uri = soup_uri_new (requested_uri);
+    fragment = soup_uri_get_fragment (uri);
+    query = soup_uri_get_query (uri);
+
+    if (fragment != NULL)
+    {
+        key_value_pairs = soup_form_decode (fragment);
+        access_token = g_strdup (g_hash_table_lookup (key_value_pairs, "access_token"));
+
+        g_hash_table_unref (key_value_pairs);
+    }
+
+    if (access_token != NULL)
+    {
+        goto ignore_request;
+    }
+
+    if (query != NULL)
+    {
+        key_value_pairs = soup_form_decode (query);
+
+        code = g_strdup (g_hash_table_lookup (key_value_pairs, "code"));
+
+        g_hash_table_unref (key_value_pairs);
+    }
+
+    if (code != NULL)
+    {
+        GError *tokens_error = NULL;
+        GSettings *settings;
+        JsonParser *parser;
+        JsonObject *object;
+
+        token_proxy = rest_proxy_new ("https://api.weibo.com/oauth2/access_token",
+                                      FALSE);
+        token_call = rest_proxy_new_call (token_proxy);
+
+        rest_proxy_call_set_method (token_call, "POST");
+        rest_proxy_call_add_header (token_call, "Content-Type",
+                                    "application/x-www-form-urlencoded");
+        rest_proxy_call_add_param (token_call, "client_id", "1450991920");
+        rest_proxy_call_add_param (token_call, "client_secret",
+                                   "24afe70740825258ca104ee54acf9712");
+        rest_proxy_call_add_param (token_call, "grant_type", "authorization_code");
+        rest_proxy_call_add_param (token_call, "redirect_uri",
+                                   "https://api.weibo.com/oauth2/default.html");
+        rest_proxy_call_add_param (token_call, "code", code);
+
+        rest_proxy_call_sync (token_call, &error);
+        if (error != NULL)
+        {
+            g_error ("Cannot make call: %s", error->message);
+            g_error_free (error);
+        }
+
+        status_code = rest_proxy_call_get_status_code (token_call);
+        if (status_code != 200)
+        {
+            g_error ("Expected status 200 when requesting access token, instead got status %d (%s)",
+                     status_code,
+                     rest_proxy_call_get_status_message (token_call));
+            g_error_free (error);
+        }
+
+        payload = rest_proxy_call_get_payload (token_call);
+        payload_length = rest_proxy_call_get_payload_length (token_call);
+
+        parser = json_parser_new ();
+
+        /* Parse the data we received */
+        if (!json_parser_load_from_data (parser,
+                                         payload, payload_length, &tokens_error))
+        {
+            g_warning ("json_parser_load_from_data () failed: %s (%s, %d)",
+                       tokens_error->message,
+                       g_quark_to_string (tokens_error->domain),
+                       tokens_error->code);
+            g_object_unref (parser);
+        }
+
+        object = json_node_get_object (json_parser_get_root (parser));
+        if (!json_object_has_member (object, "access_token"))
+        {
+            g_warning ("Did not find access_token in JSON data");
+            g_object_unref (object);
+        }
+
+        /* Got the access token */
+        access_token = g_strdup (json_object_get_string_member (object, "access_token"));
+        oauth2_proxy_set_access_token (proxy, access_token);
+
+        settings = g_settings_new ("org.gnome.Weibo");
+        g_settings_set_string (settings, "access-token", access_token);
+        g_object_unref (settings);
+
+        goto default_behaviour;
+    }
+
+ignore_request:
+    webkit_policy_decision_ignore (decision);
+
+    g_free (access_token);
+    g_free (code);
+
+    return TRUE;
+
+default_behaviour:
+    g_free (access_token);
+    g_free (code);
+
+    return FALSE;
+}
+
+static void
+on_login_button_clicked (GtkWidget *button,
+                         gpointer user_data)
+{
+    gchar *uri;
+    GtkWidget *content_area;
+    GtkWidget *dialog;
+    GtkWidget *web_view;
+    GwWindow *window;
+    RestProxy *proxy;
+
+    window = GW_WINDOW (user_data);
+
+    web_view = webkit_web_view_new ();
+    gtk_widget_set_hexpand (web_view, TRUE);
+    gtk_widget_set_vexpand (web_view, TRUE);
+    gtk_widget_set_size_request (web_view, 600, 400);
+
+    dialog = gtk_dialog_new ();
+    gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (window));
+    g_signal_connect_swapped (dialog, "response",
+                              G_CALLBACK (gtk_widget_destroy), dialog);
+    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+    gtk_container_add (GTK_CONTAINER (content_area), web_view);
+
+    proxy = oauth2_proxy_new ("1450991920",
+                              "https://api.weibo.com/oauth2/authorize",
+                              "https://api.weibo.com", FALSE);
+
+    uri = oauth2_proxy_build_login_url (OAUTH2_PROXY (proxy),
+                                        "https://api.weibo.com/oauth2/default.html");
+
+    /* Load the uri in web view */
+    webkit_web_view_load_uri (WEBKIT_WEB_VIEW (web_view), uri);
+    g_signal_connect (WEBKIT_WEB_VIEW (web_view), "decide-policy",
+                      G_CALLBACK (on_web_view_decide_policy), proxy);
+
+    gtk_widget_show_all (dialog);
+    gtk_dialog_run (GTK_DIALOG (dialog));
+}
+
 static void
 gw_window_init (GwWindow *window)
 {
+    GtkWidget *login_button;
+    GwTimelineList *timeline;
+    GwWindowPrivate *priv;
+
     /* Ensure GTK+ private types used by the template definition
      * before calling gtk_widget_init_template()
      */
     g_type_ensure (GW_TYPE_TIMELINE_LIST);
 
     gtk_widget_init_template (GTK_WIDGET (window));
+
+    priv = gw_window_get_instance_private (window);
+    timeline = GW_TIMELINE_LIST (priv->timeline);
+
+    login_button = gw_timeline_list_get_login_button (timeline);
+    g_signal_connect (login_button, "clicked",
+                      G_CALLBACK (on_login_button_clicked), window);
 }
 
 static void
