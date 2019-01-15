@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-weibo">
+  <schema id="org.gnome.Weibo" path="/org/gnome/weibo/">
+    <key name="access-token" type="s">
+      <summary>Access Token</summary>
+      <description>Access Token used to access your Weibo account.</description>
+      <default>""</default>
+    </key>
+  </schema>
+</schemalist>

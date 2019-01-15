@@ -5,6 +5,7 @@ gw_version = meson.project_version()
 
 gw_prefix = get_option('prefix')
 gw_bindir = join_paths(gw_prefix, get_option('bindir'))
+gw_datadir = join_paths(gw_prefix, get_option('datadir'))
 
 # warning cflags
 warning_cflags = [
@@ -39,3 +40,5 @@ data_dir = join_paths(meson.source_root(), 'data')
 
 subdir('data')
 subdir('src')
+
+meson.add_install_script('meson_post_install.py')

@@ -101,6 +101,11 @@ on_web_view_decide_policy (WebKitWebView *web_view,
 
     if (code != NULL)
     {
+        GError *tokens_error = NULL;
+        GSettings *settings;
+        JsonParser *parser;
+        JsonObject *object;
+
         token_proxy = rest_proxy_new ("https://api.weibo.com/oauth2/access_token",
                                       FALSE);
         token_call = rest_proxy_new_call (token_proxy);
@@ -135,10 +140,6 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         payload = rest_proxy_call_get_payload (token_call);
         payload_length = rest_proxy_call_get_payload_length (token_call);
 
-        JsonParser *parser;
-        JsonObject *object;
-        GError *tokens_error = NULL;
-
         parser = json_parser_new ();
 
         /* Parse the data we received */
@@ -162,6 +163,10 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         /* Got the access token */
         access_token = g_strdup (json_object_get_string_member (object, "access_token"));
         oauth2_proxy_set_access_token (proxy, access_token);
+
+        settings = g_settings_new ("org.gnome.Weibo");
+        g_settings_set_string (settings, "access-token", access_token);
+        g_object_unref (settings);
 
         goto default_behaviour;
     }
