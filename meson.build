@@ -27,7 +27,7 @@ add_global_arguments(supported_warning_cflags, language : 'c')
 gnome = import('gnome')
 
 #dependencies
-gl_deps = [
+gw_deps = [
     dependency('gtk+-3.0'),
     dependency('json-glib-1.0'),
     dependency('libsoup-2.4'),

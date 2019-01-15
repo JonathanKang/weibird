@@ -17,7 +17,7 @@ sources += gnome.compile_resources(
 executable(
     gw_name,
     sources,
-    dependencies : gl_deps,
+    dependencies : gw_deps,
     install : true,
     install_dir: gw_bindir
 )
