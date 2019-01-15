@@ -150,6 +150,7 @@ on_web_view_decide_policy (WebKitWebView *web_view,
                        tokens_error->message,
                        g_quark_to_string (tokens_error->domain),
                        tokens_error->code);
+            g_error_free (tokens_error);
             g_object_unref (parser);
         }
 
@@ -157,7 +158,6 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         if (!json_object_has_member (object, "access_token"))
         {
             g_warning ("Did not find access_token in JSON data");
-            g_object_unref (object);
         }
 
         /* Got the access token */
@@ -165,6 +165,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
 
         settings = g_settings_new ("org.gnome.Weibo");
         g_settings_set_string (settings, "access-token", access_token);
+
+        g_object_unref (parser);
         g_object_unref (settings);
 
         goto default_behaviour;
