@@ -126,6 +126,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         {
             g_error ("Cannot make call: %s", error->message);
             g_error_free (error);
+
+            goto ignore_request;
         }
 
         status_code = rest_proxy_call_get_status_code (token_call);
@@ -135,6 +137,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
                      status_code,
                      rest_proxy_call_get_status_message (token_call));
             g_error_free (error);
+
+            goto ignore_request;
         }
 
         payload = rest_proxy_call_get_payload (token_call);
@@ -152,12 +156,16 @@ on_web_view_decide_policy (WebKitWebView *web_view,
                        tokens_error->code);
             g_error_free (tokens_error);
             g_object_unref (parser);
+
+            goto ignore_request;
         }
 
         object = json_node_get_object (json_parser_get_root (parser));
         if (!json_object_has_member (object, "access_token"))
         {
             g_warning ("Did not find access_token in JSON data");
+
+            goto ignore_request;
         }
 
         /* Got the access token */
