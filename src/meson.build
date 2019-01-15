@@ -18,5 +18,6 @@ executable(
     gw_name,
     sources,
     dependencies : gl_deps,
-    install : true
+    install : true,
+    install_dir: gw_bindir
 )

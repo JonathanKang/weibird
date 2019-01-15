@@ -3,6 +3,9 @@ project('gnome-weibo', 'c', version : '0.0')
 gw_name = meson.project_name()
 gw_version = meson.project_version()
 
+gw_prefix = get_option('prefix')
+gw_bindir = join_paths(gw_prefix, get_option('bindir'))
+
 # warning cflags
 warning_cflags = [
     '-Wall',
