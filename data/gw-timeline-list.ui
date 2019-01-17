@@ -3,7 +3,7 @@
         <property name="orientation">vertical</property>
         <property name="visible">True</property>
         <child>
-            <object class="GtkScrolledWindow" id="diaries_scrolled">
+            <object class="GtkScrolledWindow" id="timeline_scrolled">
                 <property name="expand">True</property>
                 <property name="visible">True</property>
                 <child>
