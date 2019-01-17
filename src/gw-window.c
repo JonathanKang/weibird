@@ -203,10 +203,13 @@ on_login_button_clicked (GtkWidget *button,
     GtkWidget *content_area;
     GtkWidget *dialog;
     GtkWidget *web_view;
-    GwWindow *window;
     RestProxy *proxy;
+    GwWindow *window;
+    GwWindowPrivate *priv;
+    GwTimelineList *timeline;
 
     window = GW_WINDOW (user_data);
+    priv = gw_window_get_instance_private (window);
 
     web_view = webkit_web_view_new ();
     gtk_widget_set_hexpand (web_view, TRUE);
@@ -234,6 +237,9 @@ on_login_button_clicked (GtkWidget *button,
 
     gtk_widget_show_all (dialog);
     gtk_dialog_run (GTK_DIALOG (dialog));
+
+    timeline = GW_TIMELINE_LIST (priv->timeline);
+    gw_timeline_list_get_home_timeline (timeline);
 }
 
 static void

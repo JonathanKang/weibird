@@ -46,11 +46,62 @@ static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 static void
 gw_timeline_row_constructed (GObject *object)
 {
+    GtkWidget *hbox;
+    GtkWidget *main_box;
+    GtkWidget *name_label;
+    GtkWidget *text_label;
+    GtkWidget *time_label;
+    GwTimelineRow *row = GW_TIMELINE_ROW (object);
+    GwTimelineRowPrivate *priv = gw_timeline_row_get_instance_private (row);
+
+    hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+    main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+    gtk_widget_set_margin_start (main_box, 6);
+    gtk_widget_set_margin_end (main_box, 6);
+    gtk_widget_set_margin_top (main_box, 6);
+    gtk_widget_set_margin_bottom (main_box, 6);
+
+    name_label = gtk_label_new (priv->post_item->user->name);
+    gtk_widget_set_halign (name_label, GTK_ALIGN_START);
+    gtk_box_pack_start (GTK_BOX (hbox), name_label, TRUE, TRUE, 0);
+
+    time_label = gtk_label_new (priv->post_item->created_at);
+    gtk_widget_set_halign (time_label, GTK_ALIGN_END);
+    gtk_box_pack_end (GTK_BOX (hbox), time_label, TRUE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (main_box), hbox, TRUE, TRUE, 0);
+
+    text_label = gtk_label_new (priv->post_item->text);
+    gtk_widget_set_halign (text_label, GTK_ALIGN_START);
+    gtk_label_set_line_wrap (GTK_LABEL (text_label), TRUE);
+    gtk_box_pack_end (GTK_BOX (main_box), text_label, TRUE, TRUE, 0);
+
+    gtk_container_add (GTK_CONTAINER (row), main_box);
+    gtk_widget_show_all (GTK_WIDGET (row));
+
+    G_OBJECT_CLASS (gw_timeline_row_parent_class)->constructed (object);
 }
 
 static void
 gw_timeline_row_finalize (GObject *object)
 {
+    GwTimelineRow *self = GW_TIMELINE_ROW (object);
+    GwTimelineRowPrivate *priv = gw_timeline_row_get_instance_private (self);
+
+    g_free (priv->post_item->created_at);
+    g_free (priv->post_item->idstr);
+    g_free (priv->post_item->text);
+    g_free (priv->post_item->source);
+    g_free (priv->post_item->thumbnail_pic);
+    g_free (priv->post_item->user->idstr);
+    g_free (priv->post_item->user->name);
+    g_free (priv->post_item->user->location);
+    g_free (priv->post_item->user->description);
+    g_free (priv->post_item->user->url);
+    g_free (priv->post_item->user->profile_image_url);
+    g_free (priv->post_item->user->gender);
+    g_free (priv->post_item->user->created_at);
+    g_free (priv->post_item->user);
+    g_free (priv->post_item);
 }
 
 static void
