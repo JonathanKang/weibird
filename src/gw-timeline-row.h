@@ -21,12 +21,14 @@
 
 #include <gtk/gtk.h>
 
+#include "gw-timeline-list.h"
+
 G_BEGIN_DECLS
 
 #define GW_TYPE_TIMELINE_ROW (gw_timeline_row_get_type ())
 G_DECLARE_FINAL_TYPE (GwTimelineRow, gw_timeline_row, GW, TIMELINE_ROW, GtkListBoxRow)
 
-GwTimelineRow *gw_timeline_row_new (void);
+GwTimelineRow *gw_timeline_row_new (GwPostItem *post_item);
 
 G_END_DECLS
 
