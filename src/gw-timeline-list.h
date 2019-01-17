@@ -23,6 +23,45 @@
 
 G_BEGIN_DECLS
 
+typedef struct
+{
+    gint64 id;
+    gchar *idstr;
+    gchar *name;
+    gchar *location;
+    gchar *description;
+    gchar *url;
+    gchar *profile_image_url;
+    gchar *gender;
+    gint followers_count;
+    gint friends_count;
+    gint statuses_count;
+    gint favourites_count;
+    gchar *created_at;
+    gboolean verified;
+    gboolean follow_me;
+} GwUser;
+
+typedef struct
+{
+    gchar *created_at;
+    gint64 id;
+    gint64 mid;
+    gchar *idstr;
+
+    gchar *text;
+    gchar *source;
+
+    gboolean favourited;
+    gchar *thumbnail_pic;
+
+    gint reposts_count;
+    gint comments_count;
+    gint attitudes_count;
+
+    GwUser *user;
+} GwPostItem;
+
 #define GW_TYPE_TIMELINE_LIST (gw_timeline_list_get_type ())
 G_DECLARE_FINAL_TYPE (GwTimelineList, gw_timeline_list, GW, TIMELINE_LIST, GtkBox)
 
