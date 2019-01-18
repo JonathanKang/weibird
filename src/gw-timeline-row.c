@@ -16,7 +16,10 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gio/gio.h>
 #include <gtk/gtk.h>
+#include <libsoup/soup.h>
 
 #include "gw-timeline-list.h"
 #include "gw-timeline-row.h"
@@ -43,12 +46,65 @@ G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineRow, gw_timeline_row, GTK_TYPE_LIST_BOX_RO
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
+static GtkWidget *
+load_remote_image (const gchar *uri)
+{
+    GdkPixbuf *pixbuf;
+    GError *error = NULL;
+    GInputStream *stream;
+    GtkWidget *image;
+    guint status_code;
+    SoupMessage *msg;
+    SoupSession *session;
+
+    g_return_val_if_fail (uri != NULL, NULL);
+
+    msg = soup_message_new (SOUP_METHOD_GET, uri);
+    session = soup_session_new ();
+    status_code = soup_session_send_message (session, msg);
+    if (status_code != SOUP_STATUS_OK)
+    {
+        g_warning ("Failed to download the image.");
+
+        g_object_unref (msg);
+        g_object_unref (session);
+
+        return NULL;
+    }
+
+    stream = g_memory_input_stream_new_from_data (msg->response_body->data,
+                                                  msg->response_body->length,
+                                                  NULL);
+    pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, &error);
+    if (error != NULL)
+    {
+        g_warning ("Unable to create pixbuf: %s",
+                   error->message);
+        g_clear_error (&error);
+    }
+
+    image = gtk_image_new_from_pixbuf (pixbuf);
+
+    g_object_unref (msg);
+    g_object_unref (session);
+    g_input_stream_close (stream, NULL, &error);
+    if (error != NULL)
+    {
+        g_warning ("Unable to close the input stream: %s",
+                   error->message);
+        g_clear_error (&error);
+    }
+
+    return image;
+}
+
 static void
 gw_timeline_row_constructed (GObject *object)
 {
     GtkWidget *hbox;
     GtkWidget *main_box;
     GtkWidget *name_label;
+    GtkWidget *profile_image;
     GtkWidget *text_label;
     GtkWidget *time_label;
     GwTimelineRow *row = GW_TIMELINE_ROW (object);
@@ -61,19 +117,23 @@ gw_timeline_row_constructed (GObject *object)
     gtk_widget_set_margin_top (main_box, 6);
     gtk_widget_set_margin_bottom (main_box, 6);
 
+    profile_image = load_remote_image (priv->post_item->user->profile_image_url);
+    gtk_widget_set_halign (profile_image, GTK_ALIGN_START);
+    gtk_box_pack_start (GTK_BOX (hbox), profile_image, FALSE, FALSE, 0);
+
     name_label = gtk_label_new (priv->post_item->user->name);
     gtk_widget_set_halign (name_label, GTK_ALIGN_START);
-    gtk_box_pack_start (GTK_BOX (hbox), name_label, TRUE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (hbox), name_label, FALSE, FALSE, 0);
 
     time_label = gtk_label_new (priv->post_item->created_at);
     gtk_widget_set_halign (time_label, GTK_ALIGN_END);
-    gtk_box_pack_end (GTK_BOX (hbox), time_label, TRUE, TRUE, 0);
-    gtk_box_pack_start (GTK_BOX (main_box), hbox, TRUE, TRUE, 0);
+    gtk_box_pack_end (GTK_BOX (hbox), time_label, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (main_box), hbox, FALSE, FALSE, 0);
 
     text_label = gtk_label_new (priv->post_item->text);
     gtk_widget_set_halign (text_label, GTK_ALIGN_START);
     gtk_label_set_line_wrap (GTK_LABEL (text_label), TRUE);
-    gtk_box_pack_end (GTK_BOX (main_box), text_label, TRUE, TRUE, 0);
+    gtk_box_pack_end (GTK_BOX (main_box), text_label, FALSE, FALSE, 0);
 
     gtk_container_add (GTK_CONTAINER (row), main_box);
     gtk_widget_show_all (GTK_WIDGET (row));
