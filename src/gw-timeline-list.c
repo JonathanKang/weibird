@@ -190,6 +190,28 @@ gw_timeline_list_create_placeholder (GwTimelineList *self)
 }
 
 static void
+listbox_update_header_func (GtkListBoxRow *row,
+                            GtkListBoxRow *before,
+                            gpointer user_data)
+{
+    GtkWidget *header;
+
+    if (before == NULL)
+    {
+        gtk_list_box_row_set_header (row, NULL);
+        return;
+    }
+
+    header = gtk_list_box_row_get_header (row);
+    if (header == NULL)
+    {
+        header = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
+        gtk_widget_show (header);
+        gtk_list_box_row_set_header (row, header);
+    }
+}
+
+static void
 gw_timeline_list_class_init (GwTimelineListClass *klass)
 {
     GtkWidgetClass *widget_class;
@@ -211,6 +233,10 @@ gw_timeline_list_init (GwTimelineList *self)
     gtk_widget_init_template (GTK_WIDGET (self));
 
     priv = gw_timeline_list_get_instance_private (self);
+
+    gtk_list_box_set_header_func (priv->timeline_list,
+                                  (GtkListBoxUpdateHeaderFunc) listbox_update_header_func,
+                                  NULL, NULL);
 
     placeholder = gw_timeline_list_create_placeholder (self);
     gtk_list_box_set_placeholder (priv->timeline_list, placeholder);
