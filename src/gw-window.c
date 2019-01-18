@@ -33,10 +33,15 @@ struct _GwWindow
 
 typedef struct
 {
+    GtkStack *main_stack;
+    GtkWidget *login_box;
     GtkWidget *timeline;
 } GwWindowPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (GwWindow, gw_window, GTK_TYPE_APPLICATION_WINDOW)
+
+static const gchar SETTINGS_SCHEMA[] = "org.gnome.Weibo";
+static const gchar ACCESS_TOKEN[] = "access-token";
 
 static gboolean
 on_web_view_decide_policy (WebKitWebView *web_view,
@@ -171,8 +176,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         /* Got the access token */
         access_token = g_strdup (json_object_get_string_member (object, "access_token"));
 
-        settings = g_settings_new ("org.gnome.Weibo");
-        g_settings_set_string (settings, "access-token", access_token);
+        settings = g_settings_new (SETTINGS_SCHEMA);
+        g_settings_set_string (settings, ACCESS_TOKEN, access_token);
 
         g_object_unref (parser);
         g_object_unref (settings);
@@ -238,6 +243,7 @@ on_login_button_clicked (GtkWidget *button,
     gtk_widget_show_all (dialog);
     gtk_dialog_run (GTK_DIALOG (dialog));
 
+    gtk_stack_set_visible_child (priv->main_stack, priv->timeline);
     timeline = GW_TIMELINE_LIST (priv->timeline);
     gw_timeline_list_get_home_timeline (timeline);
 }
@@ -245,8 +251,9 @@ on_login_button_clicked (GtkWidget *button,
 static void
 gw_window_init (GwWindow *window)
 {
-    GtkWidget *login_button;
-    GwTimelineList *timeline;
+    gchar *access_token;
+    GSettings *settings;
+    GwTimelineList *list;
     GwWindowPrivate *priv;
 
     /* Ensure GTK+ private types used by the template definition
@@ -257,11 +264,22 @@ gw_window_init (GwWindow *window)
     gtk_widget_init_template (GTK_WIDGET (window));
 
     priv = gw_window_get_instance_private (window);
-    timeline = GW_TIMELINE_LIST (priv->timeline);
+    list = GW_TIMELINE_LIST (priv->timeline);
 
-    login_button = gw_timeline_list_get_login_button (timeline);
-    g_signal_connect (login_button, "clicked",
-                      G_CALLBACK (on_login_button_clicked), window);
+    settings = g_settings_new (SETTINGS_SCHEMA);
+    access_token = g_settings_get_string (settings, ACCESS_TOKEN);
+    if (g_strcmp0 (access_token, "") != 0)
+    {
+        gtk_stack_set_visible_child (priv->main_stack, priv->timeline);
+        gw_timeline_list_get_home_timeline (list);
+    }
+    else
+    {
+        gtk_stack_set_visible_child (priv->main_stack, priv->login_box);
+    }
+
+    g_free (access_token);
+    g_object_unref (settings);
 }
 
 static void
@@ -272,7 +290,13 @@ gw_window_class_init (GwWindowClass *klass)
     gtk_widget_class_set_template_from_resource (widget_class,
                                                  "/org/gnome/Weibo/gw-window.ui");
     gtk_widget_class_bind_template_child_private (widget_class,
+                                                  GwWindow, main_stack);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  GwWindow, login_box);
+    gtk_widget_class_bind_template_child_private (widget_class,
                                                   GwWindow, timeline);
+
+    gtk_widget_class_bind_template_callback (widget_class, on_login_button_clicked);
 }
 
 GtkWidget *

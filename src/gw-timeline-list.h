@@ -66,7 +66,6 @@ typedef struct
 G_DECLARE_FINAL_TYPE (GwTimelineList, gw_timeline_list, GW, TIMELINE_LIST, GtkBox)
 
 void gw_timeline_list_get_home_timeline (GwTimelineList *list);
-GtkWidget *gw_timeline_list_get_login_button (GwTimelineList *list);
 GwTimelineList *gw_timeline_list_new (void);
 
 G_END_DECLS

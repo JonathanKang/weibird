@@ -4,7 +4,7 @@
     <key name="access-token" type="s">
       <summary>Access Token</summary>
       <description>Access Token used to access your Weibo account.</description>
-      <default>""</default>
+      <default>''</default>
     </key>
   </schema>
 </schemalist>
