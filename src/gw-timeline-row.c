@@ -140,17 +140,21 @@ gw_timeline_row_constructed (GObject *object)
 
     name_label = gtk_label_new (priv->post_item->user->name);
     gtk_widget_set_halign (name_label, GTK_ALIGN_START);
-    gtk_widget_set_valign (name_label, GTK_ALIGN_END);
     gtk_box_pack_start (GTK_BOX (vbox), name_label, TRUE, TRUE, 0);
 
-    priv->post_item->source = gw_util_format_source_string (priv->post_item->source);
-    source_label = gtk_label_new (NULL);
-    context = gtk_widget_get_style_context (source_label);
-    gtk_style_context_add_class (context, "dim-label");
-    gtk_label_set_markup (GTK_LABEL (source_label), priv->post_item->source);
-    gtk_widget_set_halign (source_label, GTK_ALIGN_START);
-    gtk_widget_set_valign (source_label, GTK_ALIGN_START);
-    gtk_box_pack_end (GTK_BOX (vbox), source_label, TRUE, TRUE, 0);
+    if (g_strcmp0 (priv->post_item->source, "") != 0)
+    {
+        gtk_widget_set_valign (name_label, GTK_ALIGN_END);
+
+        priv->post_item->source = gw_util_format_source_string (priv->post_item->source);
+        source_label = gtk_label_new (NULL);
+        context = gtk_widget_get_style_context (source_label);
+        gtk_style_context_add_class (context, "dim-label");
+        gtk_label_set_markup (GTK_LABEL (source_label), priv->post_item->source);
+        gtk_widget_set_halign (source_label, GTK_ALIGN_START);
+        gtk_widget_set_valign (source_label, GTK_ALIGN_START);
+        gtk_box_pack_end (GTK_BOX (vbox), source_label, TRUE, TRUE, 0);
+    }
 
     priv->post_item->created_at = gw_util_format_time_string (priv->post_item->created_at);
     time_label = gtk_label_new (priv->post_item->created_at);
