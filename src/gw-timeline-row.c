@@ -23,6 +23,7 @@
 
 #include "gw-timeline-list.h"
 #include "gw-timeline-row.h"
+#include "gw-util.h"
 
 enum
 {
@@ -125,6 +126,7 @@ gw_timeline_row_constructed (GObject *object)
     gtk_widget_set_halign (name_label, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (hbox), name_label, FALSE, FALSE, 0);
 
+    priv->post_item->created_at = gw_util_format_time_string (priv->post_item->created_at);
     time_label = gtk_label_new (priv->post_item->created_at);
     gtk_widget_set_halign (time_label, GTK_ALIGN_END);
     gtk_box_pack_end (GTK_BOX (hbox), time_label, FALSE, FALSE, 0);

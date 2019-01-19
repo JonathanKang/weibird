@@ -3,6 +3,7 @@ sources = files(
     'gw-main.c',
     'gw-timeline-list.c',
     'gw-timeline-row.c',
+    'gw-util.c',
     'gw-window.c'
 )
 
