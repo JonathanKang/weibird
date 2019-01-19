@@ -67,7 +67,9 @@ parse_weibo_post (JsonArray *array,
     if (json_object_has_member (object, "thumbnail_pic"))
     {
         post_item->thumbnail_pic = g_strdup (json_object_get_string_member (object,
-                                                                           "thumbnail_pic"));
+                                                                            "thumbnail_pic"));
+        post_item->bmiddle_pic = g_strdup (json_object_get_string_member (object,
+                                                                          "bmiddle_pic"));
     }
     post_item->reposts_count = json_object_get_int_member (object, "reposts_count");
     post_item->comments_count = json_object_get_int_member (object, "comments_count");

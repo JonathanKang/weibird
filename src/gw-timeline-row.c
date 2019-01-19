@@ -109,6 +109,7 @@ gw_timeline_row_constructed (GObject *object)
     GtkWidget *name_label;
     GtkWidget *profile_image;
     GtkWidget *text_label;
+    GtkWidget *post_image;
     GtkWidget *time_label;
     GtkWidget *likes_label;
     GtkWidget *comments_label;
@@ -126,6 +127,7 @@ gw_timeline_row_constructed (GObject *object)
     gtk_box_pack_start (GTK_BOX (main_box), hbox1, FALSE, FALSE, 0);
     gtk_box_pack_end (GTK_BOX (main_box), hbox2, FALSE, FALSE, 0);
 
+    /* Profile image, name and time */
     profile_image = load_remote_image (priv->post_item->user->profile_image_url);
     gtk_widget_set_halign (profile_image, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (hbox1), profile_image, FALSE, FALSE, 0);
@@ -139,11 +141,21 @@ gw_timeline_row_constructed (GObject *object)
     gtk_widget_set_halign (time_label, GTK_ALIGN_END);
     gtk_box_pack_end (GTK_BOX (hbox1), time_label, FALSE, FALSE, 0);
 
+    /* Post content */
     text_label = gtk_label_new (priv->post_item->text);
     gtk_widget_set_halign (text_label, GTK_ALIGN_START);
     gtk_label_set_line_wrap (GTK_LABEL (text_label), TRUE);
-    gtk_box_pack_end (GTK_BOX (main_box), text_label, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (main_box), text_label, FALSE, FALSE, 0);
 
+    /* Post image */
+    /* TODO: Add support for multiple pictures */
+    if (priv->post_item->bmiddle_pic != NULL)
+    {
+        post_image = load_remote_image (priv->post_item->bmiddle_pic);
+        gtk_box_pack_start (GTK_BOX (main_box), post_image, FALSE, FALSE, 0);
+    }
+
+    /* Likes, comments and reposts count */
     likes_label = gtk_label_new (NULL);
     markup = g_markup_printf_escaped ("<b>%d</b> Likes",
                                       priv->post_item->attitudes_count);
@@ -182,6 +194,7 @@ gw_timeline_row_finalize (GObject *object)
     g_free (priv->post_item->text);
     g_free (priv->post_item->source);
     g_free (priv->post_item->thumbnail_pic);
+    g_free (priv->post_item->bmiddle_pic);
     g_free (priv->post_item->user->idstr);
     g_free (priv->post_item->user->name);
     g_free (priv->post_item->user->location);

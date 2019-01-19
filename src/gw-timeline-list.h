@@ -54,6 +54,7 @@ typedef struct
 
     gboolean favourited;
     gchar *thumbnail_pic;
+    gchar *bmiddle_pic;
 
     gint reposts_count;
     gint comments_count;
