@@ -67,3 +67,42 @@ gw_util_format_time_string (gchar *str)
 
     return ret;
 }
+
+/**
+ *
+ * gw_util_format_source_string:
+ * @source: the source string fetched from Weibo API
+ *
+ * The source field fetched from Weibo API looks like this:
+ * <a href="http://this.is.a/link" rel="nofollow">微博 weibo.com</a>.
+ * We can use this as a label's marked up text. But it contains a
+ * property(rel) which is not recognized by <a>. This function converts
+ * raw @source string to one that can be used as a markup string.
+ *
+ * Returns: A newly allocated markup string
+ */
+gchar *
+gw_util_format_source_string (gchar *source)
+{
+    gchar *str = NULL;
+    gchar *str1;
+    const gchar *remove = " rel=\"nofollow\"";
+    gchar *ret;
+
+    g_return_val_if_fail (source != NULL, NULL);
+
+    str = g_strrstr (source, remove);
+    /* The string to be removed not found, return the original string */
+    if (str == NULL)
+    {
+        return source;
+    }
+
+    str1 = g_strndup (source, str - source);
+    ret = g_strconcat (str1, str + strlen (remove), NULL);
+
+    g_free (str1);
+    g_free (source);
+
+    return ret;
+}

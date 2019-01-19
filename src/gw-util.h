@@ -24,6 +24,7 @@
 G_BEGIN_DECLS
 
 gchar *gw_util_format_time_string (gchar *time);
+gchar *gw_util_format_source_string (gchar *source);
 
 G_BEGIN_DECLS
 

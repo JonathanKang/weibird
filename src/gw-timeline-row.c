@@ -105,8 +105,10 @@ gw_timeline_row_constructed (GObject *object)
     gchar *markup;
     GtkWidget *hbox1;
     GtkWidget *hbox2;
+    GtkWidget *vbox;
     GtkWidget *main_box;
     GtkWidget *name_label;
+    GtkWidget *source_label;
     GtkWidget *profile_image;
     GtkWidget *text_label;
     GtkWidget *post_image;
@@ -127,14 +129,24 @@ gw_timeline_row_constructed (GObject *object)
     gtk_box_pack_start (GTK_BOX (main_box), hbox1, FALSE, FALSE, 0);
     gtk_box_pack_end (GTK_BOX (main_box), hbox2, FALSE, FALSE, 0);
 
-    /* Profile image, name and time */
+    /* Profile image, name, source and time */
     profile_image = load_remote_image (priv->post_item->user->profile_image_url);
     gtk_widget_set_halign (profile_image, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (hbox1), profile_image, FALSE, FALSE, 0);
 
+    vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_pack_start (GTK_BOX (hbox1), vbox, FALSE, FALSE, 0);
+
     name_label = gtk_label_new (priv->post_item->user->name);
     gtk_widget_set_halign (name_label, GTK_ALIGN_START);
-    gtk_box_pack_start (GTK_BOX (hbox1), name_label, FALSE, FALSE, 0);
+    gtk_widget_set_valign (name_label, GTK_ALIGN_END);
+    gtk_box_pack_start (GTK_BOX (vbox), name_label, TRUE, TRUE, 0);
+
+    priv->post_item->source = gw_util_format_source_string (priv->post_item->source);
+    source_label = gtk_label_new (NULL);
+    gtk_label_set_markup (GTK_LABEL (source_label), priv->post_item->source);
+    gtk_widget_set_valign (source_label, GTK_ALIGN_START);
+    gtk_box_pack_end (GTK_BOX (vbox), source_label, TRUE, TRUE, 0);
 
     priv->post_item->created_at = gw_util_format_time_string (priv->post_item->created_at);
     time_label = gtk_label_new (priv->post_item->created_at);
