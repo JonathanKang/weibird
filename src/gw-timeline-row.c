@@ -102,40 +102,68 @@ load_remote_image (const gchar *uri)
 static void
 gw_timeline_row_constructed (GObject *object)
 {
-    GtkWidget *hbox;
+    gchar *markup;
+    GtkWidget *hbox1;
+    GtkWidget *hbox2;
     GtkWidget *main_box;
     GtkWidget *name_label;
     GtkWidget *profile_image;
     GtkWidget *text_label;
     GtkWidget *time_label;
+    GtkWidget *likes_label;
+    GtkWidget *comments_label;
+    GtkWidget *reposts_label;
     GwTimelineRow *row = GW_TIMELINE_ROW (object);
     GwTimelineRowPrivate *priv = gw_timeline_row_get_instance_private (row);
 
-    hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+    hbox1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+    hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
     main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
     gtk_widget_set_margin_start (main_box, 6);
     gtk_widget_set_margin_end (main_box, 6);
     gtk_widget_set_margin_top (main_box, 6);
     gtk_widget_set_margin_bottom (main_box, 6);
+    gtk_box_pack_start (GTK_BOX (main_box), hbox1, FALSE, FALSE, 0);
+    gtk_box_pack_end (GTK_BOX (main_box), hbox2, FALSE, FALSE, 0);
 
     profile_image = load_remote_image (priv->post_item->user->profile_image_url);
     gtk_widget_set_halign (profile_image, GTK_ALIGN_START);
-    gtk_box_pack_start (GTK_BOX (hbox), profile_image, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (hbox1), profile_image, FALSE, FALSE, 0);
 
     name_label = gtk_label_new (priv->post_item->user->name);
     gtk_widget_set_halign (name_label, GTK_ALIGN_START);
-    gtk_box_pack_start (GTK_BOX (hbox), name_label, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (hbox1), name_label, FALSE, FALSE, 0);
 
     priv->post_item->created_at = gw_util_format_time_string (priv->post_item->created_at);
     time_label = gtk_label_new (priv->post_item->created_at);
     gtk_widget_set_halign (time_label, GTK_ALIGN_END);
-    gtk_box_pack_end (GTK_BOX (hbox), time_label, FALSE, FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (main_box), hbox, FALSE, FALSE, 0);
+    gtk_box_pack_end (GTK_BOX (hbox1), time_label, FALSE, FALSE, 0);
 
     text_label = gtk_label_new (priv->post_item->text);
     gtk_widget_set_halign (text_label, GTK_ALIGN_START);
     gtk_label_set_line_wrap (GTK_LABEL (text_label), TRUE);
     gtk_box_pack_end (GTK_BOX (main_box), text_label, FALSE, FALSE, 0);
+
+    likes_label = gtk_label_new (NULL);
+    markup = g_markup_printf_escaped ("<b>%d</b> Likes",
+                                      priv->post_item->attitudes_count);
+    gtk_label_set_markup (GTK_LABEL (likes_label), markup);
+    gtk_box_pack_start (GTK_BOX (hbox2), likes_label, FALSE, FALSE, 0);
+    g_free (markup);
+
+    comments_label = gtk_label_new (NULL);
+    markup = g_markup_printf_escaped ("<b>%d</b> Comments",
+                                      priv->post_item->comments_count);
+    gtk_label_set_markup (GTK_LABEL (comments_label), markup);
+    gtk_box_pack_start (GTK_BOX (hbox2), comments_label, FALSE, FALSE, 0);
+    g_free (markup);
+
+    reposts_label = gtk_label_new (NULL);
+    markup = g_markup_printf_escaped ("<b>%d</b> Reposts",
+                                      priv->post_item->reposts_count);
+    gtk_label_set_markup (GTK_LABEL (reposts_label), markup);
+    gtk_box_pack_start (GTK_BOX (hbox2), reposts_label, FALSE, FALSE, 0);
+    g_free (markup);
 
     gtk_container_add (GTK_CONTAINER (row), main_box);
     gtk_widget_show_all (GTK_WIDGET (row));
