@@ -103,6 +103,7 @@ static void
 gw_timeline_row_constructed (GObject *object)
 {
     gchar *markup;
+    GtkStyleContext *context;
     GtkWidget *hbox1;
     GtkWidget *hbox2;
     GtkWidget *vbox;
@@ -144,7 +145,10 @@ gw_timeline_row_constructed (GObject *object)
 
     priv->post_item->source = gw_util_format_source_string (priv->post_item->source);
     source_label = gtk_label_new (NULL);
+    context = gtk_widget_get_style_context (source_label);
+    gtk_style_context_add_class (context, "dim-label");
     gtk_label_set_markup (GTK_LABEL (source_label), priv->post_item->source);
+    gtk_widget_set_halign (source_label, GTK_ALIGN_START);
     gtk_widget_set_valign (source_label, GTK_ALIGN_START);
     gtk_box_pack_end (GTK_BOX (vbox), source_label, TRUE, TRUE, 0);
 
