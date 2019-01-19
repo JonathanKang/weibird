@@ -85,12 +85,13 @@ gw_util_format_source_string (gchar *source)
 
     g_return_val_if_fail (source != NULL, NULL);
 
-    vector = g_strsplit_set (source, "<>", -1);
-    if (vector == NULL)
+    /* Don't parse it when @source is an empty string */
+    if (g_strcmp0 (source, "") == 0)
     {
         return source;
     }
 
+    vector = g_strsplit_set (source, "<>", -1);
     ret = g_strdup (vector[2]);
 
     g_free (source);
