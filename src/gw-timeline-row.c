@@ -120,8 +120,8 @@ gw_timeline_row_constructed (GObject *object)
     hbox1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
     hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
     main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-    gtk_widget_set_margin_start (main_box, 6);
-    gtk_widget_set_margin_end (main_box, 6);
+    gtk_widget_set_margin_start (main_box, 12);
+    gtk_widget_set_margin_end (main_box, 12);
     gtk_widget_set_margin_top (main_box, 6);
     gtk_widget_set_margin_bottom (main_box, 6);
     gtk_box_pack_start (GTK_BOX (main_box), hbox1, FALSE, FALSE, 0);
