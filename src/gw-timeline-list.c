@@ -83,7 +83,7 @@ parse_weibo_post (JsonArray *array,
 
     post_item->user = user;
     row = GTK_WIDGET (gw_timeline_row_new (post_item));
-    gtk_list_box_prepend (GTK_LIST_BOX (priv->timeline_list), row);
+    gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list), row, -1);
 }
 
 void
