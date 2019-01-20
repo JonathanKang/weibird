@@ -79,6 +79,7 @@ parse_weibo_post (JsonArray *array,
     user->id = json_object_get_int_member (user_object, "id");
     user->idstr = g_strdup (json_object_get_string_member (user_object, "idstr"));
     user->name = g_strdup (json_object_get_string_member (user_object, "name"));
+    user->nickname = g_strdup (json_object_get_string_member (user_object, "remark"));
     user->location = g_strdup (json_object_get_string_member (user_object, "location"));
     user->profile_image_url = g_strdup (json_object_get_string_member (user_object,
                                                                       "profile_image_url"));

@@ -28,6 +28,7 @@ typedef struct
     gint64 id;
     gchar *idstr;
     gchar *name;
+    gchar *nickname;
     gchar *location;
     gchar *description;
     gchar *url;

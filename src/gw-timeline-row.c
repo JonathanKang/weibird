@@ -138,7 +138,14 @@ gw_timeline_row_constructed (GObject *object)
     vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_pack_start (GTK_BOX (hbox1), vbox, FALSE, FALSE, 0);
 
-    name_label = gtk_label_new (priv->post_item->user->name);
+    if (g_strcmp0 (priv->post_item->user->nickname, "") != 0)
+    {
+        name_label = gtk_label_new (priv->post_item->user->nickname);
+    }
+    else
+    {
+        name_label = gtk_label_new (priv->post_item->user->name);
+    }
     gtk_widget_set_halign (name_label, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (vbox), name_label, TRUE, TRUE, 0);
 
@@ -217,6 +224,7 @@ gw_timeline_row_finalize (GObject *object)
     g_free (priv->post_item->bmiddle_pic);
     g_free (priv->post_item->user->idstr);
     g_free (priv->post_item->user->name);
+    g_free (priv->post_item->user->nickname);
     g_free (priv->post_item->user->location);
     g_free (priv->post_item->user->description);
     g_free (priv->post_item->user->url);
