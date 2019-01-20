@@ -1,5 +1,6 @@
 sources = files(
     'gw-application.c',
+    'gw-headerbar.c',
     'gw-main.c',
     'gw-timeline-list.c',
     'gw-timeline-row.c',

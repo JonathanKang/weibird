@@ -1,5 +1,6 @@
 <gresources>
     <gresource prefix='/org/gnome/Weibo'>
+        <file preprocess='xml-stripblanks'>gw-headerbar.ui</file>
         <file preprocess='xml-stripblanks'>gw-timeline-list.ui</file>
         <file preprocess='xml-stripblanks'>gw-window.ui</file>
     </gresource>

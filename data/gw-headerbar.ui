@@ -1,0 +1,35 @@
+<interface domain="gnome-weibo">
+    <menu id='primary-menu'>
+        <section>
+            <item>
+                <attribute name="label">_About Weibo</attribute>
+                <attribute name="action">app.about</attribute>
+            </item>
+        </section>
+    </menu>
+    <template class="GwHeaderbar" parent="GtkHeaderBar">
+        <property name="expand">True</property>
+        <property name="show-close-button">True</property>
+        <property name="title">GNOME Weibo</property>
+        <property name="visible">True</property>
+        <child>
+            <object class="GtkMenuButton" id="pri_menu">
+                <property name="visible">True</property>
+                <property name="menu_model">primary-menu</property>
+                <style>
+                    <class name="image-button"/>
+                </style>
+                <child>
+                    <object class="GtkImage" id="new_icon">
+                        <property name="icon-name">open-menu-symbolic</property>
+                        <property name="icon-size">1</property>
+                        <property name="visible">True</property>
+                    </object>
+                </child>
+            </object>
+            <packing>
+                <property name="pack-type">end</property>
+            </packing>
+        </child>
+    </template>
+</interface>

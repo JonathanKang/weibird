@@ -22,6 +22,7 @@
 #include <rest/oauth2-proxy.h>
 #include <webkit2/webkit2.h>
 
+#include "gw-headerbar.h"
 #include "gw-timeline-list.h"
 #include "gw-window.h"
 
@@ -35,6 +36,7 @@ typedef struct
 {
     GtkStack *main_stack;
     GtkWidget *login_box;
+    GtkWidget *headerbar;
     GtkWidget *timeline;
 } GwWindowPrivate;
 
@@ -259,6 +261,7 @@ gw_window_init (GwWindow *window)
     /* Ensure GTK+ private types used by the template definition
      * before calling gtk_widget_init_template()
      */
+    g_type_ensure (GW_TYPE_HEADERBAR);
     g_type_ensure (GW_TYPE_TIMELINE_LIST);
 
     gtk_widget_init_template (GTK_WIDGET (window));
@@ -281,7 +284,6 @@ gw_window_init (GwWindow *window)
     g_free (access_token);
     g_object_unref (settings);
 }
-
 static void
 gw_window_class_init (GwWindowClass *klass)
 {
@@ -293,6 +295,8 @@ gw_window_class_init (GwWindowClass *klass)
                                                   GwWindow, main_stack);
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   GwWindow, login_box);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  GwWindow, headerbar);
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   GwWindow, timeline);
 

@@ -3,13 +3,7 @@
         <property name="height-request">800</property>
         <property name="width-request">640</property>
         <child type="titlebar">
-            <object class="GtkHeaderBar" id="toolbar">
-                <property name="visible">True</property>
-                <property name="show-close-button">True</property>
-                <property name="title">GNOME Weibo</property>
-                <style>
-                    <class name="titlebar"/>
-                </style>
+            <object class="GwHeaderbar" id="headerbar">
             </object>
         </child>
         <child>
