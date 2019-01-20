@@ -30,12 +30,63 @@ struct _GwApplication
 G_DEFINE_TYPE (GwApplication, gw_application, GTK_TYPE_APPLICATION)
 
 static void
+on_about (GSimpleAction *action,
+          GVariant *variant,
+          gpointer user_data)
+{
+    GtkApplication *application;
+    GtkWindow *parent;
+
+    const gchar *authors[] = {
+        "Jonathan Kang <jonathankang@gnome.org>",
+        NULL
+    };
+
+    application = GTK_APPLICATION (user_data);
+    parent = gtk_application_get_active_window (application);
+
+    gtk_show_about_dialog (parent,
+                           "authors", authors,
+                           "comments", "View and compose Weibo",
+                           "copyright", "Copyright © 2018 Jonathan Kang",
+                           "license-type", GTK_LICENSE_GPL_3_0,
+                           "website", "https://github.com/JonathanKang/gnome-weibo",
+                           NULL);
+}
+
+static void
+on_quit (GSimpleAction *action,
+         GVariant *variant,
+         gpointer user_data)
+{
+    GApplication *application;
+
+    application = G_APPLICATION (user_data);
+    g_application_quit (application);
+}
+
+static GActionEntry actions[] = {
+    { "about", on_about },
+    { "quit", on_quit }
+};
+
+static void
 gw_application_activate (GApplication *application)
 {
     GtkWidget *window;
 
     window = gw_window_new (GTK_APPLICATION (application));
     gtk_widget_show (window);
+}
+
+static void
+gw_application_startup (GApplication *application)
+{
+    g_action_map_add_action_entries (G_ACTION_MAP (application), actions,
+                                     G_N_ELEMENTS (actions), application);
+
+    /* Calls gtk_init() with no arguments. */
+    G_APPLICATION_CLASS (gw_application_parent_class)->startup (application);
 }
 
 static void
@@ -50,6 +101,7 @@ gw_application_class_init (GwApplicationClass *klass)
 
     app_class = G_APPLICATION_CLASS (klass);
     app_class->activate = gw_application_activate;
+    app_class->startup = gw_application_startup;
 }
 
 GtkApplication *
