@@ -40,6 +40,8 @@ struct _GwTimelineRow
 
 typedef struct
 {
+    GtkWidget *profile_image;
+    GtkWidget *post_image;
     GwPostItem *post_item;
 } GwTimelineRowPrivate;
 
@@ -47,30 +49,24 @@ G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineRow, gw_timeline_row, GTK_TYPE_LIST_BOX_RO
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
-static GtkWidget *
-load_remote_image (const gchar *uri)
+static void
+on_message_complete (SoupSession *session,
+                     SoupMessage *msg,
+                     gpointer user_data)
 {
     GdkPixbuf *pixbuf;
     GError *error = NULL;
     GInputStream *stream;
     GtkWidget *image;
-    guint status_code;
-    SoupMessage *msg;
-    SoupSession *session;
 
-    g_return_val_if_fail (uri != NULL, NULL);
-
-    msg = soup_message_new (SOUP_METHOD_GET, uri);
-    session = soup_session_new ();
-    status_code = soup_session_send_message (session, msg);
-    if (status_code != SOUP_STATUS_OK)
+    if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
     {
-        g_warning ("Failed to download the image.");
-
-        g_object_unref (msg);
-        g_object_unref (session);
-
-        return NULL;
+        if (msg->status_code != SOUP_STATUS_CANCELLED)
+        {
+            g_warning ("Failed to get image: %d %s.\n",
+                       msg->status_code, msg->reason_phrase);
+        }
+        return;
     }
 
     stream = g_memory_input_stream_new_from_data (msg->response_body->data,
@@ -84,10 +80,9 @@ load_remote_image (const gchar *uri)
         g_clear_error (&error);
     }
 
-    image = gtk_image_new_from_pixbuf (pixbuf);
+    image = GTK_WIDGET (user_data);
+    gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf);
 
-    g_object_unref (msg);
-    g_object_unref (session);
     g_input_stream_close (stream, NULL, &error);
     if (error != NULL)
     {
@@ -95,8 +90,19 @@ load_remote_image (const gchar *uri)
                    error->message);
         g_clear_error (&error);
     }
+}
 
-    return image;
+static void
+load_remote_image (GtkWidget *image, const gchar *uri)
+{
+    SoupMessage *msg;
+    SoupSession *session;
+
+    g_return_if_fail (uri != NULL);
+
+    msg = soup_message_new (SOUP_METHOD_GET, uri);
+    session = soup_session_new ();
+    soup_session_queue_message (session, msg, on_message_complete, image);
 }
 
 static void
@@ -110,9 +116,7 @@ gw_timeline_row_constructed (GObject *object)
     GtkWidget *main_box;
     GtkWidget *name_label;
     GtkWidget *source_label;
-    GtkWidget *profile_image;
     GtkWidget *text_label;
-    GtkWidget *post_image;
     GtkWidget *time_label;
     GtkWidget *likes_label;
     GtkWidget *comments_label;
@@ -131,9 +135,10 @@ gw_timeline_row_constructed (GObject *object)
     gtk_box_pack_end (GTK_BOX (main_box), hbox2, FALSE, FALSE, 0);
 
     /* Profile image, name, source and time */
-    profile_image = load_remote_image (priv->post_item->user->profile_image_url);
-    gtk_widget_set_halign (profile_image, GTK_ALIGN_START);
-    gtk_box_pack_start (GTK_BOX (hbox1), profile_image, FALSE, FALSE, 0);
+    load_remote_image (priv->profile_image,
+                       priv->post_item->user->profile_image_url);
+    gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
+    gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image, FALSE, FALSE, 0);
 
     vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_pack_start (GTK_BOX (hbox1), vbox, FALSE, FALSE, 0);
@@ -178,8 +183,9 @@ gw_timeline_row_constructed (GObject *object)
     /* TODO: Add support for multiple pictures */
     if (priv->post_item->bmiddle_pic != NULL)
     {
-        post_image = load_remote_image (priv->post_item->bmiddle_pic);
-        gtk_box_pack_start (GTK_BOX (main_box), post_image, FALSE, FALSE, 0);
+        load_remote_image (priv->post_image, priv->post_item->bmiddle_pic);
+        gtk_box_pack_start (GTK_BOX (main_box),
+                            priv->post_image, FALSE, FALSE, 0);
     }
 
     /* Likes, comments and reposts count */
@@ -297,6 +303,12 @@ gw_timeline_row_class_init (GwTimelineRowClass *klass)
 static void
 gw_timeline_row_init (GwTimelineRow *self)
 {
+    GwTimelineRowPrivate *priv;
+
+    priv = gw_timeline_row_get_instance_private (self);
+
+    priv->profile_image = gtk_image_new_from_pixbuf (NULL);
+    priv->post_image = gtk_image_new_from_pixbuf (NULL);
 }
 
 /**
