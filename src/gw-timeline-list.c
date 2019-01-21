@@ -31,7 +31,11 @@ struct _GwTimelineList
 
 typedef struct
 {
+    gint batch_fetched;
+    gint64 last_id;
+    gchar *last_idstr;
     GtkListBox *timeline_list;
+    GtkWidget *timeline_scrolled;
 } GwTimelineListPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineList, gw_timeline_list, GTK_TYPE_BOX)
@@ -52,6 +56,14 @@ parse_weibo_post (JsonArray *array,
 
     self = GW_TIMELINE_LIST (user_data);
     priv = gw_timeline_list_get_instance_private (self);
+
+    /* Weibo API returns an extra item which can be found in the
+     * previous batch of posts fetched before. In this case,
+     * ingore the first post item. */
+    if (index == 0 && priv->batch_fetched != 0)
+    {
+        return;
+    }
 
     object = json_node_get_object (element_node);
     post_item = g_malloc0 (sizeof (GwPostItem));
@@ -75,6 +87,16 @@ parse_weibo_post (JsonArray *array,
     post_item->comments_count = json_object_get_int_member (object, "comments_count");
     post_item->attitudes_count = json_object_get_int_member (object, "attitudes_count");
 
+    if (index == 0 && priv->batch_fetched == 0)
+    {
+        priv->last_id = post_item->id;
+    }
+    if (post_item->id < priv->last_id)
+    {
+        priv->last_id = post_item->id;
+        priv->last_idstr = post_item->idstr;
+    }
+
     user_object = json_object_get_object_member (object, "user");
     user->id = json_object_get_int_member (user_object, "id");
     user->idstr = g_strdup (json_object_get_string_member (user_object, "idstr"));
@@ -90,7 +112,8 @@ parse_weibo_post (JsonArray *array,
 }
 
 void
-gw_timeline_list_get_home_timeline (GwTimelineList *self)
+gw_timeline_list_get_home_timeline (GwTimelineList *self,
+                                    gboolean loading_more)
 {
     const gchar *payload;
     GError *error = NULL;
@@ -99,6 +122,9 @@ gw_timeline_list_get_home_timeline (GwTimelineList *self)
     JsonParser *parser;
     RestProxy *proxy;
     RestProxyCall *call;
+    GwTimelineListPrivate *priv;
+
+    priv = gw_timeline_list_get_instance_private (self);
 
     proxy = oauth2_proxy_new_with_token ("1450991920",
                                          "2.005ugqwDURNMaB003aa34d9b828hsD",
@@ -107,9 +133,13 @@ gw_timeline_list_get_home_timeline (GwTimelineList *self)
     call = rest_proxy_new_call (proxy);
     rest_proxy_call_set_function (call, "2/statuses/home_timeline.json");
     rest_proxy_call_set_method (call, "GET");
-    rest_proxy_call_add_params (call,
-                                "access_token", "2.005ugqwDURNMaB003aa34d9b828hsD",
-                                NULL);
+    rest_proxy_call_add_param (call, "access_token",
+                               "2.005ugqwDURNMaB003aa34d9b828hsD");
+    if (loading_more)
+    {
+        rest_proxy_call_add_param (call, "max_id", priv->last_idstr);
+    }
+
     rest_proxy_call_sync (call, &error);
     if (error != NULL)
     {
@@ -143,6 +173,8 @@ gw_timeline_list_get_home_timeline (GwTimelineList *self)
 
             array = json_object_get_array_member (object, "statuses");
             json_array_foreach_element (array, parse_weibo_post, self);
+
+            priv->batch_fetched++;
         }
     }
 
@@ -172,6 +204,21 @@ listbox_update_header_func (GtkListBoxRow *row,
 }
 
 static void
+gw_timeline_list_edge_reached (GtkScrolledWindow *scrolled_window,
+                               GtkPositionType pos,
+                               gpointer user_data)
+{
+    GwTimelineList *list;
+
+    list = GW_TIMELINE_LIST (user_data);
+
+    if (pos == GTK_POS_BOTTOM)
+    {
+        gw_timeline_list_get_home_timeline (list, TRUE);
+    }
+}
+
+static void
 gw_timeline_list_class_init (GwTimelineListClass *klass)
 {
     GtkWidgetClass *widget_class;
@@ -182,6 +229,8 @@ gw_timeline_list_class_init (GwTimelineListClass *klass)
                                                  "/org/gnome/Weibo/gw-timeline-list.ui");
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   GwTimelineList, timeline_list);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  GwTimelineList, timeline_scrolled);
 }
 
 static void
@@ -193,9 +242,14 @@ gw_timeline_list_init (GwTimelineList *self)
 
     priv = gw_timeline_list_get_instance_private (self);
 
+    priv->batch_fetched = 0;
+
     gtk_list_box_set_header_func (priv->timeline_list,
                                   (GtkListBoxUpdateHeaderFunc) listbox_update_header_func,
                                   NULL, NULL);
+
+    g_signal_connect (priv->timeline_scrolled, "edge-reached",
+                      G_CALLBACK (gw_timeline_list_edge_reached), self);
 }
 
 /**

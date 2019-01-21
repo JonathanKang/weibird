@@ -247,7 +247,7 @@ on_login_button_clicked (GtkWidget *button,
 
     gtk_stack_set_visible_child (priv->main_stack, priv->timeline);
     timeline = GW_TIMELINE_LIST (priv->timeline);
-    gw_timeline_list_get_home_timeline (timeline);
+    gw_timeline_list_get_home_timeline (timeline, FALSE);
 }
 
 static void
@@ -274,7 +274,7 @@ gw_window_init (GwWindow *window)
     if (g_strcmp0 (access_token, "") != 0)
     {
         gtk_stack_set_visible_child (priv->main_stack, priv->timeline);
-        gw_timeline_list_get_home_timeline (list);
+        gw_timeline_list_get_home_timeline (list, FALSE);
     }
     else
     {
