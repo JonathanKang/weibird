@@ -170,6 +170,8 @@ gw_timeline_row_constructed (GObject *object)
 
     priv->post_item->created_at = gw_util_format_time_string (priv->post_item->created_at);
     time_label = gtk_label_new (priv->post_item->created_at);
+    context = gtk_widget_get_style_context (time_label);
+    gtk_style_context_add_class (context, "dim-label");
     gtk_widget_set_halign (time_label, GTK_ALIGN_END);
     gtk_box_pack_end (GTK_BOX (hbox1), time_label, FALSE, FALSE, 0);
 
