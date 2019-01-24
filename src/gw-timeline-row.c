@@ -21,6 +21,7 @@
 #include <gtk/gtk.h>
 #include <libsoup/soup.h>
 
+#include "gw-image.h"
 #include "gw-timeline-list.h"
 #include "gw-timeline-row.h"
 #include "gw-util.h"
@@ -48,62 +49,6 @@ typedef struct
 G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineRow, gw_timeline_row, GTK_TYPE_LIST_BOX_ROW)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
-
-static void
-on_message_complete (SoupSession *session,
-                     SoupMessage *msg,
-                     gpointer user_data)
-{
-    GdkPixbuf *pixbuf;
-    GError *error = NULL;
-    GInputStream *stream;
-    GtkWidget *image;
-
-    if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
-    {
-        if (msg->status_code != SOUP_STATUS_CANCELLED)
-        {
-            g_warning ("Failed to get image: %d %s.\n",
-                       msg->status_code, msg->reason_phrase);
-        }
-        return;
-    }
-
-    stream = g_memory_input_stream_new_from_data (msg->response_body->data,
-                                                  msg->response_body->length,
-                                                  NULL);
-    pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, &error);
-    if (error != NULL)
-    {
-        g_warning ("Unable to create pixbuf: %s",
-                   error->message);
-        g_clear_error (&error);
-    }
-
-    image = GTK_WIDGET (user_data);
-    gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf);
-
-    g_input_stream_close (stream, NULL, &error);
-    if (error != NULL)
-    {
-        g_warning ("Unable to close the input stream: %s",
-                   error->message);
-        g_clear_error (&error);
-    }
-}
-
-static void
-load_remote_image (GtkWidget *image, const gchar *uri)
-{
-    SoupMessage *msg;
-    SoupSession *session;
-
-    g_return_if_fail (uri != NULL);
-
-    msg = soup_message_new (SOUP_METHOD_GET, uri);
-    session = soup_session_new ();
-    soup_session_queue_message (session, msg, on_message_complete, image);
-}
 
 static void
 gw_timeline_row_constructed (GObject *object)
@@ -135,8 +80,7 @@ gw_timeline_row_constructed (GObject *object)
     gtk_box_pack_end (GTK_BOX (main_box), hbox2, FALSE, FALSE, 0);
 
     /* Profile image, name, source and time */
-    load_remote_image (priv->profile_image,
-                       priv->post_item->user->profile_image_url);
+    priv->profile_image = gw_image_new (priv->post_item->user->profile_image_url);
     gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image, FALSE, FALSE, 0);
 
@@ -185,7 +129,7 @@ gw_timeline_row_constructed (GObject *object)
     /* TODO: Add support for multiple pictures */
     if (priv->post_item->bmiddle_pic != NULL)
     {
-        load_remote_image (priv->post_image, priv->post_item->bmiddle_pic);
+        priv->post_image = gw_image_new (priv->post_item->bmiddle_pic);
         gtk_box_pack_start (GTK_BOX (main_box),
                             priv->post_image, FALSE, FALSE, 0);
     }
