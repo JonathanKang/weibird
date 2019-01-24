@@ -69,7 +69,6 @@ gw_util_format_time_string (gchar *str)
 }
 
 /**
- *
  * gw_util_format_source_string:
  * @source: the source string fetched from Weibo API
  *
