@@ -1,6 +1,6 @@
 /*
- *  gnome weibo - view and compose weibo
- *  copyright (c) 2018 jonathan kang <jonathankang@gnome.org>.
+ *  GNOME Weibo - view and compose weibo
+ *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
  *  it under the terms of the gnu general public license as published by
