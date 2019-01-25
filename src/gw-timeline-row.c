@@ -22,6 +22,7 @@
 #include <libsoup/soup.h>
 
 #include "gw-image.h"
+#include "gw-multi-media-widget.h"
 #include "gw-timeline-list.h"
 #include "gw-timeline-row.h"
 #include "gw-util.h"
@@ -60,6 +61,7 @@ gw_timeline_row_constructed (GObject *object)
     GtkWidget *vbox;
     GtkWidget *main_box;
     GtkWidget *name_label;
+    GtkWidget *pic_grid;
     GtkWidget *source_label;
     GtkWidget *text_label;
     GtkWidget *time_label;
@@ -126,12 +128,15 @@ gw_timeline_row_constructed (GObject *object)
     gtk_box_pack_start (GTK_BOX (main_box), text_label, FALSE, FALSE, 0);
 
     /* Post image */
-    /* TODO: Add support for multiple pictures */
-    if (priv->post_item->bmiddle_pic != NULL)
+    /* TODO: Add support for display the original picture individually */
+    if (priv->post_item->picuri_array->len != 0)
     {
-        priv->post_image = gw_image_new (priv->post_item->bmiddle_pic);
-        gtk_box_pack_start (GTK_BOX (main_box),
-                            priv->post_image, FALSE, FALSE, 0);
+        pic_grid = gw_multi_media_widget_new (priv->post_item->picuri_array->len,
+                                              priv->post_item->picuri_array);
+        gtk_widget_set_halign (pic_grid, GTK_ALIGN_CENTER);
+        gtk_grid_set_column_spacing (GTK_GRID (pic_grid), 6);
+        gtk_grid_set_row_spacing (GTK_GRID (pic_grid), 6);
+        gtk_box_pack_start (GTK_BOX (main_box), pic_grid, FALSE, FALSE, 0);
     }
 
     /* Likes, comments and reposts count */
@@ -168,6 +173,7 @@ gw_timeline_row_finalize (GObject *object)
     GwTimelineRow *self = GW_TIMELINE_ROW (object);
     GwTimelineRowPrivate *priv = gw_timeline_row_get_instance_private (self);
 
+    g_array_free (priv->post_item->picuri_array, TRUE);
     g_free (priv->post_item->created_at);
     g_free (priv->post_item->idstr);
     g_free (priv->post_item->text);

@@ -41,6 +41,22 @@ typedef struct
 G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineList, gw_timeline_list, GTK_TYPE_BOX)
 
 static void
+parse_pic_uri (JsonArray *array,
+               guint index,
+               JsonNode *element_node,
+               gpointer user_data)
+{
+    const gchar *uri;
+    GwPostItem *post_item = user_data;
+    JsonObject *object;
+
+    object = json_node_get_object (element_node);
+
+    uri = g_strdup (json_object_get_string_member (object, "thumbnail_pic"));
+    g_array_append_val (post_item->picuri_array, uri);
+}
+
+static void
 parse_weibo_post (JsonArray *array,
                   guint index,
                   JsonNode *element_node,
@@ -49,6 +65,7 @@ parse_weibo_post (JsonArray *array,
     GtkWidget *row;
     GwPostItem *post_item;
     GwUser *user;
+    JsonArray *pic_array;
     JsonObject *object;
     JsonObject *user_object;
     GwTimelineList *self;
@@ -86,6 +103,14 @@ parse_weibo_post (JsonArray *array,
     post_item->reposts_count = json_object_get_int_member (object, "reposts_count");
     post_item->comments_count = json_object_get_int_member (object, "comments_count");
     post_item->attitudes_count = json_object_get_int_member (object, "attitudes_count");
+
+    /* Parse the uri for each picture if there is any */
+    post_item->picuri_array = g_array_new (FALSE, FALSE, sizeof (gchar *));
+    pic_array = json_object_get_array_member (object, "pic_urls");
+    if (json_array_get_length (pic_array) != 0)
+    {
+        json_array_foreach_element (pic_array, parse_pic_uri, post_item);
+    }
 
     if (index == 0 && priv->batch_fetched == 0)
     {
