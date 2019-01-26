@@ -21,12 +21,14 @@
 #include <gtk/gtk.h>
 #include <libsoup/soup.h>
 
+#include "gw-enums.h"
 #include "gw-image-button.h"
 
 enum
 {
     PROP_0,
     PROP_URI,
+    PROP_MEDIA_TYPE,
     N_PROPS
 };
 
@@ -40,6 +42,7 @@ typedef struct
 {
     gchar *uri;
     GtkWidget *image;
+    GwMediaType type;
 } GwImageButtonPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (GwImageButton, gw_image_button, GTK_TYPE_BUTTON)
@@ -127,6 +130,9 @@ gw_image_button_get_property (GObject    *object,
 
 		switch (prop_id)
     {
+        case PROP_MEDIA_TYPE:
+            g_value_set_enum (value, priv->type);
+            break;
         case PROP_URI:
             g_value_set_string (value, priv->uri);
             break;
@@ -146,6 +152,9 @@ gw_image_button_set_property (GObject      *object,
 
 		switch (prop_id)
     {
+        case PROP_MEDIA_TYPE:
+            priv->type = g_value_get_enum (value);
+            break;
         case PROP_URI:
             g_free (priv->uri);
             priv->uri = g_value_dup_string (value);
@@ -171,6 +180,14 @@ gw_image_button_class_init (GwImageButtonClass *klass)
                                                     G_PARAM_READWRITE |
                                                     G_PARAM_CONSTRUCT_ONLY |
                                                     G_PARAM_STATIC_STRINGS);
+    obj_properties[PROP_MEDIA_TYPE] = g_param_spec_enum ("media-type",
+                                                         "Media type",
+                                                         "Media type",
+                                                         GW_TYPE_MEDIA_TYPE,
+                                                         GW_MEDIA_TYPE_IMAGE,
+                                                         G_PARAM_READWRITE |
+                                                         G_PARAM_CONSTRUCT_ONLY |
+                                                         G_PARAM_STATIC_STRINGS);
     g_object_class_install_properties (object_class, N_PROPS, obj_properties);
 }
 
@@ -199,9 +216,11 @@ gw_image_button_init (GwImageButton *self)
  * Returns: (transfer full): a newly created #GwImageButton
  */
 GtkWidget *
-gw_image_button_new (const gchar *uri)
+gw_image_button_new (GwMediaType type,
+                     const gchar *uri)
 {
     return g_object_new (GW_TYPE_IMAGE_BUTTON,
+                         "media-type", type,
                          "uri", uri,
                          NULL);
 }

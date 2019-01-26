@@ -59,7 +59,8 @@ gw_multi_media_widget_constructed (GObject *object)
 
     for (i = 0; i < priv->n_childs; i++)
     {
-        child = gw_image_button_new (g_array_index (priv->pic_uris, gchar *, i));
+        child = gw_image_button_new (GW_MEDIA_TYPE_IMAGE,
+                                     g_array_index (priv->pic_uris, gchar *, i));
 
         if (i < 3)
         {

@@ -10,6 +10,10 @@ sources = files(
     'gw-window.c'
 )
 
+enum_headers = files(
+    'gw-image-button.h'
+)
+
 sources += gnome.compile_resources(
     'gw-resources',
     gresource,
@@ -17,6 +21,12 @@ sources += gnome.compile_resources(
     source_dir: data_dir,
     dependencies: resource_data,
     export: true
+)
+
+enum = 'gw-enums'
+sources += gnome.mkenums_simple(
+    enum,
+    sources : enum_headers
 )
 
 executable(
