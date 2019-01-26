@@ -21,7 +21,7 @@
 #include <gtk/gtk.h>
 #include <libsoup/soup.h>
 
-#include "gw-image.h"
+#include "gw-image-button.h"
 #include "gw-multi-media-widget.h"
 #include "gw-timeline-list.h"
 #include "gw-timeline-row.h"
@@ -82,7 +82,7 @@ gw_timeline_row_constructed (GObject *object)
     gtk_box_pack_end (GTK_BOX (main_box), hbox2, FALSE, FALSE, 0);
 
     /* Profile image, name, source and time */
-    priv->profile_image = gw_image_new (priv->post_item->user->profile_image_url);
+    priv->profile_image = gw_image_button_new (priv->post_item->user->profile_image_url);
     gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image, FALSE, FALSE, 0);
 

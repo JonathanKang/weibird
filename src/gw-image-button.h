@@ -16,8 +16,8 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GW_IMAGE_H_
-#define GW_IMAGE_H_
+#ifndef GW_IMAGE_BUTTON_H_
+#define GW_IMAGE_BUTTON_H_
 
 #pragma once
 
@@ -25,11 +25,11 @@
 
 G_BEGIN_DECLS
 
-#define GW_TYPE_IMAGE (gw_image_get_type ())
-G_DECLARE_FINAL_TYPE (GwImage, gw_image, GW, IMAGE, GtkImage)
+#define GW_TYPE_IMAGE_BUTTON (gw_image_button_get_type ())
+G_DECLARE_FINAL_TYPE (GwImageButton, gw_image_button, GW, IMAGE_BUTTON, GtkButton)
 
-GtkWidget *gw_image_new (const gchar *uri);
+GtkWidget *gw_image_button_new (const gchar *uri);
 
 G_END_DECLS
 
-#endif /* GW_IMAGE_H_ */
+#endif /* GW_IMAGE_BUTTON_H_ */

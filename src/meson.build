@@ -3,7 +3,7 @@ sources = files(
     'gw-headerbar.c',
     'gw-main.c',
     'gw-multi-media-widget.c',
-    'gw-image.c',
+    'gw-image-button.c',
     'gw-timeline-list.c',
     'gw-timeline-row.c',
     'gw-util.c',

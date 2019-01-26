@@ -18,7 +18,7 @@
 
 #include <gtk/gtk.h>
 
-#include "gw-image.h"
+#include "gw-image-button.h"
 #include "gw-multi-media-widget.h"
 
 enum
@@ -59,7 +59,7 @@ gw_multi_media_widget_constructed (GObject *object)
 
     for (i = 0; i < priv->n_childs; i++)
     {
-        child = gw_image_new (g_array_index (priv->pic_uris, gchar *, i));
+        child = gw_image_button_new (g_array_index (priv->pic_uris, gchar *, i));
 
         if (i < 3)
         {
