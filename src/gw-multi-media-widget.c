@@ -62,15 +62,36 @@ gw_multi_media_widget_constructed (GObject *object)
         child = gw_image_button_new (GW_MEDIA_TYPE_IMAGE,
                                      g_array_index (priv->pic_uris, gchar *, i));
 
-        if (i < 3)
+        if (i < 2)
         {
             top = 0;
             left = i;
         }
+        else if (i == 2)
+        {
+            if (priv->n_childs != 4)
+            {
+                top = 0;
+                left = i;
+            }
+            else
+            {
+                top = 1;
+                left = 0;
+            }
+        }
         else if (i >= 3 && i < 6)
         {
-            top = 1;
-            left = i - 3;
+            if (priv->n_childs != 4)
+            {
+                top = 1;
+                left = i - 3;
+            }
+            else
+            {
+                top = 1;
+                left = i - 2;
+            }
         }
         else
         {
