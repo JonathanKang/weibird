@@ -16,6 +16,8 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <glib.h>
+
 #include "gw-util.h"
 
 gchar *
@@ -95,6 +97,32 @@ gw_util_format_source_string (gchar *source)
 
     g_free (source);
     g_strfreev (vector);
+
+    return ret;
+}
+
+/**
+ * gw_util_thumbnail_to_original:
+ * @thumbnail: the thumbnail uri string fetched from Weibo API
+ *
+ * This function converts a thumbnail uri string to the
+ * original image uri string.
+ *
+ * Returns: A newly allocated uri string
+ */
+gchar *
+gw_util_thumbnail_to_original (const gchar *thumbnail)
+{
+    gchar *ret;
+    gchar *str;
+    g_autofree gchar *part1 = NULL;
+
+    g_return_val_if_fail (thumbnail != NULL, NULL);
+
+    str = g_strrstr (thumbnail, "thumbnail");
+    part1 = g_strndup (thumbnail, str - thumbnail);
+
+    ret = g_strconcat (part1, "large", str + 9, NULL);
 
     return ret;
 }

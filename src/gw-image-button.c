@@ -55,6 +55,7 @@ on_message_complete (SoupSession *session,
                      gpointer user_data)
 {
     GdkPixbuf *pixbuf;
+    GdkPixbuf *scaled_pixbuf;
     GError *error = NULL;
     GInputStream *stream;
     GwImageButton *self = GW_IMAGE_BUTTON (user_data);
@@ -81,7 +82,18 @@ on_message_complete (SoupSession *session,
         g_clear_error (&error);
     }
 
-    gtk_image_set_from_pixbuf (GTK_IMAGE (priv->image), pixbuf);
+    if (priv->type == GW_MEDIA_TYPE_IMAGE)
+    {
+        scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf, 150, 150,
+                                                 GDK_INTERP_BILINEAR);
+        g_object_unref (pixbuf);
+
+        gtk_image_set_from_pixbuf (GTK_IMAGE (priv->image), scaled_pixbuf);
+    }
+    else
+    {
+        gtk_image_set_from_pixbuf (GTK_IMAGE (priv->image), pixbuf);
+    }
 
     g_input_stream_close (stream, NULL, &error);
     if (error != NULL)

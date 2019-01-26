@@ -22,6 +22,7 @@
 
 #include "gw-timeline-list.h"
 #include "gw-timeline-row.h"
+#include "gw-util.h"
 
 struct _GwTimelineList
 {
@@ -46,13 +47,15 @@ parse_pic_uri (JsonArray *array,
                JsonNode *element_node,
                gpointer user_data)
 {
-    const gchar *uri;
+    const gchar *thumbnail;
+    gchar *uri;
     GwPostItem *post_item = user_data;
     JsonObject *object;
 
     object = json_node_get_object (element_node);
 
-    uri = g_strdup (json_object_get_string_member (object, "thumbnail_pic"));
+    thumbnail = json_object_get_string_member (object, "thumbnail_pic");
+    uri = gw_util_thumbnail_to_original (thumbnail);
     g_array_append_val (post_item->picuri_array, uri);
 }
 
