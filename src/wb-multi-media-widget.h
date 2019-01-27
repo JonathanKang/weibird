@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -16,8 +16,8 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GW_MULTI_MEDIA_WIDGET_H_
-#define GW_MULTI_MEDIA_WIDGET_H_
+#ifndef WB_MULTI_MEDIA_WIDGET_H_
+#define WB_MULTI_MEDIA_WIDGET_H_
 
 #pragma once
 
@@ -25,11 +25,11 @@
 
 G_BEGIN_DECLS
 
-#define GW_TYPE_MULTI_MEDIA_WIDGET (gw_multi_media_widget_get_type ())
-G_DECLARE_FINAL_TYPE (GwMultiMediaWidget, gw_multi_media_widget, GW, MULTI_MEDIA_WIDGET, GtkGrid)
+#define WB_TYPE_MULTI_MEDIA_WIDGET (wb_multi_media_widget_get_type ())
+G_DECLARE_FINAL_TYPE (WbMultiMediaWidget, wb_multi_media_widget, WB, MULTI_MEDIA_WIDGET, GtkGrid)
 
-GtkWidget *gw_multi_media_widget_new (gint n_childs, const GArray *pic_uris);
+GtkWidget *wb_multi_media_widget_new (gint n_childs, const GArray *pic_uris);
 
 G_END_DECLS
 
-#endif /* GW_MULTI_MEDIA_WIDGET_H_ */
+#endif /* WB_MULTI_MEDIA_WIDGET_H_ */

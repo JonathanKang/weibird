@@ -1,4 +1,4 @@
-<interface domain="gnome-weibo">
+<interface domain="weibird">
     <menu id='primary-menu'>
         <section>
             <item>
@@ -7,10 +7,10 @@
             </item>
         </section>
     </menu>
-    <template class="GwHeaderbar" parent="GtkHeaderBar">
+    <template class="WbHeaderbar" parent="GtkHeaderBar">
         <property name="expand">True</property>
         <property name="show-close-button">True</property>
-        <property name="title">GNOME Weibo</property>
+        <property name="title">Weibird</property>
         <property name="visible">True</property>
         <child>
             <object class="GtkMenuButton" id="pri_menu">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="gnome-weibo">
-  <schema id="org.gnome.Weibo" path="/org/gnome/weibo/">
+<schemalist gettext-domain="weibird">
+  <schema id="com.jonathankang.Weibird" path="/com/jonathankang/weibird/">
     <key name="access-token" type="s">
       <summary>Access Token</summary>
       <description>Access Token used to access your Weibo account.</description>

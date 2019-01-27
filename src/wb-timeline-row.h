@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -16,26 +16,22 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GW_IMAGE_BUTTON_H_
-#define GW_IMAGE_BUTTON_H_
-
-#pragma once
+#ifndef WB_TIMELINE_ROW_H_
+#define WB_TIMELINE_ROW_H_
 
 #include <gtk/gtk.h>
 
+#include "wb-timeline-list.h"
+
 G_BEGIN_DECLS
 
-typedef enum
-{
-    GW_MEDIA_TYPE_AVATAR,
-    GW_MEDIA_TYPE_IMAGE
-} GwMediaType;
+#define WB_TYPE_TIMELINE_ROW (wb_timeline_row_get_type ())
+G_DECLARE_FINAL_TYPE (WbTimelineRow, wb_timeline_row, WB, TIMELINE_ROW, GtkListBoxRow)
 
-#define GW_TYPE_IMAGE_BUTTON (gw_image_button_get_type ())
-G_DECLARE_FINAL_TYPE (GwImageButton, gw_image_button, GW, IMAGE_BUTTON, GtkButton)
-
-GtkWidget *gw_image_button_new (GwMediaType type, const gchar *uri);
+void wb_timeline_row_insert_retweeted_item (WbTimelineRow *row,
+                                            GtkWidget *retweeted_item);
+WbTimelineRow *wb_timeline_row_new (WbPostItem *post_item);
 
 G_END_DECLS
 
-#endif /* GW_IMAGE_BUTTON_H_ */
+#endif /* WB_TIMELINE_ROW_H_ */

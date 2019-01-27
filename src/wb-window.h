@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -16,18 +16,18 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GW_HEADERBAR_H_
-#define GW_HEADERBAR_H_
+#ifndef WB_WINDOW_H_
+#define WB_WINDOW_H_
 
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define GW_TYPE_HEADERBAR (gw_headerbar_get_type ())
-G_DECLARE_FINAL_TYPE (GwHeaderbar, gw_headerbar, GW, HEADERBAR, GtkHeaderBar)
+#define WB_TYPE_WINDOW (wb_window_get_type ())
+G_DECLARE_FINAL_TYPE (WbWindow, wb_window, WB, WINDOW, GtkApplicationWindow)
 
-GwHeaderbar *gw_headerbar_new (void);
+GtkWidget *wb_window_new (GtkApplication *application);
 
-G_BEGIN_DECLS
+G_END_DECLS
 
-#endif /* GW_HEADERBAR_H_ */
+#endif /* WB_WINDOW_H_ */

@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 
 #include <gtk/gtk.h>
 
-#include "gw-image-button.h"
-#include "gw-multi-media-widget.h"
+#include "wb-image-button.h"
+#include "wb-multi-media-widget.h"
 
 enum
 {
@@ -29,7 +29,7 @@ enum
     N_PROPS
 };
 
-struct _GwMultiMediaWidget
+struct _WbMultiMediaWidget
 {
     /*< private >*/
     GtkGrid parent_instance;
@@ -39,27 +39,27 @@ typedef struct
 {
     GArray *pic_uris;
     gint n_childs;
-} GwMultiMediaWidgetPrivate;
+} WbMultiMediaWidgetPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (GwMultiMediaWidget, gw_multi_media_widget, GTK_TYPE_GRID)
+G_DEFINE_TYPE_WITH_PRIVATE (WbMultiMediaWidget, wb_multi_media_widget, GTK_TYPE_GRID)
 
 static GParamSpec *obj_properties [N_PROPS] = { NULL, };
 
 static void
-gw_multi_media_widget_constructed (GObject *object)
+wb_multi_media_widget_constructed (GObject *object)
 {
     gint i;
     gint left, top;
     GtkWidget *child;
-    GwMultiMediaWidget *self;
-    GwMultiMediaWidgetPrivate *priv;
+    WbMultiMediaWidget *self;
+    WbMultiMediaWidgetPrivate *priv;
 
-    self = GW_MULTI_MEDIA_WIDGET (object);
-    priv = gw_multi_media_widget_get_instance_private (self);
+    self = WB_MULTI_MEDIA_WIDGET (object);
+    priv = wb_multi_media_widget_get_instance_private (self);
 
     for (i = 0; i < priv->n_childs; i++)
     {
-        child = gw_image_button_new (GW_MEDIA_TYPE_IMAGE,
+        child = wb_image_button_new (WB_MEDIA_TYPE_IMAGE,
                                      g_array_index (priv->pic_uris, gchar *, i));
 
         if (i < 2)
@@ -101,26 +101,26 @@ gw_multi_media_widget_constructed (GObject *object)
         gtk_grid_attach (GTK_GRID (self), child, left, top, 1, 1);
     }
 
-    G_OBJECT_CLASS (gw_multi_media_widget_parent_class)->constructed (object);
+    G_OBJECT_CLASS (wb_multi_media_widget_parent_class)->constructed (object);
 }
 
 static void
-gw_multi_media_widget_finalize (GObject *object)
+wb_multi_media_widget_finalize (GObject *object)
 {
-    G_OBJECT_CLASS (gw_multi_media_widget_parent_class)->finalize (object);
+    G_OBJECT_CLASS (wb_multi_media_widget_parent_class)->finalize (object);
 }
 
 static void
-gw_multi_media_widget_get_property (GObject    *object,
+wb_multi_media_widget_get_property (GObject    *object,
                                     guint       prop_id,
                                     GValue     *value,
                                     GParamSpec *pspec)
 {
-    GwMultiMediaWidget *self;
-    GwMultiMediaWidgetPrivate *priv;
+    WbMultiMediaWidget *self;
+    WbMultiMediaWidgetPrivate *priv;
 
-    self = GW_MULTI_MEDIA_WIDGET (object);
-    priv = gw_multi_media_widget_get_instance_private (self);
+    self = WB_MULTI_MEDIA_WIDGET (object);
+    priv = wb_multi_media_widget_get_instance_private (self);
 
 		switch (prop_id)
     {
@@ -136,16 +136,16 @@ gw_multi_media_widget_get_property (GObject    *object,
 }
 
 static void
-gw_multi_media_widget_set_property (GObject      *object,
+wb_multi_media_widget_set_property (GObject      *object,
                                     guint         prop_id,
                                     const GValue *value,
                                     GParamSpec   *pspec)
 {
-    GwMultiMediaWidget *self;
-    GwMultiMediaWidgetPrivate *priv;
+    WbMultiMediaWidget *self;
+    WbMultiMediaWidgetPrivate *priv;
 
-    self = GW_MULTI_MEDIA_WIDGET (object);
-    priv = gw_multi_media_widget_get_instance_private (self);
+    self = WB_MULTI_MEDIA_WIDGET (object);
+    priv = wb_multi_media_widget_get_instance_private (self);
 
 		switch (prop_id)
     {
@@ -161,14 +161,14 @@ gw_multi_media_widget_set_property (GObject      *object,
 }
 
 static void
-gw_multi_media_widget_class_init(GwMultiMediaWidgetClass *klass)
+wb_multi_media_widget_class_init(WbMultiMediaWidgetClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
 
-    object_class->constructed = gw_multi_media_widget_constructed;
-    object_class->finalize = gw_multi_media_widget_finalize;
-    object_class->get_property = gw_multi_media_widget_get_property;
-    object_class->set_property = gw_multi_media_widget_set_property;
+    object_class->constructed = wb_multi_media_widget_constructed;
+    object_class->finalize = wb_multi_media_widget_finalize;
+    object_class->get_property = wb_multi_media_widget_get_property;
+    object_class->set_property = wb_multi_media_widget_set_property;
 
     obj_properties[PROP_N_CHILDS] = g_param_spec_int ("n-childs",
                                                       "Child Number",
@@ -186,21 +186,21 @@ gw_multi_media_widget_class_init(GwMultiMediaWidgetClass *klass)
 }
 
 static void
-gw_multi_media_widget_init (GwMultiMediaWidget *self)
+wb_multi_media_widget_init (WbMultiMediaWidget *self)
 {
 }
 
 /**
- * gw_multi_media_widget_new:
+ * wb_multi_media_widget_new:
  *
- * Create a new #GwMultiMediaWidget.
+ * Create a new #WbMultiMediaWidget.
  *
- * Returns: (transfer full): a newly created #GwMultiMediaWidget
+ * Returns: (transfer full): a newly created #WbMultiMediaWidget
  */
 GtkWidget *
-gw_multi_media_widget_new (gint n_childs, const GArray *pic_uris)
+wb_multi_media_widget_new (gint n_childs, const GArray *pic_uris)
 {
-    return g_object_new (GW_TYPE_MULTI_MEDIA_WIDGET,
+    return g_object_new (WB_TYPE_MULTI_MEDIA_WIDGET,
                          "n-childs", n_childs,
                          "pic-uris", pic_uris,
                          NULL);

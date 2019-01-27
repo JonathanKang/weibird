@@ -1,0 +1,8 @@
+<gresources>
+    <gresource prefix='/com/jonathankang/Weibird'>
+        <file preprocess='xml-stripblanks'>wb-headerbar.ui</file>
+        <file>wb-style.css</file>
+        <file preprocess='xml-stripblanks'>wb-timeline-list.ui</file>
+        <file preprocess='xml-stripblanks'>wb-window.ui</file>
+    </gresource>
+</gresources>

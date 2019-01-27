@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -19,11 +19,11 @@
 #include <glib.h>
 #include <json-glib/json-glib.h>
 
-#include "gw-timeline-list.h"
-#include "gw-util.h"
+#include "wb-timeline-list.h"
+#include "wb-util.h"
 
 gchar *
-gw_util_format_time_string (gchar *str)
+wb_util_format_time_string (gchar *str)
 {
     const gchar *month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                "July", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -73,7 +73,7 @@ gw_util_format_time_string (gchar *str)
 }
 
 /**
- * gw_util_format_source_string:
+ * wb_util_format_source_string:
  * @source: the source string fetched from Weibo API
  *
  * This function parses a <a> tag and returns the text.
@@ -81,7 +81,7 @@ gw_util_format_time_string (gchar *str)
  * Returns: A newly allocated string
  */
 gchar *
-gw_util_format_source_string (gchar *source)
+wb_util_format_source_string (gchar *source)
 {
     gchar **vector;
     gchar *ret;
@@ -104,7 +104,7 @@ gw_util_format_source_string (gchar *source)
 }
 
 /**
- * gw_util_thumbnail_to_original:
+ * wb_util_thumbnail_to_original:
  * @thumbnail: the thumbnail uri string fetched from Weibo API
  *
  * This function converts a thumbnail uri string to the
@@ -113,7 +113,7 @@ gw_util_format_source_string (gchar *source)
  * Returns: A newly allocated uri string
  */
 gchar *
-gw_util_thumbnail_to_original (const gchar *thumbnail)
+wb_util_thumbnail_to_original (const gchar *thumbnail)
 {
     gchar *ret;
     gchar *str;
@@ -137,23 +137,23 @@ parse_pic_uri (JsonArray *array,
 {
     const gchar *thumbnail;
     gchar *uri;
-    GwPostItem *post_item = user_data;
+    WbPostItem *post_item = user_data;
     JsonObject *object;
 
     object = json_node_get_object (element_node);
 
     thumbnail = json_object_get_string_member (object, "thumbnail_pic");
-    uri = gw_util_thumbnail_to_original (thumbnail);
+    uri = wb_util_thumbnail_to_original (thumbnail);
     g_array_append_val (post_item->picuri_array, uri);
 }
 
 void
-gw_util_parse_weibo_post (JsonObject *object,
-                          GwPostItem *post_item)
+wb_util_parse_weibo_post (JsonObject *object,
+                          WbPostItem *post_item)
 {
     JsonArray *pic_array;
     JsonObject *user_object;
-    GwUser *user;
+    WbUser *user;
 
     post_item->created_at = g_strdup (json_object_get_string_member (object, "created_at"));
     post_item->id = json_object_get_int_member (object, "id");

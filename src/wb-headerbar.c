@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -16,9 +16,9 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gw-headerbar.h"
+#include "wb-headerbar.h"
 
-struct _GwHeaderbar
+struct _WbHeaderbar
 {
     /*< private >*/
     GtkHeaderBar parent_instance;
@@ -27,31 +27,31 @@ struct _GwHeaderbar
 typedef struct
 {
     GtkWidget *pri_menu;
-} GwHeaderbarPrivate;
+} WbHeaderbarPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (GwHeaderbar, gw_headerbar, GTK_TYPE_HEADER_BAR)
+G_DEFINE_TYPE_WITH_PRIVATE (WbHeaderbar, wb_headerbar, GTK_TYPE_HEADER_BAR)
 
 static void
-gw_headerbar_init (GwHeaderbar *headerbar)
+wb_headerbar_init (WbHeaderbar *headerbar)
 {
     gtk_widget_init_template (GTK_WIDGET (headerbar));
 }
 
 static void
-gw_headerbar_class_init (GwHeaderbarClass *klass)
+wb_headerbar_class_init (WbHeaderbarClass *klass)
 {
     GtkWidgetClass *widget_class;
 
     widget_class = GTK_WIDGET_CLASS (klass);
 
     gtk_widget_class_set_template_from_resource (widget_class,
-                                                 "/org/gnome/Weibo/gw-headerbar.ui");
+                                                 "/com/jonathankang/Weibird/wb-headerbar.ui");
     gtk_widget_class_bind_template_child_private (widget_class,
-                                                  GwHeaderbar, pri_menu);
+                                                  WbHeaderbar, pri_menu);
 }
 
-GwHeaderbar *
-gw_headerbar_new (void)
+WbHeaderbar *
+wb_headerbar_new (void)
 {
-    return g_object_new (GW_TYPE_HEADERBAR, NULL);
+    return g_object_new (WB_TYPE_HEADERBAR, NULL);
 }

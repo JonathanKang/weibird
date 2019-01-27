@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -20,11 +20,11 @@
 #include <json-glib/json-glib.h>
 #include <rest/oauth2-proxy.h>
 
-#include "gw-timeline-list.h"
-#include "gw-timeline-row.h"
-#include "gw-util.h"
+#include "wb-timeline-list.h"
+#include "wb-timeline-row.h"
+#include "wb-util.h"
 
-struct _GwTimelineList
+struct _WbTimelineList
 {
     /*< private >*/
     GtkBox parent_instance;
@@ -37,9 +37,9 @@ typedef struct
     gchar *last_idstr;
     GtkListBox *timeline_list;
     GtkWidget *timeline_scrolled;
-} GwTimelineListPrivate;
+} WbTimelineListPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineList, gw_timeline_list, GTK_TYPE_BOX)
+G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
 
 static void
 parse_weibo_post (JsonArray *array,
@@ -48,15 +48,15 @@ parse_weibo_post (JsonArray *array,
                   gpointer user_data)
 {
     GtkWidget *retweeted_item;
-    GwPostItem *post_item;
-    GwUser *user;
+    WbPostItem *post_item;
+    WbUser *user;
     JsonObject *object;
-    GwTimelineRow *row;
-    GwTimelineList *self;
-    GwTimelineListPrivate *priv;
+    WbTimelineRow *row;
+    WbTimelineList *self;
+    WbTimelineListPrivate *priv;
 
-    self = GW_TIMELINE_LIST (user_data);
-    priv = gw_timeline_list_get_instance_private (self);
+    self = WB_TIMELINE_LIST (user_data);
+    priv = wb_timeline_list_get_instance_private (self);
 
     /* Weibo API returns an extra item which can be found in the
      * previous batch of posts fetched before. In this case,
@@ -67,11 +67,11 @@ parse_weibo_post (JsonArray *array,
     }
 
     object = json_node_get_object (element_node);
-    post_item = g_malloc0 (sizeof (GwPostItem));
-    user = g_malloc0 (sizeof (GwUser));
+    post_item = g_malloc0 (sizeof (WbPostItem));
+    user = g_malloc0 (sizeof (WbUser));
     post_item->user = user;
 
-    gw_util_parse_weibo_post (object, post_item);
+    wb_util_parse_weibo_post (object, post_item);
 
     if (index == 0 && priv->batch_fetched == 0)
     {
@@ -83,32 +83,32 @@ parse_weibo_post (JsonArray *array,
         priv->last_idstr = post_item->idstr;
     }
 
-    row = gw_timeline_row_new (post_item);
+    row = wb_timeline_row_new (post_item);
     gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list),
                          GTK_WIDGET (row), -1);
 
     /* Add retweeted item to the row */
     if (json_object_has_member (object, "retweeted_status"))
     {
-        GwPostItem *retweeted_post_item;
-        GwUser *retweeted_user;
+        WbPostItem *retweeted_post_item;
+        WbUser *retweeted_user;
         JsonObject *retweet_object;
 
-        retweeted_post_item = g_malloc0 (sizeof (GwPostItem));
-        retweeted_user = g_malloc0 (sizeof (GwUser));
+        retweeted_post_item = g_malloc0 (sizeof (WbPostItem));
+        retweeted_user = g_malloc0 (sizeof (WbUser));
         retweeted_post_item->user = retweeted_user;
 
         retweet_object = json_object_get_object_member (object, "retweeted_status");
-        gw_util_parse_weibo_post (retweet_object, retweeted_post_item);
-        /* TODO: Add GwRetweetedItem class? */
-        retweeted_item = GTK_WIDGET (gw_timeline_row_new (retweeted_post_item));
+        wb_util_parse_weibo_post (retweet_object, retweeted_post_item);
+        /* TODO: Add WbRetweetedItem class? */
+        retweeted_item = GTK_WIDGET (wb_timeline_row_new (retweeted_post_item));
 
-        gw_timeline_row_insert_retweeted_item (row, retweeted_item);
+        wb_timeline_row_insert_retweeted_item (row, retweeted_item);
     }
 }
 
 void
-gw_timeline_list_get_home_timeline (GwTimelineList *self,
+wb_timeline_list_get_home_timeline (WbTimelineList *self,
                                     gboolean loading_more)
 {
     const gchar *payload;
@@ -118,9 +118,9 @@ gw_timeline_list_get_home_timeline (GwTimelineList *self,
     JsonParser *parser;
     RestProxy *proxy;
     RestProxyCall *call;
-    GwTimelineListPrivate *priv;
+    WbTimelineListPrivate *priv;
 
-    priv = gw_timeline_list_get_instance_private (self);
+    priv = wb_timeline_list_get_instance_private (self);
 
     proxy = oauth2_proxy_new_with_token ("1450991920",
                                          "2.005ugqwDURNMaB003aa34d9b828hsD",
@@ -200,43 +200,43 @@ listbox_update_header_func (GtkListBoxRow *row,
 }
 
 static void
-gw_timeline_list_edge_reached (GtkScrolledWindow *scrolled_window,
+wb_timeline_list_edge_reached (GtkScrolledWindow *scrolled_window,
                                GtkPositionType pos,
                                gpointer user_data)
 {
-    GwTimelineList *list;
+    WbTimelineList *list;
 
-    list = GW_TIMELINE_LIST (user_data);
+    list = WB_TIMELINE_LIST (user_data);
 
     if (pos == GTK_POS_BOTTOM)
     {
-        gw_timeline_list_get_home_timeline (list, TRUE);
+        wb_timeline_list_get_home_timeline (list, TRUE);
     }
 }
 
 static void
-gw_timeline_list_class_init (GwTimelineListClass *klass)
+wb_timeline_list_class_init (WbTimelineListClass *klass)
 {
     GtkWidgetClass *widget_class;
 
     widget_class = GTK_WIDGET_CLASS (klass);
 
     gtk_widget_class_set_template_from_resource (widget_class,
-                                                 "/org/gnome/Weibo/gw-timeline-list.ui");
+                                                 "/com/jonathankang/Weibird/wb-timeline-list.ui");
     gtk_widget_class_bind_template_child_private (widget_class,
-                                                  GwTimelineList, timeline_list);
+                                                  WbTimelineList, timeline_list);
     gtk_widget_class_bind_template_child_private (widget_class,
-                                                  GwTimelineList, timeline_scrolled);
+                                                  WbTimelineList, timeline_scrolled);
 }
 
 static void
-gw_timeline_list_init (GwTimelineList *self)
+wb_timeline_list_init (WbTimelineList *self)
 {
-    GwTimelineListPrivate *priv;
+    WbTimelineListPrivate *priv;
 
     gtk_widget_init_template (GTK_WIDGET (self));
 
-    priv = gw_timeline_list_get_instance_private (self);
+    priv = wb_timeline_list_get_instance_private (self);
 
     priv->batch_fetched = 0;
 
@@ -245,18 +245,18 @@ gw_timeline_list_init (GwTimelineList *self)
                                   NULL, NULL);
 
     g_signal_connect (priv->timeline_scrolled, "edge-reached",
-                      G_CALLBACK (gw_timeline_list_edge_reached), self);
+                      G_CALLBACK (wb_timeline_list_edge_reached), self);
 }
 
 /**
- * gw_timeline_list_new:
+ * wb_timeline_list_new:
  *
- * Create a new #GwTimelineList.
+ * Create a new #WbTimelineList.
  *
- * Returns: (transfer full): a newly created #GwTimelineList
+ * Returns: (transfer full): a newly created #WbTimelineList
  */
-GwTimelineList *
-gw_timeline_list_new (void)
+WbTimelineList *
+wb_timeline_list_new (void)
 {
-    return g_object_new (GW_TYPE_TIMELINE_LIST, NULL);
+    return g_object_new (WB_TYPE_TIMELINE_LIST, NULL);
 }

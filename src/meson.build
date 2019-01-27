@@ -1,38 +1,38 @@
 sources = files(
-    'gw-application.c',
-    'gw-headerbar.c',
-    'gw-main.c',
-    'gw-multi-media-widget.c',
-    'gw-image-button.c',
-    'gw-timeline-list.c',
-    'gw-timeline-row.c',
-    'gw-util.c',
-    'gw-window.c'
+    'wb-application.c',
+    'wb-headerbar.c',
+    'wb-main.c',
+    'wb-multi-media-widget.c',
+    'wb-image-button.c',
+    'wb-timeline-list.c',
+    'wb-timeline-row.c',
+    'wb-util.c',
+    'wb-window.c'
 )
 
 enum_headers = files(
-    'gw-image-button.h'
+    'wb-image-button.h'
 )
 
 sources += gnome.compile_resources(
-    'gw-resources',
+    'wb-resources',
     gresource,
-    c_name: 'gw',
+    c_name: 'wb',
     source_dir: data_dir,
     dependencies: resource_data,
     export: true
 )
 
-enum = 'gw-enums'
+enum = 'wb-enums'
 sources += gnome.mkenums_simple(
     enum,
     sources : enum_headers
 )
 
 executable(
-    gw_name,
+    wb_name,
     sources,
-    dependencies : gw_deps,
+    dependencies : wb_deps,
     install : true,
-    install_dir: gw_bindir
+    install_dir: wb_bindir
 )

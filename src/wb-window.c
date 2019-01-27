@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -22,11 +22,11 @@
 #include <rest/oauth2-proxy.h>
 #include <webkit2/webkit2.h>
 
-#include "gw-headerbar.h"
-#include "gw-timeline-list.h"
-#include "gw-window.h"
+#include "wb-headerbar.h"
+#include "wb-timeline-list.h"
+#include "wb-window.h"
 
-struct _GwWindow
+struct _WbWindow
 {
     /*< private >*/
     GtkApplicationWindow parent_instance;
@@ -38,11 +38,11 @@ typedef struct
     GtkWidget *login_box;
     GtkWidget *headerbar;
     GtkWidget *timeline;
-} GwWindowPrivate;
+} WbWindowPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (GwWindow, gw_window, GTK_TYPE_APPLICATION_WINDOW)
+G_DEFINE_TYPE_WITH_PRIVATE (WbWindow, wb_window, GTK_TYPE_APPLICATION_WINDOW)
 
-static const gchar SETTINGS_SCHEMA[] = "org.gnome.Weibo";
+static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
 static const gchar ACCESS_TOKEN[] = "access-token";
 
 static gboolean
@@ -211,12 +211,12 @@ on_login_button_clicked (GtkWidget *button,
     GtkWidget *dialog;
     GtkWidget *web_view;
     RestProxy *proxy;
-    GwWindow *window;
-    GwWindowPrivate *priv;
-    GwTimelineList *timeline;
+    WbWindow *window;
+    WbWindowPrivate *priv;
+    WbTimelineList *timeline;
 
-    window = GW_WINDOW (user_data);
-    priv = gw_window_get_instance_private (window);
+    window = WB_WINDOW (user_data);
+    priv = wb_window_get_instance_private (window);
 
     web_view = webkit_web_view_new ();
     gtk_widget_set_hexpand (web_view, TRUE);
@@ -246,37 +246,37 @@ on_login_button_clicked (GtkWidget *button,
     gtk_dialog_run (GTK_DIALOG (dialog));
 
     gtk_stack_set_visible_child (priv->main_stack, priv->timeline);
-    timeline = GW_TIMELINE_LIST (priv->timeline);
-    gw_timeline_list_get_home_timeline (timeline, FALSE);
+    timeline = WB_TIMELINE_LIST (priv->timeline);
+    wb_timeline_list_get_home_timeline (timeline, FALSE);
 }
 
 static void
-gw_window_init (GwWindow *window)
+wb_window_init (WbWindow *window)
 {
     gchar *access_token;
     GdkScreen *screen;
     GtkCssProvider *provider;
     GSettings *settings;
-    GwTimelineList *list;
-    GwWindowPrivate *priv;
+    WbTimelineList *list;
+    WbWindowPrivate *priv;
 
     /* Ensure GTK+ private types used by the template definition
      * before calling gtk_widget_init_template()
      */
-    g_type_ensure (GW_TYPE_HEADERBAR);
-    g_type_ensure (GW_TYPE_TIMELINE_LIST);
+    g_type_ensure (WB_TYPE_HEADERBAR);
+    g_type_ensure (WB_TYPE_TIMELINE_LIST);
 
     gtk_widget_init_template (GTK_WIDGET (window));
 
-    priv = gw_window_get_instance_private (window);
-    list = GW_TIMELINE_LIST (priv->timeline);
+    priv = wb_window_get_instance_private (window);
+    list = WB_TIMELINE_LIST (priv->timeline);
 
     settings = g_settings_new (SETTINGS_SCHEMA);
     access_token = g_settings_get_string (settings, ACCESS_TOKEN);
     if (g_strcmp0 (access_token, "") != 0)
     {
         gtk_stack_set_visible_child (priv->main_stack, priv->timeline);
-        gw_timeline_list_get_home_timeline (list, FALSE);
+        wb_timeline_list_get_home_timeline (list, FALSE);
     }
     else
     {
@@ -285,7 +285,7 @@ gw_window_init (GwWindow *window)
 
     screen = gdk_screen_get_default ();
     provider = gtk_css_provider_new ();
-    gtk_css_provider_load_from_resource (provider, "/org/gnome/Weibo/gw-style.css");
+    gtk_css_provider_load_from_resource (provider, "/com/jonathankang/Weibird/wb-style.css");
     gtk_style_context_add_provider_for_screen (screen,
                                                GTK_STYLE_PROVIDER (provider),
                                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -295,27 +295,27 @@ gw_window_init (GwWindow *window)
     g_object_unref (settings);
 }
 static void
-gw_window_class_init (GwWindowClass *klass)
+wb_window_class_init (WbWindowClass *klass)
 {
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
     gtk_widget_class_set_template_from_resource (widget_class,
-                                                 "/org/gnome/Weibo/gw-window.ui");
+                                                 "/com/jonathankang/Weibird/wb-window.ui");
     gtk_widget_class_bind_template_child_private (widget_class,
-                                                  GwWindow, main_stack);
+                                                  WbWindow, main_stack);
     gtk_widget_class_bind_template_child_private (widget_class,
-                                                  GwWindow, login_box);
+                                                  WbWindow, login_box);
     gtk_widget_class_bind_template_child_private (widget_class,
-                                                  GwWindow, headerbar);
+                                                  WbWindow, headerbar);
     gtk_widget_class_bind_template_child_private (widget_class,
-                                                  GwWindow, timeline);
+                                                  WbWindow, timeline);
 
     gtk_widget_class_bind_template_callback (widget_class, on_login_button_clicked);
 }
 
 GtkWidget *
-gw_window_new (GtkApplication *application)
+wb_window_new (GtkApplication *application)
 {
-    return g_object_new (GW_TYPE_WINDOW,
+    return g_object_new (WB_TYPE_WINDOW,
                          "application", application, NULL);
 }
