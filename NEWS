@@ -1,1 +1,22 @@
-GNOME Weibo
+GNOME Weibo 0.1.0
+=================
+
+* Added Weibo login support
+* Added supoort for displaying avatar iamges
+* Added support for displaying image thumbnails
+* Add separators between post items
+* Display likes/comments/reposts count
+* Display Weibo source label
+* Add primary menu
+* Add supoort for loading more post items
+* Asynchronously load images
+* Added support for displaying multiple images
+* Added support for displaying retweeted post
+* Improved image scaling for thumbnails
+* Fixed some memory leaks
+* Various small UI tweeks
+
+GNOME Weibo 0.0.0
+=================
+
+* Initial release

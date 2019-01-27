@@ -1,4 +1,4 @@
-project('gnome-weibo', 'c', version : '0.0')
+project('gnome-weibo', 'c', version : '0.1.0')
 
 gw_name = meson.project_name()
 gw_version = meson.project_version()
