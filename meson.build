@@ -1,12 +1,12 @@
-project('gnome-weibo', 'c', version : '0.1.0')
+project('weibird', 'c', version : '0.1.0')
 
-gw_name = meson.project_name()
-gw_version = meson.project_version()
+wb_name = meson.project_name()
+wb_version = meson.project_version()
 
-gw_prefix = get_option('prefix')
-gw_bindir = join_paths(gw_prefix, get_option('bindir'))
-gw_datadir = join_paths(gw_prefix, get_option('datadir'))
-gw_pkgdatadir = join_paths(gw_datadir, gw_name)
+wb_prefix = get_option('prefix')
+wb_bindir = join_paths(wb_prefix, get_option('bindir'))
+wb_datadir = join_paths(wb_prefix, get_option('datadir'))
+wb_pkgdatadir = join_paths(wb_datadir, wb_name)
 
 # warning cflags
 warning_cflags = [
@@ -29,7 +29,7 @@ add_global_arguments(supported_warning_cflags, language : 'c')
 gnome = import('gnome')
 
 #dependencies
-gw_deps = [
+wb_deps = [
     dependency('glib-2.0'),
     dependency('gtk+-3.0'),
     dependency('json-glib-1.0'),

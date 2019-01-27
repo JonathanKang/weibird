@@ -1,27 +1,27 @@
 resource_data = files(
-    'gw-headerbar.ui',
-    'gw-timeline-list.ui',
-    'gw-window.ui'
+    'wb-headerbar.ui',
+    'wb-timeline-list.ui',
+    'wb-window.ui'
 )
 
-gresource = files('org.gnome.Weibo.gresource.xml')
+gresource = files('com.jonathankang.Weibird.gresource.xml')
 
 # GSettings schemas
 gnome.compile_schemas(
     build_by_default: true,
-    depend_files: 'org.gnome.Weibo.gschema.xml'
+    depend_files: 'com.jonathankang.Weibird.gschema.xml'
 )
 
 install_data(
-    'org.gnome.Weibo.gschema.xml',
-    install_dir: join_paths(gw_datadir, 'glib-2.0', 'schemas')
+    'com.jonathankang.Weibird.gschema.xml',
+    install_dir: join_paths(wb_datadir, 'glib-2.0', 'schemas')
 )
 
 css_files = files(
-    'gw-style.css'
+    'wb-style.css'
 )
 
 install_data(
     css_files,
-    install_dir : gw_pkgdatadir
+    install_dir : wb_pkgdatadir
 )

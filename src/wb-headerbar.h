@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -16,22 +16,18 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GW_TIMELINE_ROW_H_
-#define GW_TIMELINE_ROW_H_
+#ifndef WB_HEADERBAR_H_
+#define WB_HEADERBAR_H_
 
 #include <gtk/gtk.h>
 
-#include "gw-timeline-list.h"
+G_BEGIN_DECLS
+
+#define WB_TYPE_HEADERBAR (wb_headerbar_get_type ())
+G_DECLARE_FINAL_TYPE (WbHeaderbar, wb_headerbar, WB, HEADERBAR, GtkHeaderBar)
+
+WbHeaderbar *wb_headerbar_new (void);
 
 G_BEGIN_DECLS
 
-#define GW_TYPE_TIMELINE_ROW (gw_timeline_row_get_type ())
-G_DECLARE_FINAL_TYPE (GwTimelineRow, gw_timeline_row, GW, TIMELINE_ROW, GtkListBoxRow)
-
-void gw_timeline_row_insert_retweeted_item (GwTimelineRow *row,
-                                            GtkWidget *retweeted_item);
-GwTimelineRow *gw_timeline_row_new (GwPostItem *post_item);
-
-G_END_DECLS
-
-#endif /* GW_TIMELINE_ROW_H_ */
+#endif /* WB_HEADERBAR_H_ */

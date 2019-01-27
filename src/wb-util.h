@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -16,18 +16,21 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GW_WINDOW_H_
-#define GW_WINDOW_H_
+#ifndef WB_UTIL_H_
+#define WB_UTIL_H_
 
 #include <gtk/gtk.h>
+#include <json-glib/json-glib.h>
+
+#include "wb-timeline-list.h"
 
 G_BEGIN_DECLS
 
-#define GW_TYPE_WINDOW (gw_window_get_type ())
-G_DECLARE_FINAL_TYPE (GwWindow, gw_window, GW, WINDOW, GtkApplicationWindow)
+gchar *wb_util_format_time_string (gchar *time);
+gchar *wb_util_format_source_string (gchar *source);
+gchar *wb_util_thumbnail_to_original (const gchar *thumbnail);
+void wb_util_parse_weibo_post (JsonObject *object, WbPostItem *post_item);
 
-GtkWidget *gw_window_new (GtkApplication *application);
+G_BEGIN_DECLS
 
-G_END_DECLS
-
-#endif /* GW_WINDOW_H_ */
+#endif /* WB_UTIL_H_ */

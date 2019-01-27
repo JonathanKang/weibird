@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -21,11 +21,11 @@
 #include <gtk/gtk.h>
 #include <libsoup/soup.h>
 
-#include "gw-image-button.h"
-#include "gw-multi-media-widget.h"
-#include "gw-timeline-list.h"
-#include "gw-timeline-row.h"
-#include "gw-util.h"
+#include "wb-image-button.h"
+#include "wb-multi-media-widget.h"
+#include "wb-timeline-list.h"
+#include "wb-timeline-row.h"
+#include "wb-util.h"
 
 enum
 {
@@ -34,7 +34,7 @@ enum
     N_PROPERTIES
 };
 
-struct _GwTimelineRow
+struct _WbTimelineRow
 {
     /*< private >*/
     GtkListBoxRow parent_instance;
@@ -45,21 +45,21 @@ typedef struct
     GtkWidget *main_box;
     GtkWidget *profile_image;
     GtkWidget *post_image;
-    GwPostItem *post_item;
-} GwTimelineRowPrivate;
+    WbPostItem *post_item;
+} WbTimelineRowPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineRow, gw_timeline_row, GTK_TYPE_LIST_BOX_ROW)
+G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineRow, wb_timeline_row, GTK_TYPE_LIST_BOX_ROW)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
 void
-gw_timeline_row_insert_retweeted_item (GwTimelineRow *self,
+wb_timeline_row_insert_retweeted_item (WbTimelineRow *self,
                                        GtkWidget *retweeted_item)
 {
     GtkStyleContext *context;
-    GwTimelineRowPrivate *priv;
+    WbTimelineRowPrivate *priv;
 
-    priv = gw_timeline_row_get_instance_private (self);
+    priv = wb_timeline_row_get_instance_private (self);
 
     context = gtk_widget_get_style_context (retweeted_item);
     gtk_style_context_add_class (context, "retweet");
@@ -68,7 +68,7 @@ gw_timeline_row_insert_retweeted_item (GwTimelineRow *self,
 }
 
 static void
-gw_timeline_row_constructed (GObject *object)
+wb_timeline_row_constructed (GObject *object)
 {
     gchar *markup;
     GtkStyleContext *context;
@@ -83,8 +83,8 @@ gw_timeline_row_constructed (GObject *object)
     GtkWidget *likes_label;
     GtkWidget *comments_label;
     GtkWidget *reposts_label;
-    GwTimelineRow *row = GW_TIMELINE_ROW (object);
-    GwTimelineRowPrivate *priv = gw_timeline_row_get_instance_private (row);
+    WbTimelineRow *row = WB_TIMELINE_ROW (object);
+    WbTimelineRowPrivate *priv = wb_timeline_row_get_instance_private (row);
 
     hbox1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
     hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
@@ -92,7 +92,7 @@ gw_timeline_row_constructed (GObject *object)
     gtk_box_pack_end (GTK_BOX (priv->main_box), hbox2, FALSE, FALSE, 0);
 
     /* Profile image, name, source and time */
-    priv->profile_image = gw_image_button_new (GW_MEDIA_TYPE_AVATAR,
+    priv->profile_image = wb_image_button_new (WB_MEDIA_TYPE_AVATAR,
                                                priv->post_item->user->profile_image_url);
     gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image, FALSE, FALSE, 0);
@@ -115,7 +115,7 @@ gw_timeline_row_constructed (GObject *object)
     {
         gtk_widget_set_valign (name_label, GTK_ALIGN_END);
 
-        priv->post_item->source = gw_util_format_source_string (priv->post_item->source);
+        priv->post_item->source = wb_util_format_source_string (priv->post_item->source);
         source_label = gtk_label_new (NULL);
         context = gtk_widget_get_style_context (source_label);
         gtk_style_context_add_class (context, "dim-label");
@@ -125,7 +125,7 @@ gw_timeline_row_constructed (GObject *object)
         gtk_box_pack_end (GTK_BOX (vbox), source_label, TRUE, TRUE, 0);
     }
 
-    priv->post_item->created_at = gw_util_format_time_string (priv->post_item->created_at);
+    priv->post_item->created_at = wb_util_format_time_string (priv->post_item->created_at);
     time_label = gtk_label_new (priv->post_item->created_at);
     context = gtk_widget_get_style_context (time_label);
     gtk_style_context_add_class (context, "dim-label");
@@ -142,7 +142,7 @@ gw_timeline_row_constructed (GObject *object)
     /* TODO: Add support for display the original picture individually */
     if (priv->post_item->picuri_array->len != 0)
     {
-        pic_grid = gw_multi_media_widget_new (priv->post_item->picuri_array->len,
+        pic_grid = wb_multi_media_widget_new (priv->post_item->picuri_array->len,
                                               priv->post_item->picuri_array);
         gtk_widget_set_halign (pic_grid, GTK_ALIGN_CENTER);
         gtk_grid_set_column_spacing (GTK_GRID (pic_grid), 0);
@@ -175,14 +175,14 @@ gw_timeline_row_constructed (GObject *object)
     gtk_container_add (GTK_CONTAINER (row), priv->main_box);
     gtk_widget_show_all (GTK_WIDGET (row));
 
-    G_OBJECT_CLASS (gw_timeline_row_parent_class)->constructed (object);
+    G_OBJECT_CLASS (wb_timeline_row_parent_class)->constructed (object);
 }
 
 static void
-gw_timeline_row_finalize (GObject *object)
+wb_timeline_row_finalize (GObject *object)
 {
-    GwTimelineRow *self = GW_TIMELINE_ROW (object);
-    GwTimelineRowPrivate *priv = gw_timeline_row_get_instance_private (self);
+    WbTimelineRow *self = WB_TIMELINE_ROW (object);
+    WbTimelineRowPrivate *priv = wb_timeline_row_get_instance_private (self);
 
     g_array_free (priv->post_item->picuri_array, TRUE);
     g_free (priv->post_item->created_at);
@@ -205,13 +205,13 @@ gw_timeline_row_finalize (GObject *object)
 }
 
 static void
-gw_timeline_row_get_property (GObject *object,
+wb_timeline_row_get_property (GObject *object,
                               guint prop_id,
                               GValue *value,
                               GParamSpec *pspec)
 {
-    GwTimelineRow *self = GW_TIMELINE_ROW (object);
-    GwTimelineRowPrivate *priv = gw_timeline_row_get_instance_private (self);
+    WbTimelineRow *self = WB_TIMELINE_ROW (object);
+    WbTimelineRowPrivate *priv = wb_timeline_row_get_instance_private (self);
 
     switch (prop_id)
     {
@@ -225,13 +225,13 @@ gw_timeline_row_get_property (GObject *object,
 }
 
 static void
-gw_timeline_row_set_property (GObject *object,
+wb_timeline_row_set_property (GObject *object,
                               guint prop_id,
                               const GValue *value,
                               GParamSpec *pspec)
 {
-    GwTimelineRow *self = GW_TIMELINE_ROW (object);
-    GwTimelineRowPrivate *priv = gw_timeline_row_get_instance_private (self);
+    WbTimelineRow *self = WB_TIMELINE_ROW (object);
+    WbTimelineRowPrivate *priv = wb_timeline_row_get_instance_private (self);
 
     switch (prop_id)
     {
@@ -245,14 +245,14 @@ gw_timeline_row_set_property (GObject *object,
 }
 
 static void
-gw_timeline_row_class_init (GwTimelineRowClass *klass)
+wb_timeline_row_class_init (WbTimelineRowClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-    gobject_class->constructed = gw_timeline_row_constructed;
-    gobject_class->finalize = gw_timeline_row_finalize;
-    gobject_class->get_property = gw_timeline_row_get_property;
-    gobject_class->set_property = gw_timeline_row_set_property;
+    gobject_class->constructed = wb_timeline_row_constructed;
+    gobject_class->finalize = wb_timeline_row_finalize;
+    gobject_class->get_property = wb_timeline_row_get_property;
+    gobject_class->set_property = wb_timeline_row_set_property;
 
     obj_properties[PROP_POST_ITEM] = g_param_spec_pointer ("post-item", "item",
                                                            "Post item for each row",
@@ -264,11 +264,11 @@ gw_timeline_row_class_init (GwTimelineRowClass *klass)
 }
 
 static void
-gw_timeline_row_init (GwTimelineRow *self)
+wb_timeline_row_init (WbTimelineRow *self)
 {
-    GwTimelineRowPrivate *priv;
+    WbTimelineRowPrivate *priv;
 
-    priv = gw_timeline_row_get_instance_private (self);
+    priv = wb_timeline_row_get_instance_private (self);
 
     priv->profile_image = gtk_image_new_from_pixbuf (NULL);
     priv->post_image = gtk_image_new_from_pixbuf (NULL);
@@ -281,16 +281,16 @@ gw_timeline_row_init (GwTimelineRow *self)
 }
 
 /**
- * gw_timeline_row_new:
+ * wb_timeline_row_new:
  *
- * Create a new #GwTimelineRow.
+ * Create a new #WbTimelineRow.
  *
- * Returns: (transfer full): a newly created #GwTimelineRow
+ * Returns: (transfer full): a newly created #WbTimelineRow
  */
-GwTimelineRow *
-gw_timeline_row_new (GwPostItem *post_item)
+WbTimelineRow *
+wb_timeline_row_new (WbPostItem *post_item)
 {
-    return g_object_new (GW_TYPE_TIMELINE_ROW,
+    return g_object_new (WB_TYPE_TIMELINE_ROW,
                          "post-item", post_item,
                          NULL);
 }

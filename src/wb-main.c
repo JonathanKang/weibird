@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - View and compose weibo
+ *  Weibird - View and compose weibo
  *  Copyright (C) 2018 Jonathan Kang <jonathankang@gnome.org>.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 #include <gtk/gtk.h>
 
-#include "gw-application.h"
+#include "wb-application.h"
 
 int
 main (int argc, char **argv)
@@ -26,7 +26,7 @@ main (int argc, char **argv)
     GtkApplication *application;
     int status;
 
-    application = gw_application_new ();
+    application = wb_application_new ();
     status = g_application_run (G_APPLICATION (application), argc, argv);
 
     return status;

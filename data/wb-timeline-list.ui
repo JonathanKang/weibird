@@ -1,5 +1,5 @@
-<interface domain="gnome-weibo">
-    <template class="GwTimelineList" parent="GtkBox">
+<interface domain="weibird">
+    <template class="WbTimelineList" parent="GtkBox">
         <property name="orientation">vertical</property>
         <property name="visible">True</property>
         <child>

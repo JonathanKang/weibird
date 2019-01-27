@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -21,8 +21,8 @@
 #include <gtk/gtk.h>
 #include <libsoup/soup.h>
 
-#include "gw-enums.h"
-#include "gw-image-button.h"
+#include "wb-enums.h"
+#include "wb-image-button.h"
 
 #define THUMBNAIL_HEIGHT 150
 #define THUMBNAIL_WIDTH 150
@@ -35,7 +35,7 @@ enum
     N_PROPS
 };
 
-struct _GwImageButton
+struct _WbImageButton
 {
     /*< private >*/
     GtkButton parent_instance;
@@ -45,10 +45,10 @@ typedef struct
 {
     gchar *uri;
     GtkWidget *image;
-    GwMediaType type;
-} GwImageButtonPrivate;
+    WbMediaType type;
+} WbImageButtonPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (GwImageButton, gw_image_button, GTK_TYPE_BUTTON)
+G_DEFINE_TYPE_WITH_PRIVATE (WbImageButton, wb_image_button, GTK_TYPE_BUTTON)
 
 static GParamSpec *obj_properties [N_PROPS] = { NULL, };
 
@@ -60,8 +60,8 @@ on_message_complete (SoupSession *session,
     GdkPixbuf *pixbuf;
     GError *error = NULL;
     GInputStream *stream;
-    GwImageButton *self = GW_IMAGE_BUTTON (user_data);
-    GwImageButtonPrivate *priv = gw_image_button_get_instance_private (self);
+    WbImageButton *self = WB_IMAGE_BUTTON (user_data);
+    WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
     if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
     {
@@ -85,7 +85,7 @@ on_message_complete (SoupSession *session,
     }
 
     /* Scale the image into thumbnail (150*150) */
-    if (priv->type == GW_MEDIA_TYPE_IMAGE)
+    if (priv->type == WB_MEDIA_TYPE_IMAGE)
     {
         gdouble scale;
         gint width, height;
@@ -151,40 +151,40 @@ on_message_complete (SoupSession *session,
 }
 
 static void
-gw_image_button_constructed (GObject *object)
+wb_image_button_constructed (GObject *object)
 {
     SoupMessage *msg;
     SoupSession *session;
-    GwImageButton *self = GW_IMAGE_BUTTON (object);
-    GwImageButtonPrivate *priv = gw_image_button_get_instance_private (self);
+    WbImageButton *self = WB_IMAGE_BUTTON (object);
+    WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
     msg = soup_message_new (SOUP_METHOD_GET, priv->uri);
     session = soup_session_new ();
     soup_session_queue_message (session, msg,
                                 on_message_complete, GTK_WIDGET (self));
 
-    G_OBJECT_CLASS (gw_image_button_parent_class)->constructed (object);
+    G_OBJECT_CLASS (wb_image_button_parent_class)->constructed (object);
 }
 
 static void
-gw_image_button_finalize (GObject *object)
+wb_image_button_finalize (GObject *object)
 {
-    GwImageButton *self = GW_IMAGE_BUTTON (object);
-    GwImageButtonPrivate *priv = gw_image_button_get_instance_private (self);
+    WbImageButton *self = WB_IMAGE_BUTTON (object);
+    WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
     g_free (priv->uri);
 
-    G_OBJECT_CLASS (gw_image_button_parent_class)->finalize (object);
+    G_OBJECT_CLASS (wb_image_button_parent_class)->finalize (object);
 }
 
 static void
-gw_image_button_get_property (GObject    *object,
+wb_image_button_get_property (GObject    *object,
                               guint       prop_id,
                               GValue     *value,
                               GParamSpec *pspec)
 {
-    GwImageButton *self = GW_IMAGE_BUTTON (object);
-    GwImageButtonPrivate *priv = gw_image_button_get_instance_private (self);
+    WbImageButton *self = WB_IMAGE_BUTTON (object);
+    WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
 		switch (prop_id)
     {
@@ -200,13 +200,13 @@ gw_image_button_get_property (GObject    *object,
 }
 
 static void
-gw_image_button_set_property (GObject      *object,
+wb_image_button_set_property (GObject      *object,
                               guint         prop_id,
                               const GValue *value,
                               GParamSpec   *pspec)
 {
-    GwImageButton *self = GW_IMAGE_BUTTON (object);
-    GwImageButtonPrivate *priv = gw_image_button_get_instance_private (self);
+    WbImageButton *self = WB_IMAGE_BUTTON (object);
+    WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
 		switch (prop_id)
     {
@@ -223,14 +223,14 @@ gw_image_button_set_property (GObject      *object,
 }
 
 static void
-gw_image_button_class_init (GwImageButtonClass *klass)
+wb_image_button_class_init (WbImageButtonClass *klass)
 {
 		GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-    object_class->constructed = gw_image_button_constructed;
-		object_class->finalize = gw_image_button_finalize;
-		object_class->get_property = gw_image_button_get_property;
-		object_class->set_property = gw_image_button_set_property;
+    object_class->constructed = wb_image_button_constructed;
+		object_class->finalize = wb_image_button_finalize;
+		object_class->get_property = wb_image_button_get_property;
+		object_class->set_property = wb_image_button_set_property;
 
     obj_properties[PROP_URI] = g_param_spec_string ("uri", "URI",
                                                     "URI for the image or video",
@@ -241,8 +241,8 @@ gw_image_button_class_init (GwImageButtonClass *klass)
     obj_properties[PROP_MEDIA_TYPE] = g_param_spec_enum ("media-type",
                                                          "Media type",
                                                          "Media type",
-                                                         GW_TYPE_MEDIA_TYPE,
-                                                         GW_MEDIA_TYPE_IMAGE,
+                                                         WB_TYPE_MEDIA_TYPE,
+                                                         WB_MEDIA_TYPE_IMAGE,
                                                          G_PARAM_READWRITE |
                                                          G_PARAM_CONSTRUCT_ONLY |
                                                          G_PARAM_STATIC_STRINGS);
@@ -250,12 +250,12 @@ gw_image_button_class_init (GwImageButtonClass *klass)
 }
 
 static void
-gw_image_button_init (GwImageButton *self)
+wb_image_button_init (WbImageButton *self)
 {
     GtkStyleContext *context;
-    GwImageButtonPrivate *priv;
+    WbImageButtonPrivate *priv;
 
-    priv = gw_image_button_get_instance_private (self);
+    priv = wb_image_button_get_instance_private (self);
 
     priv->uri = NULL;
 
@@ -267,17 +267,17 @@ gw_image_button_init (GwImageButton *self)
 }
 
 /**
- * gw_image_button_new:
+ * wb_image_button_new:
  *
- * Create a new #GwImageButton.
+ * Create a new #WbImageButton.
  *
- * Returns: (transfer full): a newly created #GwImageButton
+ * Returns: (transfer full): a newly created #WbImageButton
  */
 GtkWidget *
-gw_image_button_new (GwMediaType type,
+wb_image_button_new (WbMediaType type,
                      const gchar *uri)
 {
-    return g_object_new (GW_TYPE_IMAGE_BUTTON,
+    return g_object_new (WB_TYPE_IMAGE_BUTTON,
                          "media-type", type,
                          "uri", uri,
                          NULL);

@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -16,18 +16,26 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GW_APPLICATION_H_
-#define GW_APPLICATION_H_
+#ifndef WB_IMAGE_BUTTON_H_
+#define WB_IMAGE_BUTTON_H_
+
+#pragma once
 
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define GW_TYPE_APPLICATION (gw_application_get_type ())
-G_DECLARE_FINAL_TYPE (GwApplication, gw_application, GW, APPLICATION, GtkApplication)
+typedef enum
+{
+    WB_MEDIA_TYPE_AVATAR,
+    WB_MEDIA_TYPE_IMAGE
+} WbMediaType;
 
-GtkApplication *gw_application_new (void);
+#define WB_TYPE_IMAGE_BUTTON (wb_image_button_get_type ())
+G_DECLARE_FINAL_TYPE (WbImageButton, wb_image_button, WB, IMAGE_BUTTON, GtkButton)
+
+GtkWidget *wb_image_button_new (WbMediaType type, const gchar *uri);
 
 G_END_DECLS
 
-#endif /* GW_APPLICATION_H_ */
+#endif /* WB_IMAGE_BUTTON_H_ */

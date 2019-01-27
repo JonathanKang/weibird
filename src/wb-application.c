@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -18,16 +18,16 @@
 
 #include <gtk/gtk.h>
 
-#include "gw-application.h"
-#include "gw-window.h"
+#include "wb-application.h"
+#include "wb-window.h"
 
-struct _GwApplication
+struct _WbApplication
 {
     /*< private >*/
     GtkApplication parent_instance;
 };
 
-G_DEFINE_TYPE (GwApplication, gw_application, GTK_TYPE_APPLICATION)
+G_DEFINE_TYPE (WbApplication, wb_application, GTK_TYPE_APPLICATION)
 
 static void
 on_about (GSimpleAction *action,
@@ -50,7 +50,7 @@ on_about (GSimpleAction *action,
                            "comments", "View and compose Weibo",
                            "copyright", "Copyright © 2018 Jonathan Kang",
                            "license-type", GTK_LICENSE_GPL_3_0,
-                           "website", "https://github.com/JonathanKang/gnome-weibo",
+                           "website", "https://github.com/JonathanKang/Weibird",
                            NULL);
 }
 
@@ -71,42 +71,42 @@ static GActionEntry actions[] = {
 };
 
 static void
-gw_application_activate (GApplication *application)
+wb_application_activate (GApplication *application)
 {
     GtkWidget *window;
 
-    window = gw_window_new (GTK_APPLICATION (application));
+    window = wb_window_new (GTK_APPLICATION (application));
     gtk_widget_show (window);
 }
 
 static void
-gw_application_startup (GApplication *application)
+wb_application_startup (GApplication *application)
 {
     g_action_map_add_action_entries (G_ACTION_MAP (application), actions,
                                      G_N_ELEMENTS (actions), application);
 
     /* Calls gtk_init() with no arguments. */
-    G_APPLICATION_CLASS (gw_application_parent_class)->startup (application);
+    G_APPLICATION_CLASS (wb_application_parent_class)->startup (application);
 }
 
 static void
-gw_application_init (GwApplication *application)
+wb_application_init (WbApplication *application)
 {
 }
 
 static void
-gw_application_class_init (GwApplicationClass *klass)
+wb_application_class_init (WbApplicationClass *klass)
 {
     GApplicationClass *app_class;
 
     app_class = G_APPLICATION_CLASS (klass);
-    app_class->activate = gw_application_activate;
-    app_class->startup = gw_application_startup;
+    app_class->activate = wb_application_activate;
+    app_class->startup = wb_application_startup;
 }
 
 GtkApplication *
-gw_application_new (void)
+wb_application_new (void)
 {
-    return g_object_new (GW_TYPE_APPLICATION,
-                         "application-id", "org.gnome.Weibo", NULL);
+    return g_object_new (WB_TYPE_APPLICATION,
+                         "application-id", "com.jonathankang.Weibird", NULL);
 }

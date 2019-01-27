@@ -1,5 +1,5 @@
 /*
- *  GNOME Weibo - view and compose weibo
+ *  Weibird - view and compose weibo
  *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
@@ -16,8 +16,8 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GW_TIMELINE_LIST_H_
-#define GW_TIMELINE_LIST_H_
+#ifndef WB_TIMELINE_LIST_H_
+#define WB_TIMELINE_LIST_H_
 
 #include <gtk/gtk.h>
 
@@ -41,7 +41,7 @@ typedef struct
     gchar *created_at;
     gboolean verified;
     gboolean follow_me;
-} GwUser;
+} WbUser;
 
 typedef struct
 {
@@ -62,15 +62,15 @@ typedef struct
     gint comments_count;
     gint attitudes_count;
 
-    GwUser *user;
-} GwPostItem;
+    WbUser *user;
+} WbPostItem;
 
-#define GW_TYPE_TIMELINE_LIST (gw_timeline_list_get_type ())
-G_DECLARE_FINAL_TYPE (GwTimelineList, gw_timeline_list, GW, TIMELINE_LIST, GtkBox)
+#define WB_TYPE_TIMELINE_LIST (wb_timeline_list_get_type ())
+G_DECLARE_FINAL_TYPE (WbTimelineList, wb_timeline_list, WB, TIMELINE_LIST, GtkBox)
 
-void gw_timeline_list_get_home_timeline (GwTimelineList *list, gboolean loading_more);
-GwTimelineList *gw_timeline_list_new (void);
+void wb_timeline_list_get_home_timeline (WbTimelineList *list, gboolean loading_more);
+WbTimelineList *wb_timeline_list_new (void);
 
 G_END_DECLS
 
-#endif /* GW_TIMELINE_LIST_H_ */
+#endif /* WB_TIMELINE_LIST_H_ */
