@@ -24,14 +24,13 @@
 #include "wb-enums.h"
 #include "wb-image-button.h"
 
-#define THUMBNAIL_HEIGHT 150
-#define THUMBNAIL_WIDTH 150
-
 enum
 {
     PROP_0,
     PROP_URI,
     PROP_MEDIA_TYPE,
+    PROP_WIDTH,
+    PROP_HEIGHT,
     N_PROPS
 };
 
@@ -44,6 +43,8 @@ struct _WbImageButton
 typedef struct
 {
     gchar *uri;
+    gint width;
+    gint height;
     GtkWidget *image;
     WbMediaType type;
 } WbImageButtonPrivate;
@@ -96,29 +97,29 @@ on_message_complete (SoupSession *session,
         height = gdk_pixbuf_get_height (pixbuf);
         scaled_pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
                                         gdk_pixbuf_get_has_alpha (pixbuf),
-                                        8, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT);
+                                        8, priv->width, priv->height);
 
         /* If the image is large enough, cropped the central square part
          * of the image and scale it down to 150px by 150px */
-        if (width > THUMBNAIL_WIDTH && height > THUMBNAIL_HEIGHT)
+        if (width > priv->width && height > priv->height)
         {
             if (width <= height)
             {
-                scale = (gdouble) THUMBNAIL_WIDTH / width;
+                scale = (gdouble) priv->width / width;
                 offset = (height - width) * scale / -2;
 
                 gdk_pixbuf_scale (pixbuf, scaled_pixbuf,
-                                  0, 0, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
+                                  0, 0, priv->width, priv->height,
                                   0, offset, scale, scale,
                                   GDK_INTERP_BILINEAR);
             }
             else
             {
-                scale = (gdouble) THUMBNAIL_HEIGHT / height;
+                scale = (gdouble) priv->height / height;
                 offset = (width - height) * scale / -2;
 
                 gdk_pixbuf_scale (pixbuf, scaled_pixbuf,
-                                  0, 0, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
+                                  0, 0, priv->width, priv->height,
                                   offset, 0, scale, scale,
                                   GDK_INTERP_BILINEAR);
             }
@@ -126,8 +127,8 @@ on_message_complete (SoupSession *session,
         else
         {
             scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf,
-                                                     THUMBNAIL_WIDTH,
-                                                     THUMBNAIL_HEIGHT,
+                                                     priv->width,
+                                                     priv->height,
                                                      GDK_INTERP_BILINEAR);
         }
 
@@ -194,6 +195,12 @@ wb_image_button_get_property (GObject    *object,
         case PROP_URI:
             g_value_set_string (value, priv->uri);
             break;
+        case PROP_WIDTH:
+            g_value_set_int (value, priv->width);
+            break;
+        case PROP_HEIGHT:
+            g_value_set_int (value, priv->height);
+            break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -216,6 +223,12 @@ wb_image_button_set_property (GObject      *object,
         case PROP_URI:
             g_free (priv->uri);
             priv->uri = g_value_dup_string (value);
+            break;
+        case PROP_WIDTH:
+            priv->width = g_value_get_int (value);
+            break;
+        case PROP_HEIGHT:
+            priv->height = g_value_get_int (value);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -246,6 +259,20 @@ wb_image_button_class_init (WbImageButtonClass *klass)
                                                          G_PARAM_READWRITE |
                                                          G_PARAM_CONSTRUCT_ONLY |
                                                          G_PARAM_STATIC_STRINGS);
+    obj_properties[PROP_WIDTH] = g_param_spec_int ("width",
+                                                   "Width",
+                                                   "Width of the thumbnail image",
+                                                   50, 300, 150,
+                                                   G_PARAM_READWRITE |
+                                                   G_PARAM_CONSTRUCT_ONLY |
+                                                   G_PARAM_STATIC_STRINGS);
+    obj_properties[PROP_HEIGHT] = g_param_spec_int ("height",
+                                                   "Height",
+                                                   "Height of the thumbnail image",
+                                                   50, 300, 150,
+                                                   G_PARAM_READWRITE |
+                                                   G_PARAM_CONSTRUCT_ONLY |
+                                                   G_PARAM_STATIC_STRINGS);
     g_object_class_install_properties (object_class, N_PROPS, obj_properties);
 }
 
@@ -275,10 +302,14 @@ wb_image_button_init (WbImageButton *self)
  */
 GtkWidget *
 wb_image_button_new (WbMediaType type,
-                     const gchar *uri)
+                     const gchar *uri,
+                     gint width,
+                     gint height)
 {
     return g_object_new (WB_TYPE_IMAGE_BUTTON,
                          "media-type", type,
                          "uri", uri,
+                         "width", width,
+                         "height", height,
                          NULL);
 }

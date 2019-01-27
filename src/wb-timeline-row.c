@@ -91,9 +91,10 @@ wb_timeline_row_constructed (GObject *object)
     gtk_box_pack_start (GTK_BOX (priv->main_box), hbox1, FALSE, FALSE, 0);
     gtk_box_pack_end (GTK_BOX (priv->main_box), hbox2, FALSE, FALSE, 0);
 
-    /* Profile image, name, source and time */
+    /* Profile image (50px by 50px), name, source and time */
     priv->profile_image = wb_image_button_new (WB_MEDIA_TYPE_AVATAR,
-                                               priv->post_item->user->profile_image_url);
+                                               priv->post_item->user->profile_image_url,
+                                               50, 50);
     gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image, FALSE, FALSE, 0);
 

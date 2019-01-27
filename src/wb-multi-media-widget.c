@@ -50,6 +50,7 @@ wb_multi_media_widget_constructed (GObject *object)
 {
     gint i;
     gint left, top;
+    gint width, height;
     GtkWidget *child;
     WbMultiMediaWidget *self;
     WbMultiMediaWidgetPrivate *priv;
@@ -57,10 +58,26 @@ wb_multi_media_widget_constructed (GObject *object)
     self = WB_MULTI_MEDIA_WIDGET (object);
     priv = wb_multi_media_widget_get_instance_private (self);
 
+    /* Adjust the image size based on how many images there are
+     * in a post. */
+    if (priv->n_childs == 1)
+    {
+        width = height = 300;
+    }
+    else if (priv->n_childs == 2)
+    {
+        width = height = 240;
+    }
+    else
+    {
+        width = height = 150;
+    }
+
     for (i = 0; i < priv->n_childs; i++)
     {
         child = wb_image_button_new (WB_MEDIA_TYPE_IMAGE,
-                                     g_array_index (priv->pic_uris, gchar *, i));
+                                     g_array_index (priv->pic_uris, gchar *, i),
+                                     width, height);
 
         if (i < 2)
         {
