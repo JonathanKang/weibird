@@ -24,6 +24,9 @@
 #include "gw-enums.h"
 #include "gw-image-button.h"
 
+#define THUMBNAIL_HEIGHT 150
+#define THUMBNAIL_WIDTH 150
+
 enum
 {
     PROP_0,
@@ -55,7 +58,6 @@ on_message_complete (SoupSession *session,
                      gpointer user_data)
 {
     GdkPixbuf *pixbuf;
-    GdkPixbuf *scaled_pixbuf;
     GError *error = NULL;
     GInputStream *stream;
     GwImageButton *self = GW_IMAGE_BUTTON (user_data);
@@ -82,13 +84,56 @@ on_message_complete (SoupSession *session,
         g_clear_error (&error);
     }
 
+    /* Scale the image into thumbnail (150*150) */
     if (priv->type == GW_MEDIA_TYPE_IMAGE)
     {
-        scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf, 150, 150,
-                                                 GDK_INTERP_BILINEAR);
-        g_object_unref (pixbuf);
+        gdouble scale;
+        gint width, height;
+        gint offset;
+        GdkPixbuf *scaled_pixbuf;
+
+        width = gdk_pixbuf_get_width (pixbuf);
+        height = gdk_pixbuf_get_height (pixbuf);
+        scaled_pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
+                                        gdk_pixbuf_get_has_alpha (pixbuf),
+                                        8, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT);
+
+        /* If the image is large enough, cropped the central square part
+         * of the image and scale it down to 150px by 150px */
+        if (width > THUMBNAIL_WIDTH && height > THUMBNAIL_HEIGHT)
+        {
+            if (width <= height)
+            {
+                scale = (gdouble) THUMBNAIL_WIDTH / width;
+                offset = (height - width) * scale / -2;
+
+                gdk_pixbuf_scale (pixbuf, scaled_pixbuf,
+                                  0, 0, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
+                                  0, offset, scale, scale,
+                                  GDK_INTERP_BILINEAR);
+            }
+            else
+            {
+                scale = (gdouble) THUMBNAIL_HEIGHT / height;
+                offset = (width - height) * scale / -2;
+
+                gdk_pixbuf_scale (pixbuf, scaled_pixbuf,
+                                  0, 0, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
+                                  offset, 0, scale, scale,
+                                  GDK_INTERP_BILINEAR);
+            }
+        }
+        else
+        {
+            scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf,
+                                                     THUMBNAIL_WIDTH,
+                                                     THUMBNAIL_HEIGHT,
+                                                     GDK_INTERP_BILINEAR);
+        }
 
         gtk_image_set_from_pixbuf (GTK_IMAGE (priv->image), scaled_pixbuf);
+
+        g_object_unref (scaled_pixbuf);
     }
     else
     {
@@ -102,6 +147,7 @@ on_message_complete (SoupSession *session,
                    error->message);
         g_clear_error (&error);
     }
+    g_object_unref (pixbuf);
 }
 
 static void
