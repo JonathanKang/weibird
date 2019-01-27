@@ -42,35 +42,16 @@ typedef struct
 G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineList, gw_timeline_list, GTK_TYPE_BOX)
 
 static void
-parse_pic_uri (JsonArray *array,
-               guint index,
-               JsonNode *element_node,
-               gpointer user_data)
-{
-    const gchar *thumbnail;
-    gchar *uri;
-    GwPostItem *post_item = user_data;
-    JsonObject *object;
-
-    object = json_node_get_object (element_node);
-
-    thumbnail = json_object_get_string_member (object, "thumbnail_pic");
-    uri = gw_util_thumbnail_to_original (thumbnail);
-    g_array_append_val (post_item->picuri_array, uri);
-}
-
-static void
 parse_weibo_post (JsonArray *array,
                   guint index,
                   JsonNode *element_node,
                   gpointer user_data)
 {
-    GtkWidget *row;
+    GtkWidget *retweeted_item;
     GwPostItem *post_item;
     GwUser *user;
-    JsonArray *pic_array;
     JsonObject *object;
-    JsonObject *user_object;
+    GwTimelineRow *row;
     GwTimelineList *self;
     GwTimelineListPrivate *priv;
 
@@ -88,32 +69,9 @@ parse_weibo_post (JsonArray *array,
     object = json_node_get_object (element_node);
     post_item = g_malloc0 (sizeof (GwPostItem));
     user = g_malloc0 (sizeof (GwUser));
+    post_item->user = user;
 
-    post_item->created_at = g_strdup (json_object_get_string_member (object, "created_at"));
-    post_item->id = json_object_get_int_member (object, "id");
-    post_item->mid = json_object_get_int_member (object, "mid");
-    post_item->idstr = g_strdup (json_object_get_string_member (object, "idstr"));
-    post_item->text = g_strdup (json_object_get_string_member (object, "text"));
-    post_item->source = g_strdup (json_object_get_string_member (object, "source"));
-    post_item->favourited = json_object_get_boolean_member (object, "favorited");
-    if (json_object_has_member (object, "thumbnail_pic"))
-    {
-        post_item->thumbnail_pic = g_strdup (json_object_get_string_member (object,
-                                                                            "thumbnail_pic"));
-        post_item->bmiddle_pic = g_strdup (json_object_get_string_member (object,
-                                                                          "bmiddle_pic"));
-    }
-    post_item->reposts_count = json_object_get_int_member (object, "reposts_count");
-    post_item->comments_count = json_object_get_int_member (object, "comments_count");
-    post_item->attitudes_count = json_object_get_int_member (object, "attitudes_count");
-
-    /* Parse the uri for each picture if there is any */
-    post_item->picuri_array = g_array_new (FALSE, FALSE, sizeof (gchar *));
-    pic_array = json_object_get_array_member (object, "pic_urls");
-    if (json_array_get_length (pic_array) != 0)
-    {
-        json_array_foreach_element (pic_array, parse_pic_uri, post_item);
-    }
+    gw_util_parse_weibo_post (object, post_item);
 
     if (index == 0 && priv->batch_fetched == 0)
     {
@@ -125,18 +83,28 @@ parse_weibo_post (JsonArray *array,
         priv->last_idstr = post_item->idstr;
     }
 
-    user_object = json_object_get_object_member (object, "user");
-    user->id = json_object_get_int_member (user_object, "id");
-    user->idstr = g_strdup (json_object_get_string_member (user_object, "idstr"));
-    user->name = g_strdup (json_object_get_string_member (user_object, "name"));
-    user->nickname = g_strdup (json_object_get_string_member (user_object, "remark"));
-    user->location = g_strdup (json_object_get_string_member (user_object, "location"));
-    user->profile_image_url = g_strdup (json_object_get_string_member (user_object,
-                                                                      "profile_image_url"));
+    row = gw_timeline_row_new (post_item);
+    gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list),
+                         GTK_WIDGET (row), -1);
 
-    post_item->user = user;
-    row = GTK_WIDGET (gw_timeline_row_new (post_item));
-    gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list), row, -1);
+    /* Add retweeted item to the row */
+    if (json_object_has_member (object, "retweeted_status"))
+    {
+        GwPostItem *retweeted_post_item;
+        GwUser *retweeted_user;
+        JsonObject *retweet_object;
+
+        retweeted_post_item = g_malloc0 (sizeof (GwPostItem));
+        retweeted_user = g_malloc0 (sizeof (GwUser));
+        retweeted_post_item->user = retweeted_user;
+
+        retweet_object = json_object_get_object_member (object, "retweeted_status");
+        gw_util_parse_weibo_post (retweet_object, retweeted_post_item);
+        /* TODO: Add GwRetweetedItem class? */
+        retweeted_item = GTK_WIDGET (gw_timeline_row_new (retweeted_post_item));
+
+        gw_timeline_row_insert_retweeted_item (row, retweeted_item);
+    }
 }
 
 void

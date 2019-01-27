@@ -254,6 +254,8 @@ static void
 gw_window_init (GwWindow *window)
 {
     gchar *access_token;
+    GdkScreen *screen;
+    GtkCssProvider *provider;
     GSettings *settings;
     GwTimelineList *list;
     GwWindowPrivate *priv;
@@ -281,7 +283,15 @@ gw_window_init (GwWindow *window)
         gtk_stack_set_visible_child (priv->main_stack, priv->login_box);
     }
 
+    screen = gdk_screen_get_default ();
+    provider = gtk_css_provider_new ();
+    gtk_css_provider_load_from_resource (provider, "/org/gnome/Weibo/gw-style.css");
+    gtk_style_context_add_provider_for_screen (screen,
+                                               GTK_STYLE_PROVIDER (provider),
+                                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
     g_free (access_token);
+    g_object_unref (provider);
     g_object_unref (settings);
 }
 static void

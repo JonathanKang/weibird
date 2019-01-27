@@ -20,12 +20,16 @@
 #define GW_UTIL_H_
 
 #include <gtk/gtk.h>
+#include <json-glib/json-glib.h>
+
+#include "gw-timeline-list.h"
 
 G_BEGIN_DECLS
 
 gchar *gw_util_format_time_string (gchar *time);
 gchar *gw_util_format_source_string (gchar *source);
 gchar *gw_util_thumbnail_to_original (const gchar *thumbnail);
+void gw_util_parse_weibo_post (JsonObject *object, GwPostItem *post_item);
 
 G_BEGIN_DECLS
 

@@ -42,6 +42,7 @@ struct _GwTimelineRow
 
 typedef struct
 {
+    GtkWidget *main_box;
     GtkWidget *profile_image;
     GtkWidget *post_image;
     GwPostItem *post_item;
@@ -51,6 +52,21 @@ G_DEFINE_TYPE_WITH_PRIVATE (GwTimelineRow, gw_timeline_row, GTK_TYPE_LIST_BOX_RO
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
+void
+gw_timeline_row_insert_retweeted_item (GwTimelineRow *self,
+                                       GtkWidget *retweeted_item)
+{
+    GtkStyleContext *context;
+    GwTimelineRowPrivate *priv;
+
+    priv = gw_timeline_row_get_instance_private (self);
+
+    context = gtk_widget_get_style_context (retweeted_item);
+    gtk_style_context_add_class (context, "retweet");
+
+    gtk_box_pack_end (GTK_BOX (priv->main_box), retweeted_item, FALSE, FALSE, 0);
+}
+
 static void
 gw_timeline_row_constructed (GObject *object)
 {
@@ -59,7 +75,6 @@ gw_timeline_row_constructed (GObject *object)
     GtkWidget *hbox1;
     GtkWidget *hbox2;
     GtkWidget *vbox;
-    GtkWidget *main_box;
     GtkWidget *name_label;
     GtkWidget *pic_grid;
     GtkWidget *source_label;
@@ -73,13 +88,8 @@ gw_timeline_row_constructed (GObject *object)
 
     hbox1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
     hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-    main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-    gtk_widget_set_margin_start (main_box, 12);
-    gtk_widget_set_margin_end (main_box, 12);
-    gtk_widget_set_margin_top (main_box, 6);
-    gtk_widget_set_margin_bottom (main_box, 6);
-    gtk_box_pack_start (GTK_BOX (main_box), hbox1, FALSE, FALSE, 0);
-    gtk_box_pack_end (GTK_BOX (main_box), hbox2, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (priv->main_box), hbox1, FALSE, FALSE, 0);
+    gtk_box_pack_end (GTK_BOX (priv->main_box), hbox2, FALSE, FALSE, 0);
 
     /* Profile image, name, source and time */
     priv->profile_image = gw_image_button_new (GW_MEDIA_TYPE_AVATAR,
@@ -126,7 +136,7 @@ gw_timeline_row_constructed (GObject *object)
     text_label = gtk_label_new (priv->post_item->text);
     gtk_widget_set_halign (text_label, GTK_ALIGN_START);
     gtk_label_set_line_wrap (GTK_LABEL (text_label), TRUE);
-    gtk_box_pack_start (GTK_BOX (main_box), text_label, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (priv->main_box), text_label, FALSE, FALSE, 0);
 
     /* Post image */
     /* TODO: Add support for display the original picture individually */
@@ -137,7 +147,7 @@ gw_timeline_row_constructed (GObject *object)
         gtk_widget_set_halign (pic_grid, GTK_ALIGN_CENTER);
         gtk_grid_set_column_spacing (GTK_GRID (pic_grid), 0);
         gtk_grid_set_row_spacing (GTK_GRID (pic_grid), 0);
-        gtk_box_pack_start (GTK_BOX (main_box), pic_grid, FALSE, FALSE, 0);
+        gtk_box_pack_start (GTK_BOX (priv->main_box), pic_grid, FALSE, FALSE, 0);
     }
 
     /* Likes, comments and reposts count */
@@ -162,7 +172,7 @@ gw_timeline_row_constructed (GObject *object)
     gtk_box_pack_start (GTK_BOX (hbox2), reposts_label, FALSE, FALSE, 0);
     g_free (markup);
 
-    gtk_container_add (GTK_CONTAINER (row), main_box);
+    gtk_container_add (GTK_CONTAINER (row), priv->main_box);
     gtk_widget_show_all (GTK_WIDGET (row));
 
     G_OBJECT_CLASS (gw_timeline_row_parent_class)->constructed (object);
@@ -262,6 +272,12 @@ gw_timeline_row_init (GwTimelineRow *self)
 
     priv->profile_image = gtk_image_new_from_pixbuf (NULL);
     priv->post_image = gtk_image_new_from_pixbuf (NULL);
+
+    priv->main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+    gtk_widget_set_margin_start (priv->main_box, 12);
+    gtk_widget_set_margin_end (priv->main_box, 12);
+    gtk_widget_set_margin_top (priv->main_box, 6);
+    gtk_widget_set_margin_bottom (priv->main_box, 6);
 }
 
 /**

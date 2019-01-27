@@ -28,6 +28,8 @@ G_BEGIN_DECLS
 #define GW_TYPE_TIMELINE_ROW (gw_timeline_row_get_type ())
 G_DECLARE_FINAL_TYPE (GwTimelineRow, gw_timeline_row, GW, TIMELINE_ROW, GtkListBoxRow)
 
+void gw_timeline_row_insert_retweeted_item (GwTimelineRow *row,
+                                            GtkWidget *retweeted_item);
 GwTimelineRow *gw_timeline_row_new (GwPostItem *post_item);
 
 G_END_DECLS

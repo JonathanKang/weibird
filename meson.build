@@ -6,6 +6,7 @@ gw_version = meson.project_version()
 gw_prefix = get_option('prefix')
 gw_bindir = join_paths(gw_prefix, get_option('bindir'))
 gw_datadir = join_paths(gw_prefix, get_option('datadir'))
+gw_pkgdatadir = join_paths(gw_datadir, gw_name)
 
 # warning cflags
 warning_cflags = [

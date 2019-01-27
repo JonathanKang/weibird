@@ -1,0 +1,4 @@
+.retweet {
+    background-color: alpha(grey, 0.1);
+    border-left: 3px solid alpha(currentColor, 0.4);
+}
