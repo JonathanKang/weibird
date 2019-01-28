@@ -50,6 +50,7 @@ on_about (GSimpleAction *action,
                            "comments", "View and compose Weibo",
                            "copyright", "Copyright © 2018 Jonathan Kang",
                            "license-type", GTK_LICENSE_GPL_3_0,
+                           "logo-icon-name", "com.jonathankang.Weibird",
                            "website", "https://github.com/JonathanKang/Weibird",
                            NULL);
 }
@@ -87,6 +88,8 @@ wb_application_startup (GApplication *application)
 
     /* Calls gtk_init() with no arguments. */
     G_APPLICATION_CLASS (wb_application_parent_class)->startup (application);
+
+    gtk_window_set_default_icon_name ("com.jonathankang.Weibird");
 }
 
 static void
