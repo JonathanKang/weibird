@@ -27,3 +27,8 @@ install_data(
     css_files,
     install_dir : wb_pkgdatadir
 )
+
+install_data(
+    'com.jonathankang.Weibird.desktop',
+    install_dir : join_paths(wb_datadir, 'applications')
+)
