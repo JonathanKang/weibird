@@ -1,3 +1,5 @@
+subdir('icons')
+
 resource_data = files(
     'wb-headerbar.ui',
     'wb-timeline-list.ui',
