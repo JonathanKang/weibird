@@ -41,6 +41,9 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
 
+static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
+static const gchar ACCESS_TOKEN[] = "access-token";
+
 static void
 parse_weibo_post (JsonArray *array,
                   guint index,
@@ -112,8 +115,10 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
                                     gboolean loading_more)
 {
     const gchar *payload;
+    gchar *access_token;
     GError *error = NULL;
     goffset payload_length;
+    GSettings *settings;
     JsonNode *root_node;
     JsonParser *parser;
     RestProxy *proxy;
@@ -122,15 +127,16 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
 
     priv = wb_timeline_list_get_instance_private (self);
 
-    proxy = oauth2_proxy_new_with_token ("1450991920",
-                                         "2.005ugqwDURNMaB003aa34d9b828hsD",
+    settings = g_settings_new (SETTINGS_SCHEMA);
+    access_token = g_settings_get_string (settings, ACCESS_TOKEN);
+
+    proxy = oauth2_proxy_new_with_token ("1450991920", access_token,
                                          "https://api.weibo.com/oauth2/authorize",
                                          "https://api.weibo.com", FALSE);
     call = rest_proxy_new_call (proxy);
     rest_proxy_call_set_function (call, "2/statuses/home_timeline.json");
     rest_proxy_call_set_method (call, "GET");
-    rest_proxy_call_add_param (call, "access_token",
-                               "2.005ugqwDURNMaB003aa34d9b828hsD");
+    rest_proxy_call_add_param (call, "access_token", access_token);
     if (loading_more)
     {
         rest_proxy_call_add_param (call, "max_id", priv->last_idstr);
@@ -174,7 +180,9 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
         }
     }
 
+    g_free (access_token);
     g_object_unref (parser);
+    g_object_unref (settings);
 }
 
 static void
