@@ -32,6 +32,7 @@ sources += gnome.mkenums_simple(
 executable(
     wb_name,
     sources,
+    include_directories : [top_inc, src_inc],
     dependencies : wb_deps,
     install : true,
     install_dir: wb_bindir

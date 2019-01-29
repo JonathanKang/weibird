@@ -18,6 +18,7 @@
 
 #include <gtk/gtk.h>
 
+#include "config.h"
 #include "wb-application.h"
 #include "wb-window.h"
 
@@ -48,10 +49,12 @@ on_about (GSimpleAction *action,
     gtk_show_about_dialog (parent,
                            "authors", authors,
                            "comments", "View and compose Weibo",
-                           "copyright", "Copyright © 2018 Jonathan Kang",
+                           "copyright", "Copyright © 2018-2019 Jonathan Kang",
                            "license-type", GTK_LICENSE_GPL_3_0,
                            "logo-icon-name", "com.jonathankang.Weibird",
-                           "website", "https://github.com/JonathanKang/Weibird",
+                           "program-name", PROGRAM_NAME,
+                           "version", PACKAGE_VERSION,
+                           "website", PACKAGE_URL,
                            NULL);
 }
 
