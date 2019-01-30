@@ -130,7 +130,7 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
     settings = g_settings_new (SETTINGS_SCHEMA);
     access_token = g_settings_get_string (settings, ACCESS_TOKEN);
 
-    proxy = oauth2_proxy_new_with_token ("1450991920", access_token,
+    proxy = oauth2_proxy_new_with_token (APP_KEY, access_token,
                                          "https://api.weibo.com/oauth2/authorize",
                                          "https://api.weibo.com", FALSE);
     call = rest_proxy_new_call (proxy);
@@ -150,6 +150,7 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
     }
 
     payload = rest_proxy_call_get_payload (call);
+    g_print ("%s\n", payload);
     payload_length = rest_proxy_call_get_payload_length (call);
 
     parser = json_parser_new ();

@@ -26,6 +26,9 @@
 
 G_BEGIN_DECLS
 
+#define APP_KEY "1450991920"
+#define APP_SECRECT "24afe70740825258ca104ee54acf9712"
+
 gchar *wb_util_format_time_string (gchar *time);
 gchar *wb_util_format_source_string (gchar *source);
 gchar *wb_util_thumbnail_to_original (const gchar *thumbnail);

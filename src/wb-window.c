@@ -24,6 +24,7 @@
 
 #include "wb-headerbar.h"
 #include "wb-timeline-list.h"
+#include "wb-util.h"
 #include "wb-window.h"
 
 struct _WbWindow
@@ -120,9 +121,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         rest_proxy_call_set_method (token_call, "POST");
         rest_proxy_call_add_header (token_call, "Content-Type",
                                     "application/x-www-form-urlencoded");
-        rest_proxy_call_add_param (token_call, "client_id", "1450991920");
-        rest_proxy_call_add_param (token_call, "client_secret",
-                                   "24afe70740825258ca104ee54acf9712");
+        rest_proxy_call_add_param (token_call, "client_id", APP_KEY);
+        rest_proxy_call_add_param (token_call, "client_secret", APP_SECRECT);
         rest_proxy_call_add_param (token_call, "grant_type", "authorization_code");
         rest_proxy_call_add_param (token_call, "redirect_uri",
                                    "https://api.weibo.com/oauth2/default.html");
@@ -230,7 +230,7 @@ on_login_button_clicked (GtkWidget *button,
     content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
     gtk_container_add (GTK_CONTAINER (content_area), web_view);
 
-    proxy = oauth2_proxy_new ("1450991920",
+    proxy = oauth2_proxy_new (APP_KEY,
                               "https://api.weibo.com/oauth2/authorize",
                               "https://api.weibo.com", FALSE);
 
