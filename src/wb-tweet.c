@@ -158,26 +158,29 @@ wb_tweet_constructed (GObject *object)
     }
 
     /* Likes, comments and reposts count */
-    likes_label = gtk_label_new (NULL);
-    markup = g_markup_printf_escaped ("<b>%d</b> Likes",
-                                      priv->post_item->attitudes_count);
-    gtk_label_set_markup (GTK_LABEL (likes_label), markup);
-    gtk_box_pack_start (GTK_BOX (hbox2), likes_label, FALSE, FALSE, 0);
-    g_free (markup);
+    if (!priv->retweet)
+    {
+        likes_label = gtk_label_new (NULL);
+        markup = g_markup_printf_escaped ("<b>%d</b> Likes",
+                                          priv->post_item->attitudes_count);
+        gtk_label_set_markup (GTK_LABEL (likes_label), markup);
+        gtk_box_pack_start (GTK_BOX (hbox2), likes_label, FALSE, FALSE, 0);
+        g_free (markup);
 
-    comments_label = gtk_label_new (NULL);
-    markup = g_markup_printf_escaped ("<b>%d</b> Comments",
-                                      priv->post_item->comments_count);
-    gtk_label_set_markup (GTK_LABEL (comments_label), markup);
-    gtk_box_pack_start (GTK_BOX (hbox2), comments_label, FALSE, FALSE, 0);
-    g_free (markup);
+        comments_label = gtk_label_new (NULL);
+        markup = g_markup_printf_escaped ("<b>%d</b> Comments",
+                                          priv->post_item->comments_count);
+        gtk_label_set_markup (GTK_LABEL (comments_label), markup);
+        gtk_box_pack_start (GTK_BOX (hbox2), comments_label, FALSE, FALSE, 0);
+        g_free (markup);
 
-    reposts_label = gtk_label_new (NULL);
-    markup = g_markup_printf_escaped ("<b>%d</b> Reposts",
-                                      priv->post_item->reposts_count);
-    gtk_label_set_markup (GTK_LABEL (reposts_label), markup);
-    gtk_box_pack_start (GTK_BOX (hbox2), reposts_label, FALSE, FALSE, 0);
-    g_free (markup);
+        reposts_label = gtk_label_new (NULL);
+        markup = g_markup_printf_escaped ("<b>%d</b> Reposts",
+                                          priv->post_item->reposts_count);
+        gtk_label_set_markup (GTK_LABEL (reposts_label), markup);
+        gtk_box_pack_start (GTK_BOX (hbox2), reposts_label, FALSE, FALSE, 0);
+        g_free (markup);
+    }
 
     gtk_container_add (GTK_CONTAINER (row), priv->main_box);
     gtk_widget_show_all (GTK_WIDGET (row));
