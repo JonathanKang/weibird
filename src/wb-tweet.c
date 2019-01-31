@@ -24,7 +24,7 @@
 #include "wb-image-button.h"
 #include "wb-multi-media-widget.h"
 #include "wb-timeline-list.h"
-#include "wb-timeline-row.h"
+#include "wb-tweet.h"
 #include "wb-util.h"
 
 enum
@@ -35,7 +35,7 @@ enum
     N_PROPERTIES
 };
 
-struct _WbTimelineRow
+struct _WbTweet
 {
     /*< private >*/
     GtkListBoxRow parent_instance;
@@ -48,20 +48,20 @@ typedef struct
     GtkWidget *profile_image;
     GtkWidget *post_image;
     WbPostItem *post_item;
-} WbTimelineRowPrivate;
+} WbTweetPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineRow, wb_timeline_row, GTK_TYPE_LIST_BOX_ROW)
+G_DEFINE_TYPE_WITH_PRIVATE (WbTweet, wb_tweet, GTK_TYPE_LIST_BOX_ROW)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
 void
-wb_timeline_row_insert_retweeted_item (WbTimelineRow *self,
-                                       GtkWidget *retweeted_item)
+wb_tweet_insert_retweeted_item (WbTweet *self,
+                                GtkWidget *retweeted_item)
 {
     GtkStyleContext *context;
-    WbTimelineRowPrivate *priv;
+    WbTweetPrivate *priv;
 
-    priv = wb_timeline_row_get_instance_private (self);
+    priv = wb_tweet_get_instance_private (self);
 
     context = gtk_widget_get_style_context (retweeted_item);
     gtk_style_context_add_class (context, "retweet");
@@ -70,7 +70,7 @@ wb_timeline_row_insert_retweeted_item (WbTimelineRow *self,
 }
 
 static void
-wb_timeline_row_constructed (GObject *object)
+wb_tweet_constructed (GObject *object)
 {
     gchar *markup;
     GtkStyleContext *context;
@@ -85,8 +85,8 @@ wb_timeline_row_constructed (GObject *object)
     GtkWidget *likes_label;
     GtkWidget *comments_label;
     GtkWidget *reposts_label;
-    WbTimelineRow *row = WB_TIMELINE_ROW (object);
-    WbTimelineRowPrivate *priv = wb_timeline_row_get_instance_private (row);
+    WbTweet *row = WB_TWEET (object);
+    WbTweetPrivate *priv = wb_tweet_get_instance_private (row);
 
     hbox1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
     hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
@@ -182,14 +182,14 @@ wb_timeline_row_constructed (GObject *object)
     gtk_container_add (GTK_CONTAINER (row), priv->main_box);
     gtk_widget_show_all (GTK_WIDGET (row));
 
-    G_OBJECT_CLASS (wb_timeline_row_parent_class)->constructed (object);
+    G_OBJECT_CLASS (wb_tweet_parent_class)->constructed (object);
 }
 
 static void
-wb_timeline_row_finalize (GObject *object)
+wb_tweet_finalize (GObject *object)
 {
-    WbTimelineRow *self = WB_TIMELINE_ROW (object);
-    WbTimelineRowPrivate *priv = wb_timeline_row_get_instance_private (self);
+    WbTweet *self = WB_TWEET (object);
+    WbTweetPrivate *priv = wb_tweet_get_instance_private (self);
 
     g_array_free (priv->post_item->picuri_array, TRUE);
     g_free (priv->post_item->created_at);
@@ -212,13 +212,13 @@ wb_timeline_row_finalize (GObject *object)
 }
 
 static void
-wb_timeline_row_get_property (GObject *object,
-                              guint prop_id,
-                              GValue *value,
-                              GParamSpec *pspec)
+wb_tweet_get_property (GObject *object,
+                       guint prop_id,
+                       GValue *value,
+                       GParamSpec *pspec)
 {
-    WbTimelineRow *self = WB_TIMELINE_ROW (object);
-    WbTimelineRowPrivate *priv = wb_timeline_row_get_instance_private (self);
+    WbTweet *self = WB_TWEET (object);
+    WbTweetPrivate *priv = wb_tweet_get_instance_private (self);
 
     switch (prop_id)
     {
@@ -235,13 +235,13 @@ wb_timeline_row_get_property (GObject *object,
 }
 
 static void
-wb_timeline_row_set_property (GObject *object,
-                              guint prop_id,
-                              const GValue *value,
-                              GParamSpec *pspec)
+wb_tweet_set_property (GObject *object,
+                       guint prop_id,
+                       const GValue *value,
+                       GParamSpec *pspec)
 {
-    WbTimelineRow *self = WB_TIMELINE_ROW (object);
-    WbTimelineRowPrivate *priv = wb_timeline_row_get_instance_private (self);
+    WbTweet *self = WB_TWEET (object);
+    WbTweetPrivate *priv = wb_tweet_get_instance_private (self);
 
     switch (prop_id)
     {
@@ -258,14 +258,14 @@ wb_timeline_row_set_property (GObject *object,
 }
 
 static void
-wb_timeline_row_class_init (WbTimelineRowClass *klass)
+wb_tweet_class_init (WbTweetClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-    gobject_class->constructed = wb_timeline_row_constructed;
-    gobject_class->finalize = wb_timeline_row_finalize;
-    gobject_class->get_property = wb_timeline_row_get_property;
-    gobject_class->set_property = wb_timeline_row_set_property;
+    gobject_class->constructed = wb_tweet_constructed;
+    gobject_class->finalize = wb_tweet_finalize;
+    gobject_class->get_property = wb_tweet_get_property;
+    gobject_class->set_property = wb_tweet_set_property;
 
     obj_properties[PROP_POST_ITEM] = g_param_spec_pointer ("post-item", "item",
                                                            "Post item for each row",
@@ -283,11 +283,11 @@ wb_timeline_row_class_init (WbTimelineRowClass *klass)
 }
 
 static void
-wb_timeline_row_init (WbTimelineRow *self)
+wb_tweet_init (WbTweet *self)
 {
-    WbTimelineRowPrivate *priv;
+    WbTweetPrivate *priv;
 
-    priv = wb_timeline_row_get_instance_private (self);
+    priv = wb_tweet_get_instance_private (self);
 
     priv->profile_image = gtk_image_new_from_pixbuf (NULL);
     priv->post_image = gtk_image_new_from_pixbuf (NULL);
@@ -300,17 +300,17 @@ wb_timeline_row_init (WbTimelineRow *self)
 }
 
 /**
- * wb_timeline_row_new:
+ * wb_tweet_new:
  *
- * Create a new #WbTimelineRow.
+ * Create a new #WbTweet.
  *
- * Returns: (transfer full): a newly created #WbTimelineRow
+ * Returns: (transfer full): a newly created #WbTweet
  */
-WbTimelineRow *
-wb_timeline_row_new (WbPostItem *post_item,
-                     gboolean retweet)
+WbTweet *
+wb_tweet_new (WbPostItem *post_item,
+              gboolean retweet)
 {
-    return g_object_new (WB_TYPE_TIMELINE_ROW,
+    return g_object_new (WB_TYPE_TWEET,
                          "post-item", post_item,
                          "retweet", retweet,
                          NULL);

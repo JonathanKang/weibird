@@ -5,7 +5,7 @@ sources = files(
     'wb-multi-media-widget.c',
     'wb-image-button.c',
     'wb-timeline-list.c',
-    'wb-timeline-row.c',
+    'wb-tweet.c',
     'wb-util.c',
     'wb-window.c'
 )
