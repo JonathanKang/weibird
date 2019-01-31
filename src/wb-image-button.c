@@ -45,7 +45,7 @@ typedef struct
     gchar *uri;
     gint width;
     gint height;
-    GtkWidget *image;
+    GdkPixbuf *pixbuf;
     WbMediaType type;
 } WbImageButtonPrivate;
 
@@ -58,11 +58,14 @@ on_message_complete (SoupSession *session,
                      SoupMessage *msg,
                      gpointer user_data)
 {
-    GdkPixbuf *pixbuf;
     GError *error = NULL;
     GInputStream *stream;
+    GtkWidget *image;
     WbImageButton *self = WB_IMAGE_BUTTON (user_data);
     WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
+
+    image = gtk_image_new_from_pixbuf (NULL);
+    gtk_button_set_image (GTK_BUTTON (self), image);
 
     if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
     {
@@ -77,7 +80,7 @@ on_message_complete (SoupSession *session,
     stream = g_memory_input_stream_new_from_data (msg->response_body->data,
                                                   msg->response_body->length,
                                                   NULL);
-    pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, &error);
+    priv->pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, &error);
     if (error != NULL)
     {
         g_warning ("Unable to create pixbuf: %s",
@@ -93,10 +96,10 @@ on_message_complete (SoupSession *session,
         gint offset;
         GdkPixbuf *scaled_pixbuf;
 
-        width = gdk_pixbuf_get_width (pixbuf);
-        height = gdk_pixbuf_get_height (pixbuf);
+        width = gdk_pixbuf_get_width (priv->pixbuf);
+        height = gdk_pixbuf_get_height (priv->pixbuf);
         scaled_pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
-                                        gdk_pixbuf_get_has_alpha (pixbuf),
+                                        gdk_pixbuf_get_has_alpha (priv->pixbuf),
                                         8, priv->width, priv->height);
 
         /* If the image is large enough, cropped the central square part
@@ -108,7 +111,7 @@ on_message_complete (SoupSession *session,
                 scale = (gdouble) priv->width / width;
                 offset = (height - width) * scale / -2;
 
-                gdk_pixbuf_scale (pixbuf, scaled_pixbuf,
+                gdk_pixbuf_scale (priv->pixbuf, scaled_pixbuf,
                                   0, 0, priv->width, priv->height,
                                   0, offset, scale, scale,
                                   GDK_INTERP_BILINEAR);
@@ -118,7 +121,7 @@ on_message_complete (SoupSession *session,
                 scale = (gdouble) priv->height / height;
                 offset = (width - height) * scale / -2;
 
-                gdk_pixbuf_scale (pixbuf, scaled_pixbuf,
+                gdk_pixbuf_scale (priv->pixbuf, scaled_pixbuf,
                                   0, 0, priv->width, priv->height,
                                   offset, 0, scale, scale,
                                   GDK_INTERP_BILINEAR);
@@ -126,19 +129,19 @@ on_message_complete (SoupSession *session,
         }
         else
         {
-            scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf,
+            scaled_pixbuf = gdk_pixbuf_scale_simple (priv->pixbuf,
                                                      priv->width,
                                                      priv->height,
                                                      GDK_INTERP_BILINEAR);
         }
 
-        gtk_image_set_from_pixbuf (GTK_IMAGE (priv->image), scaled_pixbuf);
+        gtk_image_set_from_pixbuf (GTK_IMAGE (image), scaled_pixbuf);
 
         g_object_unref (scaled_pixbuf);
     }
     else
     {
-        gtk_image_set_from_pixbuf (GTK_IMAGE (priv->image), pixbuf);
+        gtk_image_set_from_pixbuf (GTK_IMAGE (image), priv->pixbuf);
     }
 
     g_input_stream_close (stream, NULL, &error);
@@ -148,7 +151,52 @@ on_message_complete (SoupSession *session,
                    error->message);
         g_clear_error (&error);
     }
-    g_object_unref (pixbuf);
+}
+
+static void
+image_viewer_response_callback (GtkDialog *dialog,
+                                gint response_id,
+                                gpointer user_data)
+{
+    gtk_widget_destroy (GTK_WIDGET (dialog));
+}
+
+static void
+on_image_clicked (GtkButton *button,
+                  gpointer user_data)
+{
+    GtkWidget *content_area;
+    GtkWidget *dialog;
+    GtkWidget *image;
+    GtkWidget *toplevel;
+    WbImageButton *self = WB_IMAGE_BUTTON (button);
+    WbImageButtonPrivate *priv;
+
+    priv = wb_image_button_get_instance_private (self);
+
+    /* TODO: Handle clicked signal of the profile image */
+    /* Return directly if it's profile image at the moment */
+    if (priv->type == WB_MEDIA_TYPE_AVATAR)
+    {
+        return;
+    }
+
+    toplevel = gtk_widget_get_toplevel (GTK_WIDGET (button));
+    dialog = gtk_dialog_new_with_buttons ("Image Viewer",
+                                          GTK_WINDOW (toplevel),
+                                          GTK_DIALOG_DESTROY_WITH_PARENT |
+                                          GTK_DIALOG_MODAL |
+                                          GTK_DIALOG_USE_HEADER_BAR,
+                                          NULL, NULL);
+    g_signal_connect (dialog, "response",
+                      G_CALLBACK (image_viewer_response_callback), NULL);
+
+    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+    image = gtk_image_new_from_pixbuf (priv->pixbuf);
+    gtk_container_add (GTK_CONTAINER (content_area), image);
+    gtk_widget_show_all (content_area);
+
+    gtk_dialog_run (GTK_DIALOG (dialog));
 }
 
 static void
@@ -174,6 +222,10 @@ wb_image_button_finalize (GObject *object)
     WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
     g_free (priv->uri);
+    if (priv->pixbuf != NULL)
+    {
+        g_object_unref (priv->pixbuf);
+    }
 
     G_OBJECT_CLASS (wb_image_button_parent_class)->finalize (object);
 }
@@ -285,12 +337,12 @@ wb_image_button_init (WbImageButton *self)
     priv = wb_image_button_get_instance_private (self);
 
     priv->uri = NULL;
-
-    priv->image = gtk_image_new_from_pixbuf (NULL);
-    gtk_button_set_image (GTK_BUTTON (self), priv->image);
+    priv->pixbuf = NULL;
 
     context = gtk_widget_get_style_context (GTK_WIDGET (self));
     gtk_style_context_add_class (context, "flat");
+
+    g_signal_connect (self, "clicked", G_CALLBACK (on_image_clicked), NULL);
 }
 
 /**
