@@ -46,6 +46,7 @@ typedef struct
     gint width;
     gint height;
     GdkPixbuf *pixbuf;
+    SoupSession *session;
     WbMediaType type;
 } WbImageButtonPrivate;
 
@@ -203,13 +204,11 @@ static void
 wb_image_button_constructed (GObject *object)
 {
     SoupMessage *msg;
-    SoupSession *session;
     WbImageButton *self = WB_IMAGE_BUTTON (object);
     WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
     msg = soup_message_new (SOUP_METHOD_GET, priv->uri);
-    session = soup_session_new ();
-    soup_session_queue_message (session, msg,
+    soup_session_queue_message (priv->session, msg,
                                 on_message_complete, GTK_WIDGET (self));
 
     G_OBJECT_CLASS (wb_image_button_parent_class)->constructed (object);
@@ -221,6 +220,7 @@ wb_image_button_finalize (GObject *object)
     WbImageButton *self = WB_IMAGE_BUTTON (object);
     WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
+    g_clear_object (&priv->session);
     g_free (priv->uri);
     if (priv->pixbuf != NULL)
     {
@@ -338,6 +338,7 @@ wb_image_button_init (WbImageButton *self)
 
     priv->uri = NULL;
     priv->pixbuf = NULL;
+    priv->session = soup_session_new ();
 
     context = gtk_widget_get_style_context (GTK_WIDGET (self));
     gtk_style_context_add_class (context, "flat");
