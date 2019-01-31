@@ -30,7 +30,7 @@ G_DECLARE_FINAL_TYPE (WbTimelineRow, wb_timeline_row, WB, TIMELINE_ROW, GtkListB
 
 void wb_timeline_row_insert_retweeted_item (WbTimelineRow *row,
                                             GtkWidget *retweeted_item);
-WbTimelineRow *wb_timeline_row_new (WbPostItem *post_item);
+WbTimelineRow *wb_timeline_row_new (WbPostItem *post_item, gboolean retweet);
 
 G_END_DECLS
 

@@ -86,7 +86,7 @@ parse_weibo_post (JsonArray *array,
         priv->last_idstr = post_item->idstr;
     }
 
-    row = wb_timeline_row_new (post_item);
+    row = wb_timeline_row_new (post_item, FALSE);
     gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list),
                          GTK_WIDGET (row), -1);
 
@@ -104,7 +104,8 @@ parse_weibo_post (JsonArray *array,
         retweet_object = json_object_get_object_member (object, "retweeted_status");
         wb_util_parse_weibo_post (retweet_object, retweeted_post_item);
         /* TODO: Add WbRetweetedItem class? */
-        retweeted_item = GTK_WIDGET (wb_timeline_row_new (retweeted_post_item));
+        retweeted_item = GTK_WIDGET (wb_timeline_row_new (retweeted_post_item,
+                                                          TRUE));
 
         wb_timeline_row_insert_retweeted_item (row, retweeted_item);
     }
@@ -150,7 +151,6 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
     }
 
     payload = rest_proxy_call_get_payload (call);
-    g_print ("%s\n", payload);
     payload_length = rest_proxy_call_get_payload_length (call);
 
     parser = json_parser_new ();

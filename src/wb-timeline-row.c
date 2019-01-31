@@ -31,6 +31,7 @@ enum
 {
     PROP_0,
     PROP_POST_ITEM,
+    PROP_RETWEET,
     N_PROPERTIES
 };
 
@@ -42,6 +43,7 @@ struct _WbTimelineRow
 
 typedef struct
 {
+    gboolean retweet;
     GtkWidget *main_box;
     GtkWidget *profile_image;
     GtkWidget *post_image;
@@ -91,12 +93,16 @@ wb_timeline_row_constructed (GObject *object)
     gtk_box_pack_start (GTK_BOX (priv->main_box), hbox1, FALSE, FALSE, 0);
     gtk_box_pack_end (GTK_BOX (priv->main_box), hbox2, FALSE, FALSE, 0);
 
-    /* Profile image (50px by 50px), name, source and time */
-    priv->profile_image = wb_image_button_new (WB_MEDIA_TYPE_AVATAR,
-                                               priv->post_item->user->profile_image_url,
-                                               50, 50);
-    gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
-    gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image, FALSE, FALSE, 0);
+    if (!priv->retweet)
+    {
+        /* Profile image (50px by 50px), name, source and time */
+        priv->profile_image = wb_image_button_new (WB_MEDIA_TYPE_AVATAR,
+                                                   priv->post_item->user->profile_image_url,
+                                                   50, 50);
+        gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
+        gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image,
+                            FALSE, FALSE, 0);
+    }
 
     vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_pack_start (GTK_BOX (hbox1), vbox, FALSE, FALSE, 0);
@@ -112,7 +118,7 @@ wb_timeline_row_constructed (GObject *object)
     gtk_widget_set_halign (name_label, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (vbox), name_label, TRUE, TRUE, 0);
 
-    if (g_strcmp0 (priv->post_item->source, "") != 0)
+    if (!priv->retweet && g_strcmp0 (priv->post_item->source, "") != 0)
     {
         gtk_widget_set_valign (name_label, GTK_ALIGN_END);
 
@@ -219,6 +225,9 @@ wb_timeline_row_get_property (GObject *object,
         case PROP_POST_ITEM:
             g_value_set_pointer (value, priv->post_item);
             break;
+        case PROP_RETWEET:
+            g_value_set_boolean (value, priv->retweet);
+            break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
             break;
@@ -238,6 +247,9 @@ wb_timeline_row_set_property (GObject *object,
     {
         case PROP_POST_ITEM:
             priv->post_item = g_value_get_pointer (value);
+            break;
+        case PROP_RETWEET:
+            priv->retweet = g_value_get_boolean (value);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -260,6 +272,12 @@ wb_timeline_row_class_init (WbTimelineRowClass *klass)
                                                            G_PARAM_READWRITE |
                                                            G_PARAM_CONSTRUCT_ONLY |
                                                            G_PARAM_STATIC_STRINGS);
+    obj_properties[PROP_RETWEET] = g_param_spec_boolean ("retweet",
+                                                         "Retweet",
+                                                         "Retweeted post or not",
+                                                         FALSE,
+                                                         G_PARAM_READWRITE |
+                                                         G_PARAM_CONSTRUCT);
     g_object_class_install_properties (gobject_class, N_PROPERTIES,
                                        obj_properties);
 }
@@ -289,9 +307,11 @@ wb_timeline_row_init (WbTimelineRow *self)
  * Returns: (transfer full): a newly created #WbTimelineRow
  */
 WbTimelineRow *
-wb_timeline_row_new (WbPostItem *post_item)
+wb_timeline_row_new (WbPostItem *post_item,
+                     gboolean retweet)
 {
     return g_object_new (WB_TYPE_TIMELINE_ROW,
                          "post-item", post_item,
+                         "retweet", retweet,
                          NULL);
 }
