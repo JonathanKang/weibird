@@ -24,6 +24,9 @@
 #include "wb-enums.h"
 #include "wb-image-button.h"
 
+#define MAX_WIDTH 1000
+#define MAX_HEIGHT 800
+
 enum
 {
     PROP_0,
@@ -155,21 +158,14 @@ on_message_complete (SoupSession *session,
 }
 
 static void
-image_viewer_response_callback (GtkDialog *dialog,
-                                gint response_id,
-                                gpointer user_data)
-{
-    gtk_widget_destroy (GTK_WIDGET (dialog));
-}
-
-static void
 on_image_clicked (GtkButton *button,
                   gpointer user_data)
 {
-    GtkWidget *content_area;
-    GtkWidget *dialog;
+    gint width, height;
     GtkWidget *image;
-    GtkWidget *toplevel;
+    GtkWidget *scrolled;
+    GtkWidget *overlay;
+    GtkWidget *viewer;
     WbImageButton *self = WB_IMAGE_BUTTON (button);
     WbImageButtonPrivate *priv;
 
@@ -182,22 +178,55 @@ on_image_clicked (GtkButton *button,
         return;
     }
 
-    toplevel = gtk_widget_get_toplevel (GTK_WIDGET (button));
-    dialog = gtk_dialog_new_with_buttons ("Image Viewer",
-                                          GTK_WINDOW (toplevel),
-                                          GTK_DIALOG_DESTROY_WITH_PARENT |
-                                          GTK_DIALOG_MODAL |
-                                          GTK_DIALOG_USE_HEADER_BAR,
-                                          NULL, NULL);
-    g_signal_connect (dialog, "response",
-                      G_CALLBACK (image_viewer_response_callback), NULL);
+    /* Scale the image a bit so that it's not too large */
+    width = gdk_pixbuf_get_width (priv->pixbuf);
+    height = gdk_pixbuf_get_height (priv->pixbuf);
+    if (width > MAX_WIDTH && height > MAX_HEIGHT)
+    {
+        gdouble scale;
+        GdkPixbuf *scaled_pixbuf;
 
-    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-    image = gtk_image_new_from_pixbuf (priv->pixbuf);
-    gtk_container_add (GTK_CONTAINER (content_area), image);
-    gtk_widget_show_all (content_area);
+        scale = (gdouble) MAX_WIDTH / width;
+        if (height * scale > MAX_HEIGHT)
+        {
+            scale = (gdouble) MAX_HEIGHT / height;
+        }
 
-    gtk_dialog_run (GTK_DIALOG (dialog));
+        scaled_pixbuf = gdk_pixbuf_scale_simple (priv->pixbuf,
+                                                 width * scale,
+                                                 height * scale,
+                                                 GDK_INTERP_BILINEAR);
+        width *= scale;
+        height *= scale;
+
+        image = gtk_image_new_from_pixbuf (scaled_pixbuf);
+
+        g_object_unref (scaled_pixbuf);
+    }
+    else
+    {
+        image = gtk_image_new_from_pixbuf (priv->pixbuf);
+    }
+
+    scrolled = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_min_content_height (GTK_SCROLLED_WINDOW (scrolled),
+                                                height < MAX_HEIGHT ? height : MAX_HEIGHT);
+    gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (scrolled),
+                                                height > MAX_HEIGHT ? height : MAX_HEIGHT);
+    gtk_scrolled_window_set_propagate_natural_width (GTK_SCROLLED_WINDOW (scrolled),
+                                                     TRUE);
+    gtk_container_add (GTK_CONTAINER (scrolled), image);
+
+    overlay = gtk_overlay_new ();
+    gtk_overlay_add_overlay (GTK_OVERLAY (overlay), scrolled);
+
+    viewer = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_default_size (GTK_WINDOW (viewer),
+                                 width,
+                                 height < MAX_HEIGHT ? height : MAX_HEIGHT);
+    gtk_container_add (GTK_CONTAINER (viewer), overlay);
+
+    gtk_widget_show_all (viewer);
 }
 
 static void
