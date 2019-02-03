@@ -19,7 +19,11 @@
 #include <gtk/gtk.h>
 
 #include "wb-image-button.h"
+#include "wb-media-dialog.h"
 #include "wb-multi-media-widget.h"
+
+#define MAX_WIDTH 1000
+#define MAX_HEIGHT 800
 
 enum
 {
@@ -44,6 +48,83 @@ typedef struct
 G_DEFINE_TYPE_WITH_PRIVATE (WbMultiMediaWidget, wb_multi_media_widget, GTK_TYPE_GRID)
 
 static GParamSpec *obj_properties [N_PROPS] = { NULL, };
+
+static void
+on_image_clicked (GtkButton *button,
+                  gpointer user_data)
+{
+    gint width, height;
+    GdkPixbuf *pixbuf;
+    GtkWidget *image;
+    GtkWidget *scrolled;
+    GtkWidget *frame;
+    GtkWidget *toplevel;
+    WbMediaType type;
+    WbMediaDialog *dialog;
+    WbImageButton *image_button = WB_IMAGE_BUTTON (button);
+
+    type = wb_image_button_get_media_type (image_button);
+    pixbuf = wb_image_button_get_pixbuf (image_button);
+
+    /* TODO: Handle clicked signal of the profile image */
+    /* Return directly if it's profile image at the moment */
+    if (type == WB_MEDIA_TYPE_AVATAR)
+    {
+        return;
+    }
+
+    /* Scale the image a bit so that it's not too large */
+    width = gdk_pixbuf_get_width (pixbuf);
+    height = gdk_pixbuf_get_height (pixbuf);
+    if (width > MAX_WIDTH && height > MAX_HEIGHT)
+    {
+        gdouble scale;
+        GdkPixbuf *scaled_pixbuf;
+
+        scale = (gdouble) MAX_WIDTH / width;
+        if (height * scale > MAX_HEIGHT)
+        {
+            scale = (gdouble) MAX_HEIGHT / height;
+        }
+
+        scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf,
+                                                 width * scale,
+                                                 height * scale,
+                                                 GDK_INTERP_BILINEAR);
+        width *= scale;
+        height *= scale;
+
+        image = gtk_image_new_from_pixbuf (scaled_pixbuf);
+
+        g_object_unref (scaled_pixbuf);
+    }
+    else
+    {
+        image = gtk_image_new_from_pixbuf (pixbuf);
+    }
+
+    scrolled = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_min_content_height (GTK_SCROLLED_WINDOW (scrolled),
+                                                height < MAX_HEIGHT ? height : MAX_HEIGHT);
+    gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (scrolled),
+                                                height > MAX_HEIGHT ? height : MAX_HEIGHT);
+    gtk_scrolled_window_set_propagate_natural_width (GTK_SCROLLED_WINDOW (scrolled),
+                                                     TRUE);
+    gtk_container_add (GTK_CONTAINER (scrolled), image);
+
+    dialog = wb_media_dialog_new ();
+    gtk_window_set_default_size (GTK_WINDOW (dialog),
+                                 width,
+                                 height < MAX_HEIGHT ? height : MAX_HEIGHT);
+    frame = wb_media_dialog_get_frame (dialog);
+    gtk_container_add (GTK_CONTAINER (frame), scrolled);
+
+    toplevel = gtk_widget_get_toplevel (GTK_WIDGET (button));
+    gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (toplevel));
+    gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
+
+    gtk_widget_show_all (GTK_WIDGET (dialog));
+}
 
 static void
 wb_multi_media_widget_constructed (GObject *object)
@@ -78,6 +159,8 @@ wb_multi_media_widget_constructed (GObject *object)
         child = wb_image_button_new (WB_MEDIA_TYPE_IMAGE,
                                      g_array_index (priv->pic_uris, gchar *, i),
                                      width, height);
+
+        g_signal_connect (child, "clicked", G_CALLBACK (on_image_clicked), NULL);
 
         if (i < 2)
         {

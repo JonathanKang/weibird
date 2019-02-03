@@ -2,6 +2,7 @@ sources = files(
     'wb-application.c',
     'wb-headerbar.c',
     'wb-main.c',
+    'wb-media-dialog.c',
     'wb-multi-media-widget.c',
     'wb-image-button.c',
     'wb-timeline-list.c',

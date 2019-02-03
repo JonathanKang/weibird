@@ -24,9 +24,6 @@
 #include "wb-enums.h"
 #include "wb-image-button.h"
 
-#define MAX_WIDTH 1000
-#define MAX_HEIGHT 800
-
 enum
 {
     PROP_0,
@@ -56,6 +53,22 @@ typedef struct
 G_DEFINE_TYPE_WITH_PRIVATE (WbImageButton, wb_image_button, GTK_TYPE_BUTTON)
 
 static GParamSpec *obj_properties [N_PROPS] = { NULL, };
+
+WbMediaType
+wb_image_button_get_media_type (WbImageButton *self)
+{
+    WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
+
+    return priv->type;
+}
+
+GdkPixbuf *
+wb_image_button_get_pixbuf (WbImageButton *self)
+{
+    WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
+
+    return priv->pixbuf;
+}
 
 static void
 on_message_complete (SoupSession *session,
@@ -155,78 +168,6 @@ on_message_complete (SoupSession *session,
                    error->message);
         g_clear_error (&error);
     }
-}
-
-static void
-on_image_clicked (GtkButton *button,
-                  gpointer user_data)
-{
-    gint width, height;
-    GtkWidget *image;
-    GtkWidget *scrolled;
-    GtkWidget *overlay;
-    GtkWidget *viewer;
-    WbImageButton *self = WB_IMAGE_BUTTON (button);
-    WbImageButtonPrivate *priv;
-
-    priv = wb_image_button_get_instance_private (self);
-
-    /* TODO: Handle clicked signal of the profile image */
-    /* Return directly if it's profile image at the moment */
-    if (priv->type == WB_MEDIA_TYPE_AVATAR)
-    {
-        return;
-    }
-
-    /* Scale the image a bit so that it's not too large */
-    width = gdk_pixbuf_get_width (priv->pixbuf);
-    height = gdk_pixbuf_get_height (priv->pixbuf);
-    if (width > MAX_WIDTH && height > MAX_HEIGHT)
-    {
-        gdouble scale;
-        GdkPixbuf *scaled_pixbuf;
-
-        scale = (gdouble) MAX_WIDTH / width;
-        if (height * scale > MAX_HEIGHT)
-        {
-            scale = (gdouble) MAX_HEIGHT / height;
-        }
-
-        scaled_pixbuf = gdk_pixbuf_scale_simple (priv->pixbuf,
-                                                 width * scale,
-                                                 height * scale,
-                                                 GDK_INTERP_BILINEAR);
-        width *= scale;
-        height *= scale;
-
-        image = gtk_image_new_from_pixbuf (scaled_pixbuf);
-
-        g_object_unref (scaled_pixbuf);
-    }
-    else
-    {
-        image = gtk_image_new_from_pixbuf (priv->pixbuf);
-    }
-
-    scrolled = gtk_scrolled_window_new (NULL, NULL);
-    gtk_scrolled_window_set_min_content_height (GTK_SCROLLED_WINDOW (scrolled),
-                                                height < MAX_HEIGHT ? height : MAX_HEIGHT);
-    gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (scrolled),
-                                                height > MAX_HEIGHT ? height : MAX_HEIGHT);
-    gtk_scrolled_window_set_propagate_natural_width (GTK_SCROLLED_WINDOW (scrolled),
-                                                     TRUE);
-    gtk_container_add (GTK_CONTAINER (scrolled), image);
-
-    overlay = gtk_overlay_new ();
-    gtk_overlay_add_overlay (GTK_OVERLAY (overlay), scrolled);
-
-    viewer = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_default_size (GTK_WINDOW (viewer),
-                                 width,
-                                 height < MAX_HEIGHT ? height : MAX_HEIGHT);
-    gtk_container_add (GTK_CONTAINER (viewer), overlay);
-
-    gtk_widget_show_all (viewer);
 }
 
 static void
@@ -371,8 +312,6 @@ wb_image_button_init (WbImageButton *self)
 
     context = gtk_widget_get_style_context (GTK_WIDGET (self));
     gtk_style_context_add_class (context, "flat");
-
-    g_signal_connect (self, "clicked", G_CALLBACK (on_image_clicked), NULL);
 }
 
 /**
