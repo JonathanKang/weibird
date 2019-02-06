@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface domain="weibird">
-  <template class="WbMediaDialog" parent="GtkWindow">
-    <property name="can-focus">False</property>
-    <property name="type-hint">dialog</property>
-    <property name="decorated">False</property>
-    <signal name="key-press-event" handler="key_press_event_cb"/>
-    <child>
-      <object class="GtkOverlay" id="overlay">
+    <template class="WbMediaDialog" parent="GtkWindow">
+        <property name="can-focus">False</property>
+        <property name="type-hint">dialog</property>
+        <property name="decorated">False</property>
+        <signal name="key-press-event" handler="key_press_event_cb"/>
         <child>
-          <object class="GtkFrame" id="frame">
-            <property name="shadow-type">none</property>
-          </object>
+            <object class="GtkOverlay" id="overlay">
+                <child>
+                    <object class="GtkFrame" id="frame">
+                        <property name="shadow-type">none</property>
+                    </object>
+                </child>
+            </object>
         </child>
-      </object>
-    </child>
-  </template>
+    </template>
 </interface>

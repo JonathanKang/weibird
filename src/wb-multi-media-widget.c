@@ -20,6 +20,7 @@
 
 #include "wb-image-button.h"
 #include "wb-media-dialog.h"
+#include "wb-media-image.h"
 #include "wb-multi-media-widget.h"
 
 #define MAX_WIDTH 1000
@@ -61,10 +62,10 @@ on_image_clicked (GtkButton *button,
     GtkWidget *toplevel;
     WbMediaType type;
     WbMediaDialog *dialog;
-    WbImageButton *image_button = WB_IMAGE_BUTTON (button);
+    WbMediaImage *media_image = WB_MEDIA_IMAGE (user_data);
 
-    type = wb_image_button_get_media_type (image_button);
-    pixbuf = wb_image_button_get_pixbuf (image_button);
+    type = wb_media_image_get_media_type (media_image);
+    pixbuf = wb_media_image_get_pixbuf (media_image);
 
     /* TODO: Handle clicked signal of the profile image */
     /* Return directly if it's profile image at the moment */
@@ -132,7 +133,8 @@ wb_multi_media_widget_constructed (GObject *object)
     gint i;
     gint left, top;
     gint width, height;
-    GtkWidget *child;
+    GtkWidget *button;
+    WbMediaImage *image;
     WbMultiMediaWidget *self;
     WbMultiMediaWidgetPrivate *priv;
 
@@ -156,11 +158,13 @@ wb_multi_media_widget_constructed (GObject *object)
 
     for (i = 0; i < priv->n_childs; i++)
     {
-        child = wb_image_button_new (WB_MEDIA_TYPE_IMAGE,
-                                     g_array_index (priv->pic_uris, gchar *, i),
-                                     width, height);
+        button = wb_image_button_new ();
+        image = wb_media_image_new (WB_MEDIA_TYPE_IMAGE,
+                                    g_array_index (priv->pic_uris, gchar *, i),
+                                    width, height);
+        gtk_button_set_image (GTK_BUTTON (button), GTK_WIDGET (image));
 
-        g_signal_connect (child, "clicked", G_CALLBACK (on_image_clicked), NULL);
+        g_signal_connect (button, "clicked", G_CALLBACK (on_image_clicked), image);
 
         if (i < 2)
         {
@@ -198,7 +202,7 @@ wb_multi_media_widget_constructed (GObject *object)
             top = 2;
             left = i - 6;
         }
-        gtk_grid_attach (GTK_GRID (self), child, left, top, 1, 1);
+        gtk_grid_attach (GTK_GRID (self), button, left, top, 1, 1);
     }
 
     G_OBJECT_CLASS (wb_multi_media_widget_parent_class)->constructed (object);

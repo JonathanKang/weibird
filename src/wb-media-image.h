@@ -16,8 +16,8 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WB_IMAGE_BUTTON_H_
-#define WB_IMAGE_BUTTON_H_
+#ifndef WB_MEDIA_IMAGE_H_
+#define WB_MEDIA_IMAGE_H_
 
 #pragma once
 
@@ -25,11 +25,23 @@
 
 G_BEGIN_DECLS
 
-#define WB_TYPE_IMAGE_BUTTON (wb_image_button_get_type ())
-G_DECLARE_FINAL_TYPE (WbImageButton, wb_image_button, WB, IMAGE_BUTTON, GtkButton)
+typedef enum
+{
+    WB_MEDIA_TYPE_AVATAR,
+    WB_MEDIA_TYPE_IMAGE
+} WbMediaType;
 
-GtkWidget *wb_image_button_new (void);
+#define WB_TYPE_MEDIA_IMAGE (wb_media_image_get_type())
+
+G_DECLARE_FINAL_TYPE (WbMediaImage, wb_media_image, WB, MEDIA_IMAGE, GtkImage)
+
+WbMediaType wb_media_image_get_media_type (WbMediaImage *self);
+GdkPixbuf *wb_media_image_get_pixbuf (WbMediaImage *self);
+WbMediaImage *wb_media_image_new (WbMediaType type,
+                                  const gchar *uri,
+                                  gint width,
+                                  gint height);
 
 G_END_DECLS
 
-#endif /* WB_IMAGE_BUTTON_H_ */
+#endif /* WB_MEDIA_IMAGE_H_ */

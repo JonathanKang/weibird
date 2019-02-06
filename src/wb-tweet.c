@@ -22,6 +22,7 @@
 #include <libsoup/soup.h>
 
 #include "wb-image-button.h"
+#include "wb-media-image.h"
 #include "wb-multi-media-widget.h"
 #include "wb-timeline-list.h"
 #include "wb-tweet.h"
@@ -85,6 +86,7 @@ wb_tweet_constructed (GObject *object)
     GtkWidget *likes_label;
     GtkWidget *comments_label;
     GtkWidget *reposts_label;
+    WbMediaImage *image;
     WbTweet *row = WB_TWEET (object);
     WbTweetPrivate *priv = wb_tweet_get_instance_private (row);
 
@@ -96,9 +98,12 @@ wb_tweet_constructed (GObject *object)
     if (!priv->retweet)
     {
         /* Profile image (50px by 50px), name, source and time */
-        priv->profile_image = wb_image_button_new (WB_MEDIA_TYPE_AVATAR,
-                                                   priv->post_item->user->profile_image_url,
-                                                   50, 50);
+        priv->profile_image = wb_image_button_new ();
+        image = wb_media_image_new (WB_MEDIA_TYPE_AVATAR,
+                                    priv->post_item->user->profile_image_url,
+                                    50, 50);
+        gtk_button_set_image (GTK_BUTTON (priv->profile_image),
+                              GTK_WIDGET (image));
         gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
         gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image,
                             FALSE, FALSE, 0);
