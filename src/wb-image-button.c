@@ -43,6 +43,7 @@ wb_image_button_init (WbImageButton *self)
 
     context = gtk_widget_get_style_context (GTK_WIDGET (self));
     gtk_style_context_add_class (context, "flat");
+    gtk_style_context_add_class (context, "ImageButton");
 }
 
 /**

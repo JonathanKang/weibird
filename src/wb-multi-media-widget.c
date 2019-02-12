@@ -292,6 +292,8 @@ wb_multi_media_widget_class_init(WbMultiMediaWidgetClass *klass)
 static void
 wb_multi_media_widget_init (WbMultiMediaWidget *self)
 {
+    gtk_grid_set_column_spacing (GTK_GRID (self), 3);
+    gtk_grid_set_row_spacing (GTK_GRID (self), 3);
 }
 
 /**

@@ -157,8 +157,6 @@ wb_tweet_constructed (GObject *object)
         pic_grid = wb_multi_media_widget_new (priv->post_item->picuri_array->len,
                                               priv->post_item->picuri_array);
         gtk_widget_set_halign (pic_grid, GTK_ALIGN_CENTER);
-        gtk_grid_set_column_spacing (GTK_GRID (pic_grid), 0);
-        gtk_grid_set_row_spacing (GTK_GRID (pic_grid), 0);
         gtk_box_pack_start (GTK_BOX (priv->main_box), pic_grid, FALSE, FALSE, 0);
     }
 
