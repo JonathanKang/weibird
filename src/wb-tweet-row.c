@@ -25,7 +25,7 @@
 #include "wb-media-image.h"
 #include "wb-multi-media-widget.h"
 #include "wb-timeline-list.h"
-#include "wb-tweet.h"
+#include "wb-tweet-row.h"
 #include "wb-util.h"
 
 enum
@@ -36,7 +36,7 @@ enum
     N_PROPERTIES
 };
 
-struct _WbTweet
+struct _WbTweetRow
 {
     /*< private >*/
     GtkListBoxRow parent_instance;
@@ -49,20 +49,20 @@ typedef struct
     GtkWidget *profile_image;
     GtkWidget *post_image;
     WbPostItem *post_item;
-} WbTweetPrivate;
+} WbTweetRowPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (WbTweet, wb_tweet, GTK_TYPE_LIST_BOX_ROW)
+G_DEFINE_TYPE_WITH_PRIVATE (WbTweetRow, wb_tweet_row, GTK_TYPE_LIST_BOX_ROW)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
 void
-wb_tweet_insert_retweeted_item (WbTweet *self,
+wb_tweet_row_insert_retweeted_item (WbTweetRow *self,
                                 GtkWidget *retweeted_item)
 {
     GtkStyleContext *context;
-    WbTweetPrivate *priv;
+    WbTweetRowPrivate *priv;
 
-    priv = wb_tweet_get_instance_private (self);
+    priv = wb_tweet_row_get_instance_private (self);
 
     context = gtk_widget_get_style_context (retweeted_item);
     gtk_style_context_add_class (context, "retweet");
@@ -71,7 +71,7 @@ wb_tweet_insert_retweeted_item (WbTweet *self,
 }
 
 static void
-wb_tweet_constructed (GObject *object)
+wb_tweet_row_constructed (GObject *object)
 {
     gchar *markup;
     GtkStyleContext *context;
@@ -87,8 +87,8 @@ wb_tweet_constructed (GObject *object)
     GtkWidget *comments_label;
     GtkWidget *reposts_label;
     WbMediaImage *image;
-    WbTweet *row = WB_TWEET (object);
-    WbTweetPrivate *priv = wb_tweet_get_instance_private (row);
+    WbTweetRow *row = WB_TWEET_ROW (object);
+    WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (row);
 
     hbox1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
     hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
@@ -188,14 +188,14 @@ wb_tweet_constructed (GObject *object)
     gtk_container_add (GTK_CONTAINER (row), priv->main_box);
     gtk_widget_show_all (GTK_WIDGET (row));
 
-    G_OBJECT_CLASS (wb_tweet_parent_class)->constructed (object);
+    G_OBJECT_CLASS (wb_tweet_row_parent_class)->constructed (object);
 }
 
 static void
-wb_tweet_finalize (GObject *object)
+wb_tweet_row_finalize (GObject *object)
 {
-    WbTweet *self = WB_TWEET (object);
-    WbTweetPrivate *priv = wb_tweet_get_instance_private (self);
+    WbTweetRow *self = WB_TWEET_ROW (object);
+    WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (self);
 
     g_array_free (priv->post_item->picuri_array, TRUE);
     g_free (priv->post_item->created_at);
@@ -218,13 +218,13 @@ wb_tweet_finalize (GObject *object)
 }
 
 static void
-wb_tweet_get_property (GObject *object,
+wb_tweet_row_get_property (GObject *object,
                        guint prop_id,
                        GValue *value,
                        GParamSpec *pspec)
 {
-    WbTweet *self = WB_TWEET (object);
-    WbTweetPrivate *priv = wb_tweet_get_instance_private (self);
+    WbTweetRow *self = WB_TWEET_ROW (object);
+    WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (self);
 
     switch (prop_id)
     {
@@ -241,13 +241,13 @@ wb_tweet_get_property (GObject *object,
 }
 
 static void
-wb_tweet_set_property (GObject *object,
+wb_tweet_row_set_property (GObject *object,
                        guint prop_id,
                        const GValue *value,
                        GParamSpec *pspec)
 {
-    WbTweet *self = WB_TWEET (object);
-    WbTweetPrivate *priv = wb_tweet_get_instance_private (self);
+    WbTweetRow *self = WB_TWEET_ROW (object);
+    WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (self);
 
     switch (prop_id)
     {
@@ -264,14 +264,14 @@ wb_tweet_set_property (GObject *object,
 }
 
 static void
-wb_tweet_class_init (WbTweetClass *klass)
+wb_tweet_row_class_init (WbTweetRowClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-    gobject_class->constructed = wb_tweet_constructed;
-    gobject_class->finalize = wb_tweet_finalize;
-    gobject_class->get_property = wb_tweet_get_property;
-    gobject_class->set_property = wb_tweet_set_property;
+    gobject_class->constructed = wb_tweet_row_constructed;
+    gobject_class->finalize = wb_tweet_row_finalize;
+    gobject_class->get_property = wb_tweet_row_get_property;
+    gobject_class->set_property = wb_tweet_row_set_property;
 
     obj_properties[PROP_POST_ITEM] = g_param_spec_pointer ("post-item", "item",
                                                            "Post item for each row",
@@ -289,11 +289,11 @@ wb_tweet_class_init (WbTweetClass *klass)
 }
 
 static void
-wb_tweet_init (WbTweet *self)
+wb_tweet_row_init (WbTweetRow *self)
 {
-    WbTweetPrivate *priv;
+    WbTweetRowPrivate *priv;
 
-    priv = wb_tweet_get_instance_private (self);
+    priv = wb_tweet_row_get_instance_private (self);
 
     priv->profile_image = gtk_image_new_from_pixbuf (NULL);
     priv->post_image = gtk_image_new_from_pixbuf (NULL);
@@ -306,17 +306,17 @@ wb_tweet_init (WbTweet *self)
 }
 
 /**
- * wb_tweet_new:
+ * wb_tweet_row_new:
  *
- * Create a new #WbTweet.
+ * Create a new #WbTweetRow.
  *
- * Returns: (transfer full): a newly created #WbTweet
+ * Returns: (transfer full): a newly created #WbTweetRow
  */
-WbTweet *
-wb_tweet_new (WbPostItem *post_item,
+WbTweetRow *
+wb_tweet_row_new (WbPostItem *post_item,
               gboolean retweet)
 {
-    return g_object_new (WB_TYPE_TWEET,
+    return g_object_new (WB_TYPE_TWEET_ROW,
                          "post-item", post_item,
                          "retweet", retweet,
                          NULL);

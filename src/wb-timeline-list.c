@@ -21,7 +21,7 @@
 #include <rest/oauth2-proxy.h>
 
 #include "wb-timeline-list.h"
-#include "wb-tweet.h"
+#include "wb-tweet-row.h"
 #include "wb-util.h"
 
 struct _WbTimelineList
@@ -54,7 +54,7 @@ parse_weibo_post (JsonArray *array,
     WbPostItem *post_item;
     WbUser *user;
     JsonObject *object;
-    WbTweet *row;
+    WbTweetRow *row;
     WbTimelineList *self;
     WbTimelineListPrivate *priv;
 
@@ -86,7 +86,7 @@ parse_weibo_post (JsonArray *array,
         priv->last_idstr = post_item->idstr;
     }
 
-    row = wb_tweet_new (post_item, FALSE);
+    row = wb_tweet_row_new (post_item, FALSE);
     gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list),
                          GTK_WIDGET (row), -1);
 
@@ -104,10 +104,10 @@ parse_weibo_post (JsonArray *array,
         retweet_object = json_object_get_object_member (object, "retweeted_status");
         wb_util_parse_weibo_post (retweet_object, retweeted_post_item);
         /* TODO: Add WbRetweetedItem class? */
-        retweeted_item = GTK_WIDGET (wb_tweet_new (retweeted_post_item,
+        retweeted_item = GTK_WIDGET (wb_tweet_row_new (retweeted_post_item,
                                                    TRUE));
 
-        wb_tweet_insert_retweeted_item (row, retweeted_item);
+        wb_tweet_row_insert_retweeted_item (row, retweeted_item);
     }
 }
 

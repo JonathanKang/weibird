@@ -16,8 +16,8 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WB_TWEET_H_
-#define WB_TWEET_H_
+#ifndef WB_TWEET_ROW_H_
+#define WB_TWEET_ROW_H_
 
 #include <gtk/gtk.h>
 
@@ -25,13 +25,13 @@
 
 G_BEGIN_DECLS
 
-#define WB_TYPE_TWEET (wb_tweet_get_type ())
-G_DECLARE_FINAL_TYPE (WbTweet, wb_tweet, WB, TWEET, GtkListBoxRow)
+#define WB_TYPE_TWEET_ROW (wb_tweet_row_get_type ())
+G_DECLARE_FINAL_TYPE (WbTweetRow, wb_tweet_row, WB, TWEET_ROW, GtkListBoxRow)
 
-void wb_tweet_insert_retweeted_item (WbTweet *row,
-                                     GtkWidget *retweeted_item);
-WbTweet *wb_tweet_new (WbPostItem *post_item, gboolean retweet);
+void wb_tweet_row_insert_retweeted_item (WbTweetRow *row,
+                                         GtkWidget *retweeted_item);
+WbTweetRow *wb_tweet_row_new (WbPostItem *post_item, gboolean retweet);
 
 G_END_DECLS
 
-#endif /* WB_TWEET_H_ */
+#endif /* WB_TWEET_ROW_H_ */
