@@ -42,8 +42,8 @@ wb_media_dialog_get_frame (WbMediaDialog *self)
 }
 
 static gboolean
-key_press_event_cb (GtkWidget *widget,
-                    GdkEventKey *event)
+button_press_event_cb (GtkWidget *widget,
+                       GdkEventButton *event)
 {
     gtk_widget_destroy (widget);
 
@@ -61,7 +61,7 @@ wb_media_dialog_class_init (WbMediaDialogClass *klass)
                                                   frame);
     gtk_widget_class_bind_template_child_private (widget_class, WbMediaDialog,
                                                   overlay);
-    gtk_widget_class_bind_template_callback (widget_class, key_press_event_cb);
+    gtk_widget_class_bind_template_callback (widget_class, button_press_event_cb);
 }
 
 static void
