@@ -25,10 +25,21 @@
 
 G_BEGIN_DECLS
 
+typedef enum
+{
+    WB_MEDIA_TYPE_AVATAR,
+    WB_MEDIA_TYPE_IMAGE
+} WbMediaType;
+
 #define WB_TYPE_IMAGE_BUTTON (wb_image_button_get_type ())
 G_DECLARE_FINAL_TYPE (WbImageButton, wb_image_button, WB, IMAGE_BUTTON, GtkButton)
 
-GtkWidget *wb_image_button_new (void);
+WbMediaType wb_image_button_get_media_type (WbImageButton *self);
+GdkPixbuf *wb_image_button_get_pixbuf (WbImageButton *self);
+WbImageButton *wb_image_button_new (WbMediaType type,
+                                    const gchar *uri,
+                                    gint width,
+                                    gint height);
 
 G_END_DECLS
 
