@@ -21,9 +21,7 @@
 #include "wb-image-button.h"
 #include "wb-media-dialog.h"
 #include "wb-multi-media-widget.h"
-
-#define MAX_WIDTH 1000
-#define MAX_HEIGHT 800
+#include "wb-util.h"
 
 enum
 {
@@ -78,32 +76,7 @@ on_image_clicked (GtkButton *button,
     /* Scale the image a bit so that it's not too large */
     width = gdk_pixbuf_get_width (pixbuf);
     height = gdk_pixbuf_get_height (pixbuf);
-    if (width > MAX_WIDTH && height > MAX_HEIGHT)
-    {
-        gdouble scale;
-        GdkPixbuf *scaled_pixbuf;
-
-        scale = (gdouble) MAX_WIDTH / width;
-        if (height * scale > MAX_HEIGHT)
-        {
-            scale = (gdouble) MAX_HEIGHT / height;
-        }
-
-        scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf,
-                                                 width * scale,
-                                                 height * scale,
-                                                 GDK_INTERP_BILINEAR);
-        width *= scale;
-        height *= scale;
-
-        image = gtk_image_new_from_pixbuf (scaled_pixbuf);
-
-        g_object_unref (scaled_pixbuf);
-    }
-    else
-    {
-        image = gtk_image_new_from_pixbuf (pixbuf);
-    }
+    image = wb_util_scale_image (pixbuf, &width, &height);
 
     scrolled = gtk_scrolled_window_new (NULL, NULL);
     gtk_scrolled_window_set_min_content_height (GTK_SCROLLED_WINDOW (scrolled),

@@ -191,3 +191,40 @@ wb_util_parse_weibo_post (JsonObject *object,
     user->profile_image_url = g_strdup (json_object_get_string_member (user_object,
                                                                       "profile_image_url"));
 }
+
+GtkWidget *
+wb_util_scale_image (GdkPixbuf *pixbuf,
+                     gint *width,
+                     gint *height)
+{
+    GtkWidget *image;
+
+    if (*width > MAX_WIDTH && *height > MAX_HEIGHT)
+    {
+        gdouble scale;
+        GdkPixbuf *scaled_pixbuf;
+
+        scale = (gdouble) MAX_WIDTH / *width;
+        if (*height * scale > MAX_HEIGHT)
+        {
+            scale = (gdouble) MAX_HEIGHT / *height;
+        }
+
+        scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf,
+                                                 *width * scale,
+                                                 *height * scale,
+                                                 GDK_INTERP_BILINEAR);
+        *width *= scale;
+        *height *= scale;
+
+        image = gtk_image_new_from_pixbuf (scaled_pixbuf);
+
+        g_object_unref (scaled_pixbuf);
+    }
+    else
+    {
+        image = gtk_image_new_from_pixbuf (pixbuf);
+    }
+
+    return image;
+}
