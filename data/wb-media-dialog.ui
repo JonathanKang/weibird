@@ -12,6 +12,50 @@
                         <property name="shadow-type">none</property>
                     </object>
                 </child>
+                <child type="overlay">
+                    <object class="GtkRevealer" id="previous_revealer">
+                        <property name="reveal-child">True</property>
+                        <property name="halign">start</property>
+                        <property name="valign">center</property>
+                        <property name="margin-start">24</property>
+                        <property name="transition-type">crossfade</property>
+                        <child>
+                            <object class="GtkButton" id="previous_button">
+                                <signal name="clicked" handler="previous_button_clicked_cb"/>
+                                <style>
+                                    <class name="osd"/>
+                                </style>
+                                <child>
+                                    <object class="GtkImage">
+                                        <property name="icon-name">pan-start-symbolic</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+                <child type="overlay">
+                    <object class="GtkRevealer" id="next_revealer">
+                        <property name="reveal-child">True</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <property name="margin-end">24</property>
+                        <property name="transition-type">crossfade</property>
+                        <child>
+                            <object class="GtkButton" id="next_button">
+                                <signal name="clicked" handler="next_button_clicked_cb"/>
+                                <style>
+                                    <class name="osd"/>
+                                </style>
+                                <child>
+                                    <object class="GtkImage">
+                                        <property name="icon-name">pan-end-symbolic</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
             </object>
         </child>
     </template>

@@ -29,6 +29,7 @@ enum
     PROP_0,
     PROP_URI,
     PROP_MEDIA_TYPE,
+    PROP_NTH_MEDIA,
     PROP_WIDTH,
     PROP_HEIGHT,
     N_PROPS
@@ -43,6 +44,7 @@ struct _WbImageButton
 typedef struct
 {
     gchar *uri;
+    gint nth_media;
     gint width;
     gint height;
     GdkPixbuf *pixbuf;
@@ -54,6 +56,14 @@ typedef struct
 G_DEFINE_TYPE_WITH_PRIVATE (WbImageButton, wb_image_button, GTK_TYPE_BUTTON)
 
 static GParamSpec *obj_properties [N_PROPS] = { NULL, };
+
+gint
+wb_image_button_get_nth_media (WbImageButton *self)
+{
+    WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
+
+    return priv->nth_media;
+}
 
 WbMediaType
 wb_image_button_get_media_type (WbImageButton *self)
@@ -215,6 +225,9 @@ wb_image_button_get_property (GObject    *object,
         case PROP_URI:
             g_value_set_string (value, priv->uri);
             break;
+        case PROP_NTH_MEDIA:
+            g_value_set_int (value, priv->nth_media);
+            break;
         case PROP_WIDTH:
             g_value_set_int (value, priv->width);
             break;
@@ -243,6 +256,9 @@ wb_image_button_set_property (GObject      *object,
         case PROP_URI:
             g_free (priv->uri);
             priv->uri = g_value_dup_string (value);
+            break;
+        case PROP_NTH_MEDIA:
+            priv->nth_media = g_value_get_int (value);
             break;
         case PROP_WIDTH:
             priv->width = g_value_get_int (value);
@@ -279,6 +295,13 @@ wb_image_button_class_init (WbImageButtonClass *klass)
                                                          G_PARAM_READWRITE |
                                                          G_PARAM_CONSTRUCT_ONLY |
                                                          G_PARAM_STATIC_STRINGS);
+    obj_properties[PROP_NTH_MEDIA] = g_param_spec_int ("nth-media",
+                                                       "Nth Media",
+                                                       "Nth Media of the multimedia grid",
+                                                       1, 9, 1,
+                                                       G_PARAM_READWRITE |
+                                                       G_PARAM_CONSTRUCT_ONLY |
+                                                       G_PARAM_STATIC_STRINGS);
     obj_properties[PROP_WIDTH] = g_param_spec_int ("width",
                                                    "Width",
                                                    "Width of the thumbnail image",
@@ -326,12 +349,14 @@ wb_image_button_init (WbImageButton *self)
 WbImageButton*
 wb_image_button_new (WbMediaType type,
                      const gchar *uri,
+                     gint nth_media,
                      gint width,
                      gint height)
 {
     return g_object_new (WB_TYPE_IMAGE_BUTTON,
                          "media-type", type,
                          "uri", uri,
+                         "nth-media", nth_media,
                          "width", width,
                          "height", height,
                          NULL);

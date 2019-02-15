@@ -99,7 +99,7 @@ wb_tweet_row_constructed (GObject *object)
         /* Profile image (50px by 50px), name, source and time */
         button = wb_image_button_new (WB_MEDIA_TYPE_AVATAR,
                                      priv->post_item->user->profile_image_url,
-                                     50, 50);
+                                     1, 50, 50);
         priv->profile_image = GTK_WIDGET (button);
         gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
         gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image,
