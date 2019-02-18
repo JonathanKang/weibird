@@ -56,6 +56,34 @@ button_press_event_cb (GtkWidget *widget,
     return GDK_EVENT_PROPAGATE;
 }
 
+static gboolean
+enter_notify_event_cb (GtkWidget *widget,
+                       GdkEvent *event,
+                       gpointer user_data)
+{
+    WbMediaDialog *self = WB_MEDIA_DIALOG (user_data);
+    WbMediaDialogPrivate *priv = wb_media_dialog_get_instance_private (self);
+
+    gtk_revealer_set_reveal_child (GTK_REVEALER (priv->previous_revealer), TRUE);
+    gtk_revealer_set_reveal_child (GTK_REVEALER (priv->next_revealer), TRUE);
+
+    return GDK_EVENT_PROPAGATE;
+}
+
+static gboolean
+leave_notify_event_cb (GtkWidget *widget,
+                       GdkEvent *event,
+                       gpointer user_data)
+{
+    WbMediaDialog *self = WB_MEDIA_DIALOG (user_data);
+    WbMediaDialogPrivate *priv = wb_media_dialog_get_instance_private (self);
+
+    gtk_revealer_set_reveal_child (GTK_REVEALER (priv->previous_revealer), FALSE);
+    gtk_revealer_set_reveal_child (GTK_REVEALER (priv->next_revealer), FALSE);
+
+    return GDK_EVENT_PROPAGATE;
+}
+
 static void
 change_media (WbMediaDialog *media_dialog,
               gboolean previous)
@@ -144,6 +172,8 @@ wb_media_dialog_class_init (WbMediaDialogClass *klass)
     gtk_widget_class_bind_template_child_private (widget_class, WbMediaDialog,
                                                   next_revealer);
     gtk_widget_class_bind_template_callback (widget_class, button_press_event_cb);
+    gtk_widget_class_bind_template_callback (widget_class, enter_notify_event_cb);
+    gtk_widget_class_bind_template_callback (widget_class, leave_notify_event_cb);
     gtk_widget_class_bind_template_callback (widget_class, previous_button_clicked_cb);
     gtk_widget_class_bind_template_callback (widget_class, next_button_clicked_cb);
 }
@@ -151,7 +181,18 @@ wb_media_dialog_class_init (WbMediaDialogClass *klass)
 static void
 wb_media_dialog_init (WbMediaDialog *self)
 {
+    WbMediaDialogPrivate *priv = wb_media_dialog_get_instance_private (self);
+
     gtk_widget_init_template (GTK_WIDGET (self));
+
+    gtk_revealer_set_transition_type (GTK_REVEALER (priv->previous_revealer),
+                                      GTK_REVEALER_TRANSITION_TYPE_CROSSFADE);
+    gtk_revealer_set_transition_type (GTK_REVEALER (priv->next_revealer),
+                                      GTK_REVEALER_TRANSITION_TYPE_CROSSFADE);
+    gtk_revealer_set_transition_duration (GTK_REVEALER (priv->previous_revealer),
+                                          1000);
+    gtk_revealer_set_transition_duration (GTK_REVEALER (priv->next_revealer),
+                                          1000);
 }
 
 /**
