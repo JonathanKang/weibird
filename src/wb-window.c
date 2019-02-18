@@ -45,6 +45,8 @@ G_DEFINE_TYPE_WITH_PRIVATE (WbWindow, wb_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
 static const gchar ACCESS_TOKEN[] = "access-token";
+static const gchar EXPIRES_IN[] = "expires-in";
+static const gchar UID[] = "uid";
 
 static gboolean
 on_web_view_decide_policy (WebKitWebView *web_view,
@@ -104,6 +106,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
     if (code != NULL)
     {
         const gchar *payload;
+        gchar *uid = NULL;
+        gint64 expires_in;
         GError *error = NULL;
         GError *tokens_error = NULL;
         GSettings *settings;
@@ -177,10 +181,15 @@ on_web_view_decide_policy (WebKitWebView *web_view,
 
         /* Got the access token */
         access_token = g_strdup (json_object_get_string_member (object, "access_token"));
+        expires_in = json_object_get_int_member (object, "expires_in");
+        uid = g_strdup (json_object_get_string_member (object, "uid"));
 
         settings = g_settings_new (SETTINGS_SCHEMA);
         g_settings_set_string (settings, ACCESS_TOKEN, access_token);
+        g_settings_set_int64 (settings, EXPIRES_IN, expires_in);
+        g_settings_set_string (settings, UID, uid);
 
+        g_free (uid);
         g_object_unref (parser);
         g_object_unref (settings);
 
