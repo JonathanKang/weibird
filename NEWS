@@ -1,3 +1,22 @@
+Weibird 0.1.2
+=============
+
+* Improved looking of retweeted item
+* Hiding Likes/Comments/Reposts count in retweeted item
+* Add support for showing original images
+* Add WbMediaDialog class for displaying larger images
+* Improved image scaling for displaying images
+* Some memory leak fixes
+* Added css style support for some widgets
+* Renamed GwTimelineRow class to GwTweet
+* Renamed WbTweet class to WbTweetRow
+* Image loading are processed in WbMediaImage
+* Add support for closing larger images by clicking on them
+* Removed WbMediaImage class
+* Add support for viewing multiple larger images in the same dialog
+* Hiding navigation buttons in image dialog when necessary
+* Added appdata file
+
 Weibird 0.1.1
 =============
 
