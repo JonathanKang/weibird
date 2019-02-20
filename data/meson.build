@@ -33,3 +33,8 @@ install_data(
     'com.jonathankang.Weibird.desktop',
     install_dir : join_paths(wb_datadir, 'applications')
 )
+
+install_data(
+    'com.jonathankang.Weibird.appdata.xml',
+    install_dir : join_paths(wb_datadir, 'metainfo')
+)
