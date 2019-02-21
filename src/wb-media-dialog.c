@@ -154,7 +154,7 @@ change_media (WbMediaDialog *media_dialog,
     gtk_container_add (GTK_CONTAINER (scrolled), image);
     priv->cur_image = scrolled;
 
-    gtk_window_set_default_size (GTK_WINDOW (media_dialog),
+    gtk_widget_set_size_request (GTK_WIDGET (media_dialog),
                                  width,
                                  height < MAX_HEIGHT ? height : MAX_HEIGHT);
     gtk_container_add (GTK_CONTAINER (priv->frame), scrolled);
