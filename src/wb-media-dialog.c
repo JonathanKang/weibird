@@ -39,6 +39,9 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbMediaDialog, wb_media_dialog, GTK_TYPE_WINDOW)
 
+static void change_media (WbMediaDialog *media_dialog,
+                          gboolean previous);
+
 GtkWidget *
 wb_media_dialog_get_frame (WbMediaDialog *self)
 {
@@ -52,6 +55,29 @@ button_press_event_cb (GtkWidget *widget,
                        GdkEventButton *event)
 {
     gtk_widget_destroy (widget);
+
+    return GDK_EVENT_PROPAGATE;
+}
+
+static gboolean
+key_press_event_cb (GtkWidget *widget,
+                    GdkEvent *event,
+                    gpointer user_data)
+{
+    WbMediaDialog *media_dialog = WB_MEDIA_DIALOG (user_data);
+
+    if (event->key.keyval == GDK_KEY_Left)
+    {
+        change_media (media_dialog, TRUE);
+    }
+    else if (event->key.keyval == GDK_KEY_Right)
+    {
+        change_media (media_dialog, FALSE);
+    }
+    else
+    {
+        gtk_widget_destroy (widget);
+    }
 
     return GDK_EVENT_PROPAGATE;
 }
@@ -172,6 +198,7 @@ wb_media_dialog_class_init (WbMediaDialogClass *klass)
     gtk_widget_class_bind_template_child_private (widget_class, WbMediaDialog,
                                                   next_revealer);
     gtk_widget_class_bind_template_callback (widget_class, button_press_event_cb);
+    gtk_widget_class_bind_template_callback (widget_class, key_press_event_cb);
     gtk_widget_class_bind_template_callback (widget_class, enter_notify_event_cb);
     gtk_widget_class_bind_template_callback (widget_class, leave_notify_event_cb);
     gtk_widget_class_bind_template_callback (widget_class, previous_button_clicked_cb);
