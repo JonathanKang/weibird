@@ -127,7 +127,7 @@ wb_multi_media_widget_constructed (GObject *object)
     {
         width = height = 300;
     }
-    else if (priv->n_childs == 2)
+    else if (priv->n_childs == 2 || priv->n_childs == 4)
     {
         width = height = 240;
     }
