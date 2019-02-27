@@ -1,6 +1,6 @@
 /*
  *  Weibird - view and compose weibo
- *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
+ *  copyright (c) 2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
  *  it under the terms of the gnu general public license as published by
@@ -16,8 +16,10 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WB_TWEET_ROW_H_
-#define WB_TWEET_ROW_H_
+#ifndef WB_TWEET_DETAIL_PAGE_H_
+#define WB_TWEET_DETAIL_PAGE_H_
+
+#pragma once
 
 #include <gtk/gtk.h>
 
@@ -25,14 +27,12 @@
 
 G_BEGIN_DECLS
 
-#define WB_TYPE_TWEET_ROW (wb_tweet_row_get_type ())
-G_DECLARE_FINAL_TYPE (WbTweetRow, wb_tweet_row, WB, TWEET_ROW, GtkListBoxRow)
+#define WB_TYPE_TWEET_DETAIL_PAGE (wb_tweet_detail_page_get_type())
 
-WbPostItem *wb_tweet_row_get_post_item (WbTweetRow *row);
-void wb_tweet_row_insert_retweeted_item (WbTweetRow *row,
-                                         GtkWidget *retweeted_item);
-WbTweetRow *wb_tweet_row_new (WbPostItem *post_item, gboolean retweet);
+G_DECLARE_FINAL_TYPE (WbTweetDetailPage, wb_tweet_detail_page, WB, TWEET_DETAIL_PAGE, GtkBox)
+
+WbTweetDetailPage *wb_tweet_detail_page_new (WbPostItem *post_item);
 
 G_END_DECLS
 
-#endif /* WB_TWEET_ROW_H_ */
+#endif /* WB_TWEET_DETAIL_PAGE_H_ */

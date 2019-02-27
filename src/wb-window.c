@@ -24,6 +24,8 @@
 
 #include "wb-headerbar.h"
 #include "wb-timeline-list.h"
+#include "wb-tweet-row.h"
+#include "wb-tweet-detail-page.h"
 #include "wb-util.h"
 #include "wb-window.h"
 
@@ -212,6 +214,25 @@ default_behaviour:
 }
 
 static void
+row_activated_cb (GtkListBox *box,
+                  GtkListBoxRow *row,
+                  gpointer user_data)
+{
+    WbPostItem *post_item;
+    WbTweetRow *tweet_row = WB_TWEET_ROW (row);
+    WbTweetDetailPage *detail;
+    WbWindow *window = WB_WINDOW (user_data);
+    WbWindowPrivate *priv = wb_window_get_instance_private (window);
+
+    post_item = wb_tweet_row_get_post_item (tweet_row);
+    detail = wb_tweet_detail_page_new (post_item);
+
+    gtk_stack_add_named (GTK_STACK (priv->main_stack),
+                         GTK_WIDGET (detail), "detail");
+    gtk_stack_set_visible_child_name (GTK_STACK (priv->main_stack), "detail");
+}
+
+static void
 on_login_button_clicked (GtkWidget *button,
                          gpointer user_data)
 {
@@ -265,6 +286,7 @@ wb_window_init (WbWindow *window)
     gchar *access_token;
     GdkScreen *screen;
     GtkCssProvider *provider;
+    GtkListBox *listbox;
     GSettings *settings;
     WbTimelineList *list;
     WbWindowPrivate *priv;
@@ -279,6 +301,9 @@ wb_window_init (WbWindow *window)
 
     priv = wb_window_get_instance_private (window);
     list = WB_TIMELINE_LIST (priv->timeline);
+
+    listbox = wb_timeline_list_get_listbox (list);
+    g_signal_connect (listbox, "row-activated", G_CALLBACK (row_activated_cb), window);
 
     settings = g_settings_new (SETTINGS_SCHEMA);
     access_token = g_settings_get_string (settings, ACCESS_TOKEN);

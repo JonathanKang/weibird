@@ -44,6 +44,14 @@ G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
 static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
 static const gchar ACCESS_TOKEN[] = "access-token";
 
+GtkListBox *
+wb_timeline_list_get_listbox (WbTimelineList *self)
+{
+    WbTimelineListPrivate *priv = wb_timeline_list_get_instance_private (self);
+
+    return priv->timeline_list;
+}
+
 static void
 parse_weibo_post (JsonArray *array,
                   guint index,
