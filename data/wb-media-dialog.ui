@@ -21,9 +21,12 @@
                         <property name="halign">start</property>
                         <property name="valign">center</property>
                         <property name="margin-start">24</property>
+                        <property name="no-show-all">TRUE</property>
                         <property name="transition-type">crossfade</property>
+                        <property name="visible">True</property>
                         <child>
                             <object class="GtkButton" id="previous_button">
+                                <property name="visible">True</property>
                                 <signal name="clicked" handler="previous_button_clicked_cb"/>
                                 <style>
                                     <class name="osd"/>
@@ -31,6 +34,7 @@
                                 <child>
                                     <object class="GtkImage">
                                         <property name="icon-name">pan-start-symbolic</property>
+                                        <property name="visible">True</property>
                                     </object>
                                 </child>
                             </object>
@@ -43,9 +47,12 @@
                         <property name="halign">end</property>
                         <property name="valign">center</property>
                         <property name="margin-end">24</property>
+                        <property name="no-show-all">TRUE</property>
                         <property name="transition-type">crossfade</property>
+                        <property name="visible">True</property>
                         <child>
                             <object class="GtkButton" id="next_button">
+                                <property name="visible">True</property>
                                 <signal name="clicked" handler="next_button_clicked_cb"/>
                                 <style>
                                     <class name="osd"/>
@@ -53,6 +60,7 @@
                                 <child>
                                     <object class="GtkImage">
                                         <property name="icon-name">pan-end-symbolic</property>
+                                        <property name="visible">True</property>
                                     </object>
                                 </child>
                             </object>

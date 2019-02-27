@@ -137,6 +137,11 @@ change_media (WbMediaDialog *media_dialog,
 
     priv->nth_media = previous ? priv->nth_media - 1 : priv->nth_media + 1;
 
+    /* Reveal the previous and next button or not */
+    gtk_widget_set_visible (priv->previous_revealer, priv->nth_media != 1);
+    gtk_widget_set_visible (priv->next_revealer,
+                            priv->nth_media != priv->images->len);
+
     cur_image = g_array_index (priv->images, WbImageButton *, priv->nth_media - 1);
     pixbuf = wb_image_button_get_pixbuf (cur_image);
 
@@ -243,6 +248,18 @@ wb_media_dialog_new (GArray *images,
     priv->images = images;
     priv->nth_media = nth_media;
     priv->cur_image = cur_image;
+
+    /* Whether to reveal the previous and next button or not */
+    if (priv->nth_media == 1)
+    {
+        g_print ("hide previous\n");
+        gtk_widget_hide (priv->previous_revealer);
+    }
+    if (priv->nth_media == priv->images->len)
+    {
+        g_print ("hide next\n");
+        gtk_widget_hide (priv->next_revealer);
+    }
 
     return self;
 }
