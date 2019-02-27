@@ -22,6 +22,7 @@
 #include <rest/oauth2-proxy.h>
 #include <webkit2/webkit2.h>
 
+#include "wb-enums.h"
 #include "wb-headerbar.h"
 #include "wb-timeline-list.h"
 #include "wb-tweet-row.h"
@@ -219,10 +220,16 @@ row_activated_cb (GtkListBox *box,
                   gpointer user_data)
 {
     WbPostItem *post_item;
-    WbTweetRow *tweet_row = WB_TWEET_ROW (row);
+    WbHeaderbar *headerbar;
+    WbTweetRow *tweet_row;
     WbTweetDetailPage *detail;
-    WbWindow *window = WB_WINDOW (user_data);
-    WbWindowPrivate *priv = wb_window_get_instance_private (window);
+    WbWindow *window;
+    WbWindowPrivate *priv;
+
+    window = WB_WINDOW (user_data);
+    priv = wb_window_get_instance_private (window);
+    tweet_row = WB_TWEET_ROW (row);
+    headerbar = WB_HEADERBAR (priv->headerbar);
 
     post_item = wb_tweet_row_get_post_item (tweet_row);
     detail = wb_tweet_detail_page_new (post_item);
@@ -230,6 +237,8 @@ row_activated_cb (GtkListBox *box,
     gtk_stack_add_named (GTK_STACK (priv->main_stack),
                          GTK_WIDGET (detail), "detail");
     gtk_stack_set_visible_child_name (GTK_STACK (priv->main_stack), "detail");
+
+    wb_headerbar_set_mode (headerbar, WB_HEADERBAR_MODE_DETAIL);
 }
 
 static void
@@ -281,6 +290,54 @@ on_login_button_clicked (GtkWidget *button,
 }
 
 static void
+on_action_radio (GSimpleAction *action,
+                 GVariant *variant,
+                 gpointer user_data)
+{
+    g_action_change_state (G_ACTION (action), variant);
+}
+
+static void
+on_headerbar_mode (GSimpleAction *action,
+                   GVariant *variant,
+                   gpointer user_data)
+{
+    const gchar *mode;
+    GEnumClass *eclass;
+    GEnumValue *evalue;
+    WbWindowPrivate *priv;
+
+    priv = wb_window_get_instance_private (WB_WINDOW (user_data));
+    mode = g_variant_get_string (variant, NULL);
+    eclass = g_type_class_ref (WB_TYPE_HEADERBAR_MODE);
+    evalue = g_enum_get_value_by_nick (eclass, mode);
+
+    if (evalue->value == WB_HEADERBAR_MODE_LIST)
+    {
+        /* Switch back to list mode when the back button is clicked. */
+        GtkWidget *child;
+        WbHeaderbar *headerbar;
+
+        headerbar = WB_HEADERBAR (priv->headerbar);
+
+        wb_headerbar_set_mode (headerbar, WB_HEADERBAR_MODE_LIST);
+
+        child = gtk_stack_get_visible_child (priv->main_stack);
+        gtk_container_remove (GTK_CONTAINER (priv->main_stack), child);
+        gtk_stack_set_visible_child (GTK_STACK (priv->main_stack),
+                                     priv->timeline);
+    }
+
+    g_simple_action_set_state (action, variant);
+
+    g_type_class_unref (eclass);
+}
+
+static GActionEntry actions[] = {
+    { "headerbar-mode", on_action_radio, "s", "'list'", on_headerbar_mode }
+};
+
+static void
 wb_window_init (WbWindow *window)
 {
     gchar *access_token;
@@ -298,6 +355,9 @@ wb_window_init (WbWindow *window)
     g_type_ensure (WB_TYPE_TIMELINE_LIST);
 
     gtk_widget_init_template (GTK_WIDGET (window));
+
+    g_action_map_add_action_entries (G_ACTION_MAP (window), actions,
+                                     G_N_ELEMENTS (actions), window);
 
     priv = wb_window_get_instance_private (window);
     list = WB_TIMELINE_LIST (priv->timeline);

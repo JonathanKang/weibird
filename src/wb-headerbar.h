@@ -23,9 +23,23 @@
 
 G_BEGIN_DECLS
 
+/*
+ * WbHeaderBarMode:
+ * @WB_HEADERBAR_MODE_LIST:
+ * @WB_HEADERBAR_MODE_DETAIL:
+ *
+ * The mode.
+ */
+typedef enum
+{
+    WB_HEADERBAR_MODE_LIST,
+    WB_HEADERBAR_MODE_DETAIL
+} WbHeaderbarMode;
+
 #define WB_TYPE_HEADERBAR (wb_headerbar_get_type ())
 G_DECLARE_FINAL_TYPE (WbHeaderbar, wb_headerbar, WB, HEADERBAR, GtkHeaderBar)
 
+void wb_headerbar_set_mode (WbHeaderbar *self, WbHeaderbarMode mode);
 WbHeaderbar *wb_headerbar_new (void);
 
 G_BEGIN_DECLS
