@@ -59,6 +59,8 @@ wb_tweet_row_get_post_item (WbTweetRow *self)
 {
     WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (self);
 
+    g_return_val_if_fail (WB_TWEET_ROW (self), NULL);
+
     return priv->post_item;
 }
 

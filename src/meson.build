@@ -2,6 +2,7 @@ sources = files(
     'wb-application.c',
     'wb-headerbar.c',
     'wb-main.c',
+    'wb-main-widget.c',
     'wb-media-dialog.c',
     'wb-multi-media-widget.c',
     'wb-image-button.c',
@@ -14,7 +15,8 @@ sources = files(
 
 enum_headers = files(
     'wb-headerbar.h',
-    'wb-image-button.h'
+    'wb-image-button.h',
+    'wb-main-widget.h'
 )
 
 sources += gnome.compile_resources(

@@ -20,6 +20,8 @@
 #include <json-glib/json-glib.h>
 #include <rest/oauth2-proxy.h>
 
+#include "wb-enums.h"
+#include "wb-main-widget.h"
 #include "wb-timeline-list.h"
 #include "wb-tweet-row.h"
 #include "wb-util.h"
@@ -37,6 +39,7 @@ typedef struct
     gchar *last_idstr;
     GtkListBox *timeline_list;
     GtkWidget *timeline_scrolled;
+    WbPostItem *post_item;
 } WbTimelineListPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
@@ -44,10 +47,22 @@ G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
 static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
 static const gchar ACCESS_TOKEN[] = "access-token";
 
+WbPostItem *
+wb_timeline_list_get_post_item (WbTimelineList *self)
+{
+    WbTimelineListPrivate *priv = wb_timeline_list_get_instance_private (self);
+
+    g_return_val_if_fail (WB_TIMELINE_LIST (self), NULL);
+
+    return priv->post_item;
+}
+
 GtkListBox *
 wb_timeline_list_get_listbox (WbTimelineList *self)
 {
     WbTimelineListPrivate *priv = wb_timeline_list_get_instance_private (self);
+
+    g_return_val_if_fail (WB_TIMELINE_LIST (self), NULL);
 
     return priv->timeline_list;
 }
@@ -217,6 +232,41 @@ listbox_update_header_func (GtkListBoxRow *row,
 }
 
 static void
+row_activated_cb (GtkListBox *box,
+                  GtkListBoxRow *row,
+                  gpointer user_data)
+{
+    GtkWidget *toplevel;
+    WbTimelineList *list;
+    WbTimelineListPrivate *priv;
+
+    list = WB_TIMELINE_LIST (user_data);
+    priv = wb_timeline_list_get_instance_private (list);
+
+    priv->post_item = wb_tweet_row_get_post_item (WB_TWEET_ROW (row));
+    toplevel = gtk_widget_get_toplevel (GTK_WIDGET (list));
+
+    if (gtk_widget_is_toplevel (toplevel))
+    {
+        GAction *mode;
+        GEnumClass *eclass;
+        GEnumValue *evalue;
+
+        mode = g_action_map_lookup_action (G_ACTION_MAP (toplevel), "view-mode");
+        eclass = g_type_class_ref (WB_TYPE_MAIN_WIDGET_MODE);
+        evalue = g_enum_get_value (eclass, WB_MAIN_WIDGET_MODE_DETAIL);
+
+        g_action_activate (mode, g_variant_new_string (evalue->value_nick));
+
+        g_type_class_unref (eclass);
+    }
+    else
+    {
+        g_debug ("Widget not in toplevel window, not switching toolbar mode");
+    }
+}
+
+static void
 wb_timeline_list_edge_reached (GtkScrolledWindow *scrolled_window,
                                GtkPositionType pos,
                                gpointer user_data)
@@ -261,6 +311,8 @@ wb_timeline_list_init (WbTimelineList *self)
                                   (GtkListBoxUpdateHeaderFunc) listbox_update_header_func,
                                   NULL, NULL);
 
+    g_signal_connect (priv->timeline_list, "row-activated",
+                      G_CALLBACK (row_activated_cb), self);
     g_signal_connect (priv->timeline_scrolled, "edge-reached",
                       G_CALLBACK (wb_timeline_list_edge_reached), self);
 }
