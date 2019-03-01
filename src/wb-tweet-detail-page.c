@@ -116,6 +116,7 @@ wb_tweet_detail_page_constructed (GObject *object)
     text_label = gtk_label_new (priv->post_item->text);
     gtk_widget_set_halign (text_label, GTK_ALIGN_START);
     gtk_label_set_line_wrap (GTK_LABEL (text_label), TRUE);
+    gtk_label_set_selectable (GTK_LABEL (text_label), TRUE);
     gtk_box_pack_start (GTK_BOX (page), text_label, FALSE, FALSE, 0);
 
     /* Post image */
