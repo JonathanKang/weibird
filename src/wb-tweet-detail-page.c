@@ -220,6 +220,7 @@ wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
 static void
 wb_tweet_detail_page_init (WbTweetDetailPage *self)
 {
+    gtk_box_set_spacing (GTK_BOX (self), 6);
     gtk_orientable_set_orientation (GTK_ORIENTABLE (self),
                                     GTK_ORIENTATION_VERTICAL);
     gtk_widget_set_margin_start (GTK_WIDGET (self), 12);
