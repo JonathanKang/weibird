@@ -252,12 +252,10 @@ wb_media_dialog_new (GArray *images,
     /* Whether to reveal the previous and next button or not */
     if (priv->nth_media == 1)
     {
-        g_print ("hide previous\n");
         gtk_widget_hide (priv->previous_revealer);
     }
     if (priv->nth_media == priv->images->len)
     {
-        g_print ("hide next\n");
         gtk_widget_hide (priv->next_revealer);
     }
 
