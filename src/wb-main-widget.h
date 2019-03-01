@@ -1,6 +1,6 @@
 /*
  *  Weibird - view and compose weibo
- *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
+ *  copyright (c) 2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
  *  it under the terms of the gnu general public license as published by
@@ -16,32 +16,37 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WB_HEADERBAR_H_
-#define WB_HEADERBAR_H_
+#ifndef WB_MAIN_WIDGET_H_
+#define WB_MAIN_WIDGET_H_
+
+#pragma once
 
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
 /*
- * WbHeaderBarMode:
- * @WB_HEADERBAR_MODE_LIST:
- * @WB_HEADERBAR_MODE_DETAIL:
+ * WbMainWidgetMode:
+ * @WB_MAIN_WIDGET_MODE_LIST:
+ * @WB_MAIN_WIDGET_MODE_DETAIL:
  *
- * The mode.
+ * The mode, mirroring the GlEventToolbar mode, used to show events.
  */
 typedef enum
 {
-    WB_HEADERBAR_MODE_LIST,
-    WB_HEADERBAR_MODE_DETAIL
-} WbHeaderbarMode;
+    WB_MAIN_WIDGET_MODE_LIST,
+    WB_MAIN_WIDGET_MODE_DETAIL
+} WbMainWidgetMode;
 
-#define WB_TYPE_HEADERBAR (wb_headerbar_get_type ())
-G_DECLARE_FINAL_TYPE (WbHeaderbar, wb_headerbar, WB, HEADERBAR, GtkHeaderBar)
+#define WB_TYPE_MAIN_WIDGET (wb_main_widget_get_type())
 
-void wb_headerbar_set_mode (WbHeaderbar *self, WbHeaderbarMode mode);
-WbHeaderbar *wb_headerbar_new (void);
+G_DECLARE_FINAL_TYPE (WbMainWidget, wb_main_widget, WB, MAIN_WIDGET, GtkStack)
 
-G_BEGIN_DECLS
+GtkWidget *wb_main_widget_get_timeline (WbMainWidget *main_widget);
+void wb_main_widget_set_mode (WbMainWidget *self, WbMainWidgetMode mode);
+WbMainWidget *wb_main_widget_new (void);
 
-#endif /* WB_HEADERBAR_H_ */
+G_END_DECLS
+
+
+#endif /* WB_MAIN_WIDGET_H_ */

@@ -13,6 +13,25 @@
         <property name="title">Weibird</property>
         <property name="visible">True</property>
         <child>
+            <object class="GtkButton" id="back_button">
+                <property name="tooltip-text">Go back to the timeline list</property>
+                <signal name="clicked" handler="back_button_clicked_cb"/>
+                <style>
+                    <class name="image-button"/>
+                </style>
+                <child>
+                    <object class="GtkImage">
+                        <property name="icon-name">go-previous-symbolic</property>
+                        <property name="icon-size">1</property>
+                        <property name="visible">True</property>
+                    </object>
+                </child>
+            </object>
+            <packing>
+                <property name="pack-type">start</property>
+            </packing>
+        </child>
+        <child>
             <object class="GtkMenuButton" id="pri_menu">
                 <property name="visible">True</property>
                 <property name="menu_model">primary-menu</property>
@@ -20,7 +39,7 @@
                     <class name="image-button"/>
                 </style>
                 <child>
-                    <object class="GtkImage" id="new_icon">
+                    <object class="GtkImage">
                         <property name="icon-name">open-menu-symbolic</property>
                         <property name="icon-size">1</property>
                         <property name="visible">True</property>

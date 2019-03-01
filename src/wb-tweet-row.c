@@ -54,6 +54,16 @@ G_DEFINE_TYPE_WITH_PRIVATE (WbTweetRow, wb_tweet_row, GTK_TYPE_LIST_BOX_ROW)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
+WbPostItem *
+wb_tweet_row_get_post_item (WbTweetRow *self)
+{
+    WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (self);
+
+    g_return_val_if_fail (WB_TWEET_ROW (self), NULL);
+
+    return priv->post_item;
+}
+
 void
 wb_tweet_row_insert_retweeted_item (WbTweetRow *self,
                                 GtkWidget *retweeted_item)

@@ -1,6 +1,6 @@
 /*
  *  Weibird - view and compose weibo
- *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
+ *  copyright (c) 2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
  *  it under the terms of the gnu general public license as published by
@@ -16,32 +16,23 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WB_HEADERBAR_H_
-#define WB_HEADERBAR_H_
+#ifndef WB_TWEET_DETAIL_PAGE_H_
+#define WB_TWEET_DETAIL_PAGE_H_
+
+#pragma once
 
 #include <gtk/gtk.h>
 
-G_BEGIN_DECLS
-
-/*
- * WbHeaderBarMode:
- * @WB_HEADERBAR_MODE_LIST:
- * @WB_HEADERBAR_MODE_DETAIL:
- *
- * The mode.
- */
-typedef enum
-{
-    WB_HEADERBAR_MODE_LIST,
-    WB_HEADERBAR_MODE_DETAIL
-} WbHeaderbarMode;
-
-#define WB_TYPE_HEADERBAR (wb_headerbar_get_type ())
-G_DECLARE_FINAL_TYPE (WbHeaderbar, wb_headerbar, WB, HEADERBAR, GtkHeaderBar)
-
-void wb_headerbar_set_mode (WbHeaderbar *self, WbHeaderbarMode mode);
-WbHeaderbar *wb_headerbar_new (void);
+#include "wb-timeline-list.h"
 
 G_BEGIN_DECLS
 
-#endif /* WB_HEADERBAR_H_ */
+#define WB_TYPE_TWEET_DETAIL_PAGE (wb_tweet_detail_page_get_type())
+
+G_DECLARE_FINAL_TYPE (WbTweetDetailPage, wb_tweet_detail_page, WB, TWEET_DETAIL_PAGE, GtkBox)
+
+WbTweetDetailPage *wb_tweet_detail_page_new (WbPostItem *post_item);
+
+G_END_DECLS
+
+#endif /* WB_TWEET_DETAIL_PAGE_H_ */

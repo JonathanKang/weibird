@@ -11,38 +11,7 @@
                 <property name="orientation">vertical</property>
                 <property name="visible">True</property>
                 <child>
-                    <object class="GtkStack" id="main_stack">
-                        <property name="expand">True</property>
-                        <property name="visible">True</property>
-                        <child>
-                            <object class="WbTimelineList" id="timeline">
-                            </object>
-                        </child>
-                        <child>
-                            <object class="GtkBox" id="login_box">
-                                <property name="orientation">vertical</property>
-                                <property name="expand">True</property>
-                                <property name="halign">center</property>
-                                <property name="valign">center</property>
-                                <property name="spacing">12</property>
-                                <property name="visible">True</property>
-                                <child>
-                                    <object class="GtkButton" id="login_button">
-                                        <property name="halign">center</property>
-                                        <property name="label">Login</property>
-                                        <property name="visible">True</property>
-                                        <signal name="clicked" handler="on_login_button_clicked"/>
-                                    </object>
-                                </child>
-                                <child>
-                                    <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="use-markup">True</property>
-                                        <property name="label">&lt;big&gt;Click the button to log in.&lt;/big&gt;</property>
-                                    </object>
-                                </child>
-                            </object>
-                        </child>
+                    <object class="WbMainWidget" id="main_widget">
                     </object>
                 </child>
             </object>

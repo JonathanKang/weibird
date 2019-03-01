@@ -17,13 +17,13 @@
  */
 
 #include <gtk/gtk.h>
-#include <json-glib/json-glib.h>
-#include <libsoup/soup.h>
-#include <rest/oauth2-proxy.h>
-#include <webkit2/webkit2.h>
 
+#include "wb-enums.h"
 #include "wb-headerbar.h"
+#include "wb-main-widget.h"
 #include "wb-timeline-list.h"
+#include "wb-tweet-row.h"
+#include "wb-tweet-detail-page.h"
 #include "wb-util.h"
 #include "wb-window.h"
 
@@ -35,262 +35,112 @@ struct _WbWindow
 
 typedef struct
 {
-    GtkStack *main_stack;
-    GtkWidget *login_box;
+    GtkWidget *main_widget;
     GtkWidget *headerbar;
-    GtkWidget *timeline;
 } WbWindowPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbWindow, wb_window, GTK_TYPE_APPLICATION_WINDOW)
 
-static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
-static const gchar ACCESS_TOKEN[] = "access-token";
-static const gchar EXPIRES_IN[] = "expires-in";
-static const gchar UID[] = "uid";
-
-static gboolean
-on_web_view_decide_policy (WebKitWebView *web_view,
-                           WebKitPolicyDecision *decision,
-                           WebKitPolicyDecisionType decision_type,
-                           gpointer user_data)
+static void
+on_action_radio (GSimpleAction *action,
+                 GVariant *variant,
+                 gpointer user_data)
 {
-    const gchar *requested_uri;
-    const gchar *fragment;
-    const gchar *query;
-    gchar *access_token = NULL;
-    gchar *code = NULL;
-    GHashTable *key_value_pairs;
-    SoupURI *uri;
-    WebKitNavigationAction *action;
-    WebKitURIRequest *request;
-
-    if (decision_type != WEBKIT_POLICY_DECISION_TYPE_NAVIGATION_ACTION)
-    {
-        goto default_behaviour;
-    }
-
-    action = webkit_navigation_policy_decision_get_navigation_action (WEBKIT_NAVIGATION_POLICY_DECISION (decision));
-    request = webkit_navigation_action_get_request (action);
-    requested_uri = webkit_uri_request_get_uri (request);
-    if (!g_str_has_prefix (requested_uri, "https://api.weibo.com/oauth2/default.html"))
-    {
-        goto default_behaviour;
-    }
-
-    uri = soup_uri_new (requested_uri);
-    fragment = soup_uri_get_fragment (uri);
-    query = soup_uri_get_query (uri);
-
-    if (fragment != NULL)
-    {
-        key_value_pairs = soup_form_decode (fragment);
-        access_token = g_strdup (g_hash_table_lookup (key_value_pairs, "access_token"));
-
-        g_hash_table_unref (key_value_pairs);
-    }
-
-    if (access_token != NULL)
-    {
-        goto ignore_request;
-    }
-
-    if (query != NULL)
-    {
-        key_value_pairs = soup_form_decode (query);
-
-        code = g_strdup (g_hash_table_lookup (key_value_pairs, "code"));
-
-        g_hash_table_unref (key_value_pairs);
-    }
-
-    if (code != NULL)
-    {
-        const gchar *payload;
-        gchar *uid = NULL;
-        gint64 expires_in;
-        GError *error = NULL;
-        GError *tokens_error = NULL;
-        GSettings *settings;
-        gsize payload_length;
-        guint status_code;
-        JsonParser *parser;
-        JsonObject *object;
-        RestProxy *token_proxy;
-        RestProxyCall *token_call;
-
-        token_proxy = rest_proxy_new ("https://api.weibo.com/oauth2/access_token",
-                                      FALSE);
-        token_call = rest_proxy_new_call (token_proxy);
-
-        rest_proxy_call_set_method (token_call, "POST");
-        rest_proxy_call_add_header (token_call, "Content-Type",
-                                    "application/x-www-form-urlencoded");
-        rest_proxy_call_add_param (token_call, "client_id", APP_KEY);
-        rest_proxy_call_add_param (token_call, "client_secret", APP_SECRECT);
-        rest_proxy_call_add_param (token_call, "grant_type", "authorization_code");
-        rest_proxy_call_add_param (token_call, "redirect_uri",
-                                   "https://api.weibo.com/oauth2/default.html");
-        rest_proxy_call_add_param (token_call, "code", code);
-
-        rest_proxy_call_sync (token_call, &error);
-        if (error != NULL)
-        {
-            g_error ("Cannot make call: %s", error->message);
-            g_error_free (error);
-
-            goto ignore_request;
-        }
-
-        status_code = rest_proxy_call_get_status_code (token_call);
-        if (status_code != 200)
-        {
-            g_error ("Expected status 200 when requesting access token, instead got status %d (%s)",
-                     status_code,
-                     rest_proxy_call_get_status_message (token_call));
-            g_error_free (error);
-
-            goto ignore_request;
-        }
-
-        payload = rest_proxy_call_get_payload (token_call);
-        payload_length = rest_proxy_call_get_payload_length (token_call);
-
-        parser = json_parser_new ();
-
-        /* Parse the data we received */
-        if (!json_parser_load_from_data (parser,
-                                         payload, payload_length, &tokens_error))
-        {
-            g_warning ("json_parser_load_from_data () failed: %s (%s, %d)",
-                       tokens_error->message,
-                       g_quark_to_string (tokens_error->domain),
-                       tokens_error->code);
-            g_error_free (tokens_error);
-            g_object_unref (parser);
-
-            goto ignore_request;
-        }
-
-        object = json_node_get_object (json_parser_get_root (parser));
-        if (!json_object_has_member (object, "access_token"))
-        {
-            g_warning ("Did not find access_token in JSON data");
-
-            goto ignore_request;
-        }
-
-        /* Got the access token */
-        access_token = g_strdup (json_object_get_string_member (object, "access_token"));
-        expires_in = json_object_get_int_member (object, "expires_in");
-        uid = g_strdup (json_object_get_string_member (object, "uid"));
-
-        settings = g_settings_new (SETTINGS_SCHEMA);
-        g_settings_set_string (settings, ACCESS_TOKEN, access_token);
-        g_settings_set_int64 (settings, EXPIRES_IN, expires_in);
-        g_settings_set_string (settings, UID, uid);
-
-        g_free (uid);
-        g_object_unref (parser);
-        g_object_unref (settings);
-
-        goto default_behaviour;
-    }
-
-ignore_request:
-    webkit_policy_decision_ignore (decision);
-
-    g_free (access_token);
-    g_free (code);
-
-    return TRUE;
-
-default_behaviour:
-    g_free (access_token);
-    g_free (code);
-
-    return FALSE;
+    g_action_change_state (G_ACTION (action), variant);
 }
 
 static void
-on_login_button_clicked (GtkWidget *button,
-                         gpointer user_data)
+on_headerbar_mode (GSimpleAction *action,
+                   GVariant *variant,
+                   gpointer user_data)
 {
-    gchar *uri;
-    GtkWidget *content_area;
-    GtkWidget *dialog;
-    GtkWidget *web_view;
-    RestProxy *proxy;
-    WbWindow *window;
+    const gchar *mode;
+    GEnumClass *eclass;
+    GEnumValue *evalue;
     WbWindowPrivate *priv;
-    WbTimelineList *timeline;
 
-    window = WB_WINDOW (user_data);
-    priv = wb_window_get_instance_private (window);
+    priv = wb_window_get_instance_private (WB_WINDOW (user_data));
 
-    web_view = webkit_web_view_new ();
-    gtk_widget_set_hexpand (web_view, TRUE);
-    gtk_widget_set_vexpand (web_view, TRUE);
-    gtk_widget_set_size_request (web_view, 600, 400);
+    mode = g_variant_get_string (variant, NULL);
+    eclass = g_type_class_ref (WB_TYPE_HEADERBAR_MODE);
+    evalue = g_enum_get_value_by_nick (eclass, mode);
 
-    dialog = gtk_dialog_new ();
-    gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (window));
-    g_signal_connect_swapped (dialog, "response",
-                              G_CALLBACK (gtk_widget_destroy), dialog);
-    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-    gtk_container_add (GTK_CONTAINER (content_area), web_view);
+    if (evalue->value == WB_HEADERBAR_MODE_LIST)
+    {
+        /* Switch back to list mode when the back button is clicked. */
+        WbMainWidget *main_widget;
 
-    proxy = oauth2_proxy_new (APP_KEY,
-                              "https://api.weibo.com/oauth2/authorize",
-                              "https://api.weibo.com", FALSE);
+        main_widget = WB_MAIN_WIDGET (priv->main_widget);
 
-    uri = oauth2_proxy_build_login_url (OAUTH2_PROXY (proxy),
-                                        "https://api.weibo.com/oauth2/default.html");
+        wb_main_widget_set_mode (main_widget, WB_MAIN_WIDGET_MODE_LIST);
+    }
 
-    /* Load the uri in web view */
-    webkit_web_view_load_uri (WEBKIT_WEB_VIEW (web_view), uri);
-    g_signal_connect (WEBKIT_WEB_VIEW (web_view), "decide-policy",
-                      G_CALLBACK (on_web_view_decide_policy), proxy);
+    g_simple_action_set_state (action, variant);
 
-    gtk_widget_show_all (dialog);
-    gtk_dialog_run (GTK_DIALOG (dialog));
-
-    gtk_stack_set_visible_child (priv->main_stack, priv->timeline);
-    timeline = WB_TIMELINE_LIST (priv->timeline);
-    wb_timeline_list_get_home_timeline (timeline, FALSE);
+    g_type_class_unref (eclass);
 }
+
+static void
+on_view_mode (GSimpleAction *action,
+              GVariant *variant,
+              gpointer user_data)
+{
+    const gchar *mode;
+    GEnumClass *eclass;
+    GEnumValue *evalue;
+    WbHeaderbar *headerbar;
+    WbMainWidget *main_widget;
+    WbWindowPrivate *priv;
+
+    priv = wb_window_get_instance_private (WB_WINDOW (user_data));
+    headerbar = WB_HEADERBAR (priv->headerbar);
+    main_widget = WB_MAIN_WIDGET (priv->main_widget);
+
+    mode = g_variant_get_string (variant, NULL);
+    eclass = g_type_class_ref (WB_TYPE_HEADERBAR_MODE);
+    evalue = g_enum_get_value_by_nick (eclass, mode);
+
+    switch (evalue->value)
+    {
+        case WB_MAIN_WIDGET_MODE_LIST:
+            wb_headerbar_set_mode (headerbar, WB_HEADERBAR_MODE_LIST);
+            break;
+        case WB_MAIN_WIDGET_MODE_DETAIL:
+            wb_headerbar_set_mode (headerbar, WB_HEADERBAR_MODE_DETAIL);
+            wb_main_widget_set_mode (main_widget, WB_MAIN_WIDGET_MODE_DETAIL);
+            break;
+        default:
+            g_assert_not_reached ();
+            break;
+    }
+
+    g_simple_action_set_state (action, variant);
+
+    g_type_class_unref (eclass);
+}
+
+static GActionEntry actions[] = {
+    { "headerbar-mode", on_action_radio, "s", "'list'", on_headerbar_mode },
+    { "view-mode", on_view_mode, "s", "'list'", on_view_mode }
+};
 
 static void
 wb_window_init (WbWindow *window)
 {
-    gchar *access_token;
     GdkScreen *screen;
     GtkCssProvider *provider;
-    GSettings *settings;
-    WbTimelineList *list;
-    WbWindowPrivate *priv;
 
     /* Ensure GTK+ private types used by the template definition
      * before calling gtk_widget_init_template()
      */
     g_type_ensure (WB_TYPE_HEADERBAR);
+    g_type_ensure (WB_TYPE_MAIN_WIDGET);
     g_type_ensure (WB_TYPE_TIMELINE_LIST);
 
     gtk_widget_init_template (GTK_WIDGET (window));
 
-    priv = wb_window_get_instance_private (window);
-    list = WB_TIMELINE_LIST (priv->timeline);
-
-    settings = g_settings_new (SETTINGS_SCHEMA);
-    access_token = g_settings_get_string (settings, ACCESS_TOKEN);
-    if (g_strcmp0 (access_token, "") != 0)
-    {
-        gtk_stack_set_visible_child (priv->main_stack, priv->timeline);
-        wb_timeline_list_get_home_timeline (list, FALSE);
-    }
-    else
-    {
-        gtk_stack_set_visible_child (priv->main_stack, priv->login_box);
-    }
+    g_action_map_add_action_entries (G_ACTION_MAP (window), actions,
+                                     G_N_ELEMENTS (actions), window);
 
     screen = gdk_screen_get_default ();
     provider = gtk_css_provider_new ();
@@ -299,9 +149,7 @@ wb_window_init (WbWindow *window)
                                                GTK_STYLE_PROVIDER (provider),
                                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-    g_free (access_token);
     g_object_unref (provider);
-    g_object_unref (settings);
 }
 static void
 wb_window_class_init (WbWindowClass *klass)
@@ -311,15 +159,9 @@ wb_window_class_init (WbWindowClass *klass)
     gtk_widget_class_set_template_from_resource (widget_class,
                                                  "/com/jonathankang/Weibird/wb-window.ui");
     gtk_widget_class_bind_template_child_private (widget_class,
-                                                  WbWindow, main_stack);
-    gtk_widget_class_bind_template_child_private (widget_class,
-                                                  WbWindow, login_box);
+                                                  WbWindow, main_widget);
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   WbWindow, headerbar);
-    gtk_widget_class_bind_template_child_private (widget_class,
-                                                  WbWindow, timeline);
-
-    gtk_widget_class_bind_template_callback (widget_class, on_login_button_clicked);
 }
 
 GtkWidget *

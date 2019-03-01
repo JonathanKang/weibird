@@ -68,6 +68,8 @@ typedef struct
 #define WB_TYPE_TIMELINE_LIST (wb_timeline_list_get_type ())
 G_DECLARE_FINAL_TYPE (WbTimelineList, wb_timeline_list, WB, TIMELINE_LIST, GtkBox)
 
+WbPostItem *wb_timeline_list_get_post_item (WbTimelineList *list);
+GtkListBox *wb_timeline_list_get_listbox (WbTimelineList *list);
 void wb_timeline_list_get_home_timeline (WbTimelineList *list, gboolean loading_more);
 WbTimelineList *wb_timeline_list_new (void);
 

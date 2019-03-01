@@ -2,6 +2,7 @@ subdir('icons')
 
 resource_data = files(
     'wb-headerbar.ui',
+    'wb-main-widget.ui',
     'wb-media-dialog.ui',
     'wb-timeline-list.ui',
     'wb-window.ui'
