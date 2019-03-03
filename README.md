@@ -27,7 +27,7 @@ Contributions are welcome (code, design, ideas, etc).
 ## Compiling
 
 ```
-meson ./builddir
+meson ./builddir --prefix=/usr
 ninja -C ./builddir
 ninja -C ./builddir install
 ```
