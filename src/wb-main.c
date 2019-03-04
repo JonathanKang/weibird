@@ -29,5 +29,7 @@ main (int argc, char **argv)
     application = wb_application_new ();
     status = g_application_run (G_APPLICATION (application), argc, argv);
 
+    g_object_unref (application);
+
     return status;
 }
