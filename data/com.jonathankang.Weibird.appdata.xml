@@ -15,6 +15,7 @@
     <screenshot type="default">
       <image type="source">https://raw.githubusercontent.com/JonathanKang/weibird-appdata/master/screenshot-2.png</image>
     </screenshot>
+  </screenshots>
   <url type="homepage">https://github.com/JonathanKang/weibird</url>
   <url type="bugtracker">https://github.com/JonathanKang/weibird/issues</url>
   <update_contact>jonathankang@gnome.org</update_contact>
