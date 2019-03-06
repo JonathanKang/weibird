@@ -27,7 +27,8 @@
  * @time: the time string fetched from Weibo API
  *
  * This function parses the time string fetched from Weibo
- * API and return a meaningful time.
+ * API(for instance, Wed Mar 06 14:00:58 +0800 2019) and
+ * return a meaningful time.
  *
  * Returns: A newly allocated string
  */
@@ -35,7 +36,7 @@ gchar *
 wb_util_format_time_string (const gchar *time)
 {
     const gchar *month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                               "July", "Aug", "Sep", "Oct", "Nov", "Dec"};
+                                "July", "Aug", "Sep", "Oct", "Nov", "Dec"};
     gchar *ret;
     gchar *year;
     gchar *day;
@@ -50,7 +51,15 @@ wb_util_format_time_string (const gchar *time)
     now = g_date_time_new_now_local ();
     vector = g_strsplit_set (time, " :", -1);
     year = g_strdup_printf ("%d", g_date_time_get_year (now));
-    day = g_strdup_printf ("%d", g_date_time_get_day_of_month (now));
+    if (g_date_time_get_day_of_month (now) < 10)
+    {
+        /* Prefix "0" if it's smaller than 10. */
+        day = g_strdup_printf ("0%d", g_date_time_get_day_of_month (now));
+    }
+    else
+    {
+        day = g_strdup_printf ("%d", g_date_time_get_day_of_month (now));
+    }
 
     same_year = !g_strcmp0 (year, vector[7]);
     same_month = !g_strcmp0 (month_str[g_date_time_get_month (now) - 1], vector[1]);
