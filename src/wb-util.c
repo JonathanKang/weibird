@@ -22,8 +22,17 @@
 #include "wb-timeline-list.h"
 #include "wb-util.h"
 
+/**
+ * wb_util_format_time_string:
+ * @time: the time string fetched from Weibo API
+ *
+ * This function parses the time string fetched from Weibo
+ * API and return a meaningful time.
+ *
+ * Returns: A newly allocated string
+ */
 gchar *
-wb_util_format_time_string (const gchar *str)
+wb_util_format_time_string (const gchar *time)
 {
     const gchar *month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                "July", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -36,10 +45,10 @@ wb_util_format_time_string (const gchar *str)
     gchar **vector;
     GDateTime *now;
 
-    g_return_val_if_fail (str != NULL, NULL);
+    g_return_val_if_fail (time != NULL, NULL);
 
     now = g_date_time_new_now_local ();
-    vector = g_strsplit_set (str, " :", -1);
+    vector = g_strsplit_set (time, " :", -1);
     year = g_strdup_printf ("%d", g_date_time_get_year (now));
     day = g_strdup_printf ("%d", g_date_time_get_day_of_month (now));
 
