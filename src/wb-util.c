@@ -23,7 +23,7 @@
 #include "wb-util.h"
 
 gchar *
-wb_util_format_time_string (gchar *str)
+wb_util_format_time_string (const gchar *str)
 {
     const gchar *month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                "July", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -64,7 +64,6 @@ wb_util_format_time_string (gchar *str)
     }
 
     g_date_time_unref (now);
-    g_free (str);
     g_free (year);
     g_free (day);
     g_strfreev (vector);
@@ -81,7 +80,7 @@ wb_util_format_time_string (gchar *str)
  * Returns: A newly allocated string
  */
 gchar *
-wb_util_format_source_string (gchar *source)
+wb_util_format_source_string (const gchar *source)
 {
     gchar **vector;
     gchar *ret;
@@ -91,13 +90,12 @@ wb_util_format_source_string (gchar *source)
     /* Don't parse it when @source is an empty string */
     if (g_strcmp0 (source, "") == 0)
     {
-        return source;
+        return NULL;
     }
 
     vector = g_strsplit_set (source, "<>", -1);
     ret = g_strdup (vector[2]);
 
-    g_free (source);
     g_strfreev (vector);
 
     return ret;

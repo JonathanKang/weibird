@@ -31,8 +31,8 @@ G_BEGIN_DECLS
 #define MAX_WIDTH 1000
 #define MAX_HEIGHT 800
 
-gchar *wb_util_format_time_string (gchar *time);
-gchar *wb_util_format_source_string (gchar *source);
+gchar *wb_util_format_time_string (const gchar *time);
+gchar *wb_util_format_source_string (const gchar *source);
 gchar *wb_util_thumbnail_to_original (const gchar *thumbnail);
 void wb_util_parse_weibo_post (JsonObject *object, WbPostItem *post_item);
 GtkWidget *wb_util_scale_image (GdkPixbuf *pixbuf, gint *width, gint *height);

@@ -82,6 +82,7 @@ wb_tweet_row_insert_retweeted_item (WbTweetRow *self,
 static void
 wb_tweet_row_constructed (GObject *object)
 {
+    gchar *created_at;
     gchar *markup;
     GtkStyleContext *context;
     GtkWidget *hbox1;
@@ -132,20 +133,23 @@ wb_tweet_row_constructed (GObject *object)
 
     if (!priv->retweet && g_strcmp0 (priv->post_item->source, "") != 0)
     {
+        gchar *source;
+
         gtk_widget_set_valign (name_label, GTK_ALIGN_END);
 
-        priv->post_item->source = wb_util_format_source_string (priv->post_item->source);
-        source_label = gtk_label_new (NULL);
+        source = wb_util_format_source_string (priv->post_item->source);
+        source_label = gtk_label_new (source);
         context = gtk_widget_get_style_context (source_label);
         gtk_style_context_add_class (context, "dim-label");
-        gtk_label_set_markup (GTK_LABEL (source_label), priv->post_item->source);
         gtk_widget_set_halign (source_label, GTK_ALIGN_START);
         gtk_widget_set_valign (source_label, GTK_ALIGN_START);
         gtk_box_pack_end (GTK_BOX (vbox), source_label, TRUE, TRUE, 0);
+
+        g_free (source);
     }
 
-    priv->post_item->created_at = wb_util_format_time_string (priv->post_item->created_at);
-    time_label = gtk_label_new (priv->post_item->created_at);
+    created_at = wb_util_format_time_string (priv->post_item->created_at);
+    time_label = gtk_label_new (created_at);
     context = gtk_widget_get_style_context (time_label);
     gtk_style_context_add_class (context, "dim-label");
     gtk_widget_set_halign (time_label, GTK_ALIGN_END);
@@ -194,6 +198,8 @@ wb_tweet_row_constructed (GObject *object)
 
     gtk_container_add (GTK_CONTAINER (row), priv->main_box);
     gtk_widget_show_all (GTK_WIDGET (row));
+
+    g_free (created_at);
 
     G_OBJECT_CLASS (wb_tweet_row_parent_class)->constructed (object);
 }
