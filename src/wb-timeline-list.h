@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (WbTimelineList, wb_timeline_list, WB, TIMELINE_LIST, GtkBox)
 
 WbTweetItem *wb_timeline_list_get_tweet_item (WbTimelineList *list);
+WbTweetItem *wb_timeline_list_get_retweeted_item (WbTimelineList *list);
 GtkListBox *wb_timeline_list_get_listbox (WbTimelineList *list);
 void wb_timeline_list_get_home_timeline (WbTimelineList *list, gboolean loading_more);
 WbTimelineList *wb_timeline_list_new (void);

@@ -23,7 +23,7 @@
 
 #include <gtk/gtk.h>
 
-#include "wb-timeline-list.h"
+#include "wb-tweet-item.h"
 
 G_BEGIN_DECLS
 
@@ -31,7 +31,8 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (WbTweetDetailPage, wb_tweet_detail_page, WB, TWEET_DETAIL_PAGE, GtkBox)
 
-WbTweetDetailPage *wb_tweet_detail_page_new (WbTweetItem *tweet_item);
+WbTweetDetailPage *wb_tweet_detail_page_new (WbTweetItem *tweet_item,
+                                             WbTweetItem *retweeted_item);
 
 G_END_DECLS
 

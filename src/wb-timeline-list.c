@@ -22,7 +22,6 @@
 
 #include "wb-enums.h"
 #include "wb-main-widget.h"
-#include "wb-timeline-list.h"
 #include "wb-tweet-item.h"
 #include "wb-tweet-row.h"
 #include "wb-util.h"
@@ -41,6 +40,7 @@ typedef struct
     GtkListBox *timeline_list;
     GtkWidget *timeline_scrolled;
     WbTweetItem *tweet_item;
+    WbTweetItem *retweeted_item;
 } WbTimelineListPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
@@ -56,6 +56,16 @@ wb_timeline_list_get_tweet_item (WbTimelineList *self)
     g_return_val_if_fail (WB_TIMELINE_LIST (self), NULL);
 
     return priv->tweet_item;
+}
+
+WbTweetItem *
+wb_timeline_list_get_retweeted_item (WbTimelineList *self)
+{
+    WbTimelineListPrivate *priv = wb_timeline_list_get_instance_private (self);
+
+    g_return_val_if_fail (WB_TIMELINE_LIST (self), NULL);
+
+    return priv->retweeted_item;
 }
 
 GtkListBox *
@@ -104,10 +114,6 @@ parse_weibo_post (JsonArray *array,
         priv->last_idstr = tweet_item->idstr;
     }
 
-    row = wb_tweet_row_new (tweet_item, FALSE);
-    gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list),
-                         GTK_WIDGET (row), -1);
-
     /* Add retweeted item to the row */
     if (json_object_has_member (object, "retweeted_status"))
     {
@@ -119,10 +125,24 @@ parse_weibo_post (JsonArray *array,
         retweeted_item = wb_tweet_item_new (retweeted_object);
         /* TODO: Add WbRetweetedItem class? */
         retweeted_widget = GTK_WIDGET (wb_tweet_row_new (retweeted_item,
-                                                         TRUE));
+                                                         NULL, TRUE));
+
+        row = wb_tweet_row_new (tweet_item, retweeted_item, FALSE);
+        gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list),
+                             GTK_WIDGET (row), -1);
 
         wb_tweet_row_insert_retweeted_item (row, retweeted_widget);
+
+        g_object_unref (retweeted_item);
     }
+    else
+    {
+        row = wb_tweet_row_new (tweet_item, NULL, FALSE);
+        gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list),
+                             GTK_WIDGET (row), -1);
+    }
+
+    g_object_unref (tweet_item);
 }
 
 void
@@ -235,6 +255,7 @@ row_activated_cb (GtkListBox *box,
     priv = wb_timeline_list_get_instance_private (list);
 
     priv->tweet_item = wb_tweet_row_get_tweet_item (WB_TWEET_ROW (row));
+    priv->retweeted_item = wb_tweet_row_get_retweeted_item (WB_TWEET_ROW (row));
     toplevel = gtk_widget_get_toplevel (GTK_WIDGET (list));
 
     if (gtk_widget_is_toplevel (toplevel))

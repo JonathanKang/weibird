@@ -23,7 +23,6 @@
 
 #include "wb-image-button.h"
 #include "wb-multi-media-widget.h"
-#include "wb-timeline-list.h"
 #include "wb-tweet-item.h"
 #include "wb-tweet-row.h"
 #include "wb-util.h"
@@ -49,6 +48,7 @@ typedef struct
     GtkWidget *profile_image;
     GtkWidget *post_image;
     WbTweetItem *tweet_item;
+    WbTweetItem *retweeted_item;
 } WbTweetRowPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbTweetRow, wb_tweet_row, GTK_TYPE_LIST_BOX_ROW)
@@ -63,6 +63,16 @@ wb_tweet_row_get_tweet_item (WbTweetRow *self)
     g_return_val_if_fail (WB_TWEET_ROW (self), NULL);
 
     return priv->tweet_item;
+}
+
+WbTweetItem *
+wb_tweet_row_get_retweeted_item (WbTweetRow *self)
+{
+    WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (self);
+
+    g_return_val_if_fail (WB_TWEET_ROW (self), NULL);
+
+    return priv->retweeted_item;
 }
 
 void
@@ -251,7 +261,7 @@ wb_tweet_row_set_property (GObject *object,
     switch (prop_id)
     {
         case PROP_TWEET_ITEM:
-            priv->tweet_item = g_value_get_object (value);
+            priv->tweet_item = g_value_dup_object (value);
             break;
         case PROP_RETWEET:
             priv->retweet = g_value_get_boolean (value);
@@ -315,10 +325,19 @@ wb_tweet_row_init (WbTweetRow *self)
  */
 WbTweetRow *
 wb_tweet_row_new (WbTweetItem *tweet_item,
+                  WbTweetItem *retweeted_item,
                   gboolean retweet)
 {
-    return g_object_new (WB_TYPE_TWEET_ROW,
+    WbTweetRow *self;
+    WbTweetRowPrivate *priv;
+
+    self = g_object_new (WB_TYPE_TWEET_ROW,
                          "tweet-item", tweet_item,
                          "retweet", retweet,
                          NULL);
+    priv = wb_tweet_row_get_instance_private (self);
+
+    priv->retweeted_item = retweeted_item;
+
+    return self;
 }
