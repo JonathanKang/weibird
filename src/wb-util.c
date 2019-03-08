@@ -145,69 +145,6 @@ wb_util_thumbnail_to_original (const gchar *thumbnail)
     return ret;
 }
 
-static void
-parse_pic_uri (JsonArray *array,
-               guint index,
-               JsonNode *element_node,
-               gpointer user_data)
-{
-    const gchar *thumbnail;
-    gchar *uri;
-    WbPostItem *post_item = user_data;
-    JsonObject *object;
-
-    object = json_node_get_object (element_node);
-
-    thumbnail = json_object_get_string_member (object, "thumbnail_pic");
-    uri = wb_util_thumbnail_to_original (thumbnail);
-    g_array_append_val (post_item->picuri_array, uri);
-}
-
-void
-wb_util_parse_weibo_post (JsonObject *object,
-                          WbPostItem *post_item)
-{
-    JsonArray *pic_array;
-    JsonObject *user_object;
-    WbUser *user;
-
-    post_item->created_at = g_strdup (json_object_get_string_member (object, "created_at"));
-    post_item->id = json_object_get_int_member (object, "id");
-    post_item->mid = json_object_get_int_member (object, "mid");
-    post_item->idstr = g_strdup (json_object_get_string_member (object, "idstr"));
-    post_item->text = g_strdup (json_object_get_string_member (object, "text"));
-    post_item->source = g_strdup (json_object_get_string_member (object, "source"));
-    post_item->favourited = json_object_get_boolean_member (object, "favorited");
-    if (json_object_has_member (object, "thumbnail_pic"))
-    {
-        post_item->thumbnail_pic = g_strdup (json_object_get_string_member (object,
-                                                                            "thumbnail_pic"));
-        post_item->bmiddle_pic = g_strdup (json_object_get_string_member (object,
-                                                                          "bmiddle_pic"));
-    }
-    post_item->reposts_count = json_object_get_int_member (object, "reposts_count");
-    post_item->comments_count = json_object_get_int_member (object, "comments_count");
-    post_item->attitudes_count = json_object_get_int_member (object, "attitudes_count");
-
-    /* Parse the uri for each picture if there is any */
-    post_item->picuri_array = g_array_new (FALSE, FALSE, sizeof (gchar *));
-    pic_array = json_object_get_array_member (object, "pic_urls");
-    if (json_array_get_length (pic_array) != 0)
-    {
-        json_array_foreach_element (pic_array, parse_pic_uri, post_item);
-    }
-
-    user_object = json_object_get_object_member (object, "user");
-    user = post_item->user;
-    user->id = json_object_get_int_member (user_object, "id");
-    user->idstr = g_strdup (json_object_get_string_member (user_object, "idstr"));
-    user->name = g_strdup (json_object_get_string_member (user_object, "name"));
-    user->nickname = g_strdup (json_object_get_string_member (user_object, "remark"));
-    user->location = g_strdup (json_object_get_string_member (user_object, "location"));
-    user->profile_image_url = g_strdup (json_object_get_string_member (user_object,
-                                                                      "profile_image_url"));
-}
-
 GtkWidget *
 wb_util_scale_image (GdkPixbuf *pixbuf,
                      gint *width,

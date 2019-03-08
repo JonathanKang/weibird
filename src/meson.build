@@ -8,7 +8,9 @@ sources = files(
     'wb-image-button.c',
     'wb-timeline-list.c',
     'wb-tweet-detail-page.c',
+    'wb-tweet-item.c',
     'wb-tweet-row.c',
+    'wb-user.c',
     'wb-util.c',
     'wb-window.c'
 )

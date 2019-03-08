@@ -22,16 +22,17 @@
 #include <gtk/gtk.h>
 
 #include "wb-timeline-list.h"
+#include "wb-tweet-item.h"
 
 G_BEGIN_DECLS
 
 #define WB_TYPE_TWEET_ROW (wb_tweet_row_get_type ())
 G_DECLARE_FINAL_TYPE (WbTweetRow, wb_tweet_row, WB, TWEET_ROW, GtkListBoxRow)
 
-WbPostItem *wb_tweet_row_get_post_item (WbTweetRow *row);
+WbTweetItem *wb_tweet_row_get_tweet_item (WbTweetRow *row);
 void wb_tweet_row_insert_retweeted_item (WbTweetRow *row,
                                          GtkWidget *retweeted_item);
-WbTweetRow *wb_tweet_row_new (WbPostItem *post_item, gboolean retweet);
+WbTweetRow *wb_tweet_row_new (WbTweetItem *tweet_item, gboolean retweet);
 
 G_END_DECLS
 

@@ -24,13 +24,14 @@
 #include "wb-image-button.h"
 #include "wb-multi-media-widget.h"
 #include "wb-timeline-list.h"
+#include "wb-tweet-item.h"
 #include "wb-tweet-row.h"
 #include "wb-util.h"
 
 enum
 {
     PROP_0,
-    PROP_POST_ITEM,
+    PROP_TWEET_ITEM,
     PROP_RETWEET,
     N_PROPERTIES
 };
@@ -47,26 +48,26 @@ typedef struct
     GtkWidget *main_box;
     GtkWidget *profile_image;
     GtkWidget *post_image;
-    WbPostItem *post_item;
+    WbTweetItem *tweet_item;
 } WbTweetRowPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbTweetRow, wb_tweet_row, GTK_TYPE_LIST_BOX_ROW)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
-WbPostItem *
-wb_tweet_row_get_post_item (WbTweetRow *self)
+WbTweetItem *
+wb_tweet_row_get_tweet_item (WbTweetRow *self)
 {
     WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (self);
 
     g_return_val_if_fail (WB_TWEET_ROW (self), NULL);
 
-    return priv->post_item;
+    return priv->tweet_item;
 }
 
 void
 wb_tweet_row_insert_retweeted_item (WbTweetRow *self,
-                                GtkWidget *retweeted_item)
+                                    GtkWidget *retweeted_item)
 {
     GtkStyleContext *context;
     WbTweetRowPrivate *priv;
@@ -109,8 +110,8 @@ wb_tweet_row_constructed (GObject *object)
     {
         /* Profile image (50px by 50px), name, source and time */
         button = wb_image_button_new (WB_MEDIA_TYPE_AVATAR,
-                                     priv->post_item->user->profile_image_url,
-                                     1, 50, 50);
+                                      priv->tweet_item->user->profile_image_url,
+                                      1, 50, 50);
         priv->profile_image = GTK_WIDGET (button);
         gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
         gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image,
@@ -120,24 +121,24 @@ wb_tweet_row_constructed (GObject *object)
     vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_pack_start (GTK_BOX (hbox1), vbox, FALSE, FALSE, 0);
 
-    if (g_strcmp0 (priv->post_item->user->nickname, "") != 0)
+    if (g_strcmp0 (priv->tweet_item->user->nickname, "") != 0)
     {
-        name_label = gtk_label_new (priv->post_item->user->nickname);
+        name_label = gtk_label_new (priv->tweet_item->user->nickname);
     }
     else
     {
-        name_label = gtk_label_new (priv->post_item->user->name);
+        name_label = gtk_label_new (priv->tweet_item->user->name);
     }
     gtk_widget_set_halign (name_label, GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (vbox), name_label, TRUE, TRUE, 0);
 
-    if (!priv->retweet && g_strcmp0 (priv->post_item->source, "") != 0)
+    if (!priv->retweet && g_strcmp0 (priv->tweet_item->source, "") != 0)
     {
         gchar *source;
 
         gtk_widget_set_valign (name_label, GTK_ALIGN_END);
 
-        source = wb_util_format_source_string (priv->post_item->source);
+        source = wb_util_format_source_string (priv->tweet_item->source);
         source_label = gtk_label_new (source);
         context = gtk_widget_get_style_context (source_label);
         gtk_style_context_add_class (context, "dim-label");
@@ -148,7 +149,7 @@ wb_tweet_row_constructed (GObject *object)
         g_free (source);
     }
 
-    created_at = wb_util_format_time_string (priv->post_item->created_at);
+    created_at = wb_util_format_time_string (priv->tweet_item->created_at);
     time_label = gtk_label_new (created_at);
     context = gtk_widget_get_style_context (time_label);
     gtk_style_context_add_class (context, "dim-label");
@@ -156,17 +157,17 @@ wb_tweet_row_constructed (GObject *object)
     gtk_box_pack_end (GTK_BOX (hbox1), time_label, FALSE, FALSE, 0);
 
     /* Post content */
-    text_label = gtk_label_new (priv->post_item->text);
+    text_label = gtk_label_new (priv->tweet_item->text);
     gtk_widget_set_halign (text_label, GTK_ALIGN_START);
     gtk_label_set_line_wrap (GTK_LABEL (text_label), TRUE);
     gtk_box_pack_start (GTK_BOX (priv->main_box), text_label, FALSE, FALSE, 0);
 
     /* Post image */
     /* TODO: Add support for display the original picture individually */
-    if (priv->post_item->picuri_array->len != 0)
+    if (priv->tweet_item->picuri_array->len != 0)
     {
-        pic_grid = wb_multi_media_widget_new (priv->post_item->picuri_array->len,
-                                              priv->post_item->picuri_array);
+        pic_grid = wb_multi_media_widget_new (priv->tweet_item->picuri_array->len,
+                                              priv->tweet_item->picuri_array);
         gtk_widget_set_halign (pic_grid, GTK_ALIGN_CENTER);
         gtk_box_pack_start (GTK_BOX (priv->main_box), pic_grid, FALSE, FALSE, 0);
     }
@@ -176,21 +177,21 @@ wb_tweet_row_constructed (GObject *object)
     {
         likes_label = gtk_label_new (NULL);
         markup = g_markup_printf_escaped ("<b>%d</b> Likes",
-                                          priv->post_item->attitudes_count);
+                                          priv->tweet_item->attitudes_count);
         gtk_label_set_markup (GTK_LABEL (likes_label), markup);
         gtk_box_pack_start (GTK_BOX (hbox2), likes_label, FALSE, FALSE, 0);
         g_free (markup);
 
         comments_label = gtk_label_new (NULL);
         markup = g_markup_printf_escaped ("<b>%d</b> Comments",
-                                          priv->post_item->comments_count);
+                                          priv->tweet_item->comments_count);
         gtk_label_set_markup (GTK_LABEL (comments_label), markup);
         gtk_box_pack_start (GTK_BOX (hbox2), comments_label, FALSE, FALSE, 0);
         g_free (markup);
 
         reposts_label = gtk_label_new (NULL);
         markup = g_markup_printf_escaped ("<b>%d</b> Reposts",
-                                          priv->post_item->reposts_count);
+                                          priv->tweet_item->reposts_count);
         gtk_label_set_markup (GTK_LABEL (reposts_label), markup);
         gtk_box_pack_start (GTK_BOX (hbox2), reposts_label, FALSE, FALSE, 0);
         g_free (markup);
@@ -210,24 +211,9 @@ wb_tweet_row_finalize (GObject *object)
     WbTweetRow *self = WB_TWEET_ROW (object);
     WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (self);
 
-    g_array_free (priv->post_item->picuri_array, TRUE);
-    g_free (priv->post_item->created_at);
-    g_free (priv->post_item->idstr);
-    g_free (priv->post_item->text);
-    g_free (priv->post_item->source);
-    g_free (priv->post_item->thumbnail_pic);
-    g_free (priv->post_item->bmiddle_pic);
-    g_free (priv->post_item->user->idstr);
-    g_free (priv->post_item->user->name);
-    g_free (priv->post_item->user->nickname);
-    g_free (priv->post_item->user->location);
-    g_free (priv->post_item->user->description);
-    g_free (priv->post_item->user->url);
-    g_free (priv->post_item->user->profile_image_url);
-    g_free (priv->post_item->user->gender);
-    g_free (priv->post_item->user->created_at);
-    g_free (priv->post_item->user);
-    g_free (priv->post_item);
+    g_object_unref (priv->tweet_item);
+
+    G_OBJECT_CLASS (wb_tweet_row_parent_class)->finalize (object);
 }
 
 static void
@@ -241,8 +227,8 @@ wb_tweet_row_get_property (GObject *object,
 
     switch (prop_id)
     {
-        case PROP_POST_ITEM:
-            g_value_set_pointer (value, priv->post_item);
+        case PROP_TWEET_ITEM:
+            g_value_set_object (value, priv->tweet_item);
             break;
         case PROP_RETWEET:
             g_value_set_boolean (value, priv->retweet);
@@ -264,8 +250,8 @@ wb_tweet_row_set_property (GObject *object,
 
     switch (prop_id)
     {
-        case PROP_POST_ITEM:
-            priv->post_item = g_value_get_pointer (value);
+        case PROP_TWEET_ITEM:
+            priv->tweet_item = g_value_get_object (value);
             break;
         case PROP_RETWEET:
             priv->retweet = g_value_get_boolean (value);
@@ -286,8 +272,10 @@ wb_tweet_row_class_init (WbTweetRowClass *klass)
     gobject_class->get_property = wb_tweet_row_get_property;
     gobject_class->set_property = wb_tweet_row_set_property;
 
-    obj_properties[PROP_POST_ITEM] = g_param_spec_pointer ("post-item", "item",
-                                                           "Post item for each row",
+    obj_properties[PROP_TWEET_ITEM] = g_param_spec_object ("tweet-item",
+                                                           "item",
+                                                           "Tweet item for each row",
+                                                           WB_TYPE_TWEET_ITEM,
                                                            G_PARAM_READWRITE |
                                                            G_PARAM_CONSTRUCT_ONLY |
                                                            G_PARAM_STATIC_STRINGS);
@@ -326,11 +314,11 @@ wb_tweet_row_init (WbTweetRow *self)
  * Returns: (transfer full): a newly created #WbTweetRow
  */
 WbTweetRow *
-wb_tweet_row_new (WbPostItem *post_item,
-              gboolean retweet)
+wb_tweet_row_new (WbTweetItem *tweet_item,
+                  gboolean retweet)
 {
     return g_object_new (WB_TYPE_TWEET_ROW,
-                         "post-item", post_item,
+                         "tweet-item", tweet_item,
                          "retweet", retweet,
                          NULL);
 }

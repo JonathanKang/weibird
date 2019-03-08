@@ -23,6 +23,7 @@
 #include "wb-enums.h"
 #include "wb-main-widget.h"
 #include "wb-timeline-list.h"
+#include "wb-tweet-item.h"
 #include "wb-tweet-row.h"
 #include "wb-util.h"
 
@@ -39,7 +40,7 @@ typedef struct
     gchar *last_idstr;
     GtkListBox *timeline_list;
     GtkWidget *timeline_scrolled;
-    WbPostItem *post_item;
+    WbTweetItem *tweet_item;
 } WbTimelineListPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
@@ -47,14 +48,14 @@ G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
 static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
 static const gchar ACCESS_TOKEN[] = "access-token";
 
-WbPostItem *
-wb_timeline_list_get_post_item (WbTimelineList *self)
+WbTweetItem *
+wb_timeline_list_get_tweet_item (WbTimelineList *self)
 {
     WbTimelineListPrivate *priv = wb_timeline_list_get_instance_private (self);
 
     g_return_val_if_fail (WB_TIMELINE_LIST (self), NULL);
 
-    return priv->post_item;
+    return priv->tweet_item;
 }
 
 GtkListBox *
@@ -73,10 +74,8 @@ parse_weibo_post (JsonArray *array,
                   JsonNode *element_node,
                   gpointer user_data)
 {
-    GtkWidget *retweeted_item;
-    WbPostItem *post_item;
-    WbUser *user;
     JsonObject *object;
+    WbTweetItem *tweet_item;
     WbTweetRow *row;
     WbTimelineList *self;
     WbTimelineListPrivate *priv;
@@ -93,44 +92,36 @@ parse_weibo_post (JsonArray *array,
     }
 
     object = json_node_get_object (element_node);
-    post_item = g_malloc0 (sizeof (WbPostItem));
-    user = g_malloc0 (sizeof (WbUser));
-    post_item->user = user;
-
-    wb_util_parse_weibo_post (object, post_item);
+    tweet_item = wb_tweet_item_new (object);
 
     if (index == 0 && priv->batch_fetched == 0)
     {
-        priv->last_id = post_item->id;
+        priv->last_id = tweet_item->id;
     }
-    if (post_item->id < priv->last_id)
+    if (tweet_item->id < priv->last_id)
     {
-        priv->last_id = post_item->id;
-        priv->last_idstr = post_item->idstr;
+        priv->last_id = tweet_item->id;
+        priv->last_idstr = tweet_item->idstr;
     }
 
-    row = wb_tweet_row_new (post_item, FALSE);
+    row = wb_tweet_row_new (tweet_item, FALSE);
     gtk_list_box_insert (GTK_LIST_BOX (priv->timeline_list),
                          GTK_WIDGET (row), -1);
 
     /* Add retweeted item to the row */
     if (json_object_has_member (object, "retweeted_status"))
     {
-        WbPostItem *retweeted_post_item;
-        WbUser *retweeted_user;
-        JsonObject *retweet_object;
+        GtkWidget *retweeted_widget;
+        JsonObject *retweeted_object;
+        WbTweetItem *retweeted_item;
 
-        retweeted_post_item = g_malloc0 (sizeof (WbPostItem));
-        retweeted_user = g_malloc0 (sizeof (WbUser));
-        retweeted_post_item->user = retweeted_user;
-
-        retweet_object = json_object_get_object_member (object, "retweeted_status");
-        wb_util_parse_weibo_post (retweet_object, retweeted_post_item);
+        retweeted_object = json_object_get_object_member (object, "retweeted_status");
+        retweeted_item = wb_tweet_item_new (retweeted_object);
         /* TODO: Add WbRetweetedItem class? */
-        retweeted_item = GTK_WIDGET (wb_tweet_row_new (retweeted_post_item,
-                                                   TRUE));
+        retweeted_widget = GTK_WIDGET (wb_tweet_row_new (retweeted_item,
+                                                         TRUE));
 
-        wb_tweet_row_insert_retweeted_item (row, retweeted_item);
+        wb_tweet_row_insert_retweeted_item (row, retweeted_widget);
     }
 }
 
@@ -243,7 +234,7 @@ row_activated_cb (GtkListBox *box,
     list = WB_TIMELINE_LIST (user_data);
     priv = wb_timeline_list_get_instance_private (list);
 
-    priv->post_item = wb_tweet_row_get_post_item (WB_TWEET_ROW (row));
+    priv->tweet_item = wb_tweet_row_get_tweet_item (WB_TWEET_ROW (row));
     toplevel = gtk_widget_get_toplevel (GTK_WIDGET (list));
 
     if (gtk_widget_is_toplevel (toplevel))

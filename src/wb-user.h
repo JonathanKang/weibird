@@ -1,6 +1,6 @@
 /*
  *  Weibird - view and compose weibo
- *  copyright (c) 2018-2019 jonathan kang <jonathankang@gnome.org>.
+ *  copyright (c) 2019 jonathan kang <jonathankang@gnome.org>.
  *
  *  this program is free software: you can redistribute it and/or modify
  *  it under the terms of the gnu general public license as published by
@@ -16,26 +16,39 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WB_UTIL_H_
-#define WB_UTIL_H_
+#pragma once
 
-#include <gtk/gtk.h>
+#include <glib-object.h>
 #include <json-glib/json-glib.h>
 
-#include "wb-timeline-list.h"
-
 G_BEGIN_DECLS
 
-#define APP_KEY "1450991920"
-#define APP_SECRECT "24afe70740825258ca104ee54acf9712"
-#define MAX_WIDTH 1000
-#define MAX_HEIGHT 800
+struct _WbUser
+{
+		GObject parent_instance;
 
-gchar *wb_util_format_time_string (const gchar *time);
-gchar *wb_util_format_source_string (const gchar *source);
-gchar *wb_util_thumbnail_to_original (const gchar *thumbnail);
-GtkWidget *wb_util_scale_image (GdkPixbuf *pixbuf, gint *width, gint *height);
+    gint64 id;
+    gchar *idstr;
+    gchar *name;
+    gchar *nickname;
+    gchar *location;
+    gchar *description;
+    gchar *url;
+    gchar *profile_image_url;
+    gchar *gender;
+    gint followers_count;
+    gint friends_count;
+    gint statuses_count;
+    gint favourites_count;
+    gchar *created_at;
+    gboolean verified;
+    gboolean follow_me;
+};
 
-G_BEGIN_DECLS
+#define WB_TYPE_USER (wb_user_get_type ())
 
-#endif /* WB_UTIL_H_ */
+G_DECLARE_FINAL_TYPE (WbUser, wb_user, WB, USER, GObject)
+
+WbUser *wb_user_new (JsonObject *jobject);
+
+G_END_DECLS

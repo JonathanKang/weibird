@@ -46,7 +46,7 @@ typedef struct
     GtkWidget *login_box;
     GtkWidget *timeline;
     WbMainWidgetMode mode;
-    WbPostItem *post_item;
+    WbTweetItem *tweet_item;
 } WbMainWidgetPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbMainWidget, wb_main_widget, GTK_TYPE_STACK)
@@ -311,7 +311,7 @@ notify_mode_cb (GObject *object,
     GtkStack *stack;
     GtkWidget *child;
     GtkWidget *toplevel;
-    WbPostItem *post_item;
+    WbTweetItem *tweet_item;
     WbTweetDetailPage *detail;
     WbMainWidget *self = WB_MAIN_WIDGET (object);
     WbMainWidgetPrivate *priv = wb_main_widget_get_instance_private (self);
@@ -336,8 +336,8 @@ notify_mode_cb (GObject *object,
 
                 timeline = WB_TIMELINE_LIST (priv->timeline);
 
-                post_item = wb_timeline_list_get_post_item (timeline);
-                detail = wb_tweet_detail_page_new (post_item);
+                tweet_item = wb_timeline_list_get_tweet_item (timeline);
+                detail = wb_tweet_detail_page_new (tweet_item);
 
                 gtk_stack_add_named (stack, GTK_WIDGET (detail), "detail");
                 gtk_stack_set_visible_child_name (stack, "detail");
