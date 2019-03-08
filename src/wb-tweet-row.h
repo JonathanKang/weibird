@@ -31,7 +31,7 @@ G_DECLARE_FINAL_TYPE (WbTweetRow, wb_tweet_row, WB, TWEET_ROW, GtkListBoxRow)
 WbTweetItem *wb_tweet_row_get_tweet_item (WbTweetRow *row);
 WbTweetItem *wb_tweet_row_get_retweeted_item (WbTweetRow *row);
 void wb_tweet_row_insert_retweeted_item (WbTweetRow *row,
-                                         GtkWidget *retweeted_item);
+                                         GtkWidget *retweeted_widget);
 WbTweetRow *wb_tweet_row_new (WbTweetItem *tweet_item,
                               WbTweetItem *retweet_item,
                               gboolean retweet);

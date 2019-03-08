@@ -45,6 +45,7 @@ typedef struct
 {
     gboolean retweet;
     GtkWidget *main_box;
+    GtkWidget *retweet_box;
     GtkWidget *profile_image;
     GtkWidget *post_image;
     WbTweetItem *tweet_item;
@@ -77,17 +78,18 @@ wb_tweet_row_get_retweeted_item (WbTweetRow *self)
 
 void
 wb_tweet_row_insert_retweeted_item (WbTweetRow *self,
-                                    GtkWidget *retweeted_item)
+                                    GtkWidget *retweeted_widget)
 {
     GtkStyleContext *context;
     WbTweetRowPrivate *priv;
 
     priv = wb_tweet_row_get_instance_private (self);
 
-    context = gtk_widget_get_style_context (retweeted_item);
+    context = gtk_widget_get_style_context (retweeted_widget);
     gtk_style_context_add_class (context, "retweet");
 
-    gtk_box_pack_end (GTK_BOX (priv->main_box), retweeted_item, FALSE, FALSE, 0);
+    gtk_box_pack_end (GTK_BOX (priv->retweet_box), retweeted_widget,
+                      TRUE, TRUE, 0);
 }
 
 static void
@@ -114,7 +116,6 @@ wb_tweet_row_constructed (GObject *object)
     hbox1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
     hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_box_pack_start (GTK_BOX (priv->main_box), hbox1, FALSE, FALSE, 0);
-    gtk_box_pack_end (GTK_BOX (priv->main_box), hbox2, FALSE, FALSE, 0);
 
     if (!priv->retweet)
     {
@@ -182,6 +183,11 @@ wb_tweet_row_constructed (GObject *object)
         gtk_box_pack_start (GTK_BOX (priv->main_box), pic_grid, FALSE, FALSE, 0);
     }
 
+    /* Retweeted post goes here, if there is one. */
+    priv->retweet_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_box_pack_start (GTK_BOX (priv->main_box), priv->retweet_box,
+                        FALSE, FALSE, 0);
+
     /* Likes, comments and reposts count */
     if (!priv->retweet)
     {
@@ -205,6 +211,8 @@ wb_tweet_row_constructed (GObject *object)
         gtk_label_set_markup (GTK_LABEL (reposts_label), markup);
         gtk_box_pack_start (GTK_BOX (hbox2), reposts_label, FALSE, FALSE, 0);
         g_free (markup);
+
+        gtk_box_pack_start (GTK_BOX (priv->main_box), hbox2, FALSE, FALSE, 0);
     }
 
     gtk_container_add (GTK_CONTAINER (row), priv->main_box);
