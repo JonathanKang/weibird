@@ -1,3 +1,14 @@
+Weibird 0.1.4
+=============
+
+* Fix broken appdata
+* Some memory leak fixes
+* Fix date showing up for posts of today
+* Add WbTweetItem and WbUser class
+* Displaying retweeted post in detail page
+* Fix some widgets aligning to bottom of detail page
+* Updated documentation comments and README
+
 Weibird 0.1.3
 =============
 
