@@ -31,3 +31,7 @@ meson ./builddir --prefix=/usr
 ninja -C ./builddir
 ninja -C ./builddir install
 ```
+
+## Installing
+
+You can also install Weibird using flatpak. Check this [page](https://flathub.org/apps/details/com.jonathankang.Weibird) for more information.
