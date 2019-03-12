@@ -1,5 +1,7 @@
 sources = files(
     'wb-application.c',
+    'wb-comment.c',
+    'wb-comment-row.c',
     'wb-headerbar.c',
     'wb-main.c',
     'wb-main-widget.c',
