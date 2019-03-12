@@ -2,6 +2,8 @@
 
 Weibird is a GTK+ client for viewing and composing weibo.
 
+It’s still heavily under development. Some features are working in progress or to be implemented.
+
 ## Notice
 
 Weibird is not published in sina app platform, which means you can’t use it directly, *yet*. You’ll need to [contact](mailto:jonathankang@gnome.org) me to get testing access of this application. Then you can login your Weibo account with Weibird.
