@@ -283,6 +283,7 @@ wb_tweet_detail_page_init (WbTweetDetailPage *self)
     priv = wb_tweet_detail_page_get_instance_private (self);
 
     priv->main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+    gtk_widget_set_valign (GTK_WIDGET (priv->main_box), GTK_ALIGN_START);
     gtk_container_add (GTK_CONTAINER (self), priv->main_box);
 
     priv->listbox = GTK_WIDGET (wb_comment_list_new ());
