@@ -29,7 +29,7 @@ G_BEGIN_DECLS
 
 #define WB_TYPE_TWEET_DETAIL_PAGE (wb_tweet_detail_page_get_type())
 
-G_DECLARE_FINAL_TYPE (WbTweetDetailPage, wb_tweet_detail_page, WB, TWEET_DETAIL_PAGE, GtkBox)
+G_DECLARE_FINAL_TYPE (WbTweetDetailPage, wb_tweet_detail_page, WB, TWEET_DETAIL_PAGE, GtkScrolledWindow)
 
 WbTweetDetailPage *wb_tweet_detail_page_new (WbTweetItem *tweet_item,
                                              WbTweetItem *retweeted_item);

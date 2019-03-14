@@ -38,16 +38,17 @@ enum
 
 struct _WbTweetDetailPage
 {
-		GtkBox parent_instance;
+		GtkScrolledWindow parent_instance;
 };
 
 typedef struct
 {
+    GtkWidget *main_box;
     WbTweetItem *tweet_item;
     WbTweetItem *retweeted_item;
 } WbTweetDetailPagePrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (WbTweetDetailPage, wb_tweet_detail_page, GTK_TYPE_BOX)
+G_DEFINE_TYPE_WITH_PRIVATE (WbTweetDetailPage, wb_tweet_detail_page, GTK_TYPE_SCROLLED_WINDOW)
 
 static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
 static const gchar ACCESS_TOKEN[] = "access-token";
@@ -63,14 +64,17 @@ parse_weibo_comments (JsonArray *array,
     WbComment *comment;
     WbCommentRow *comment_row;
     WbTweetDetailPage *self;
+    WbTweetDetailPagePrivate *priv;
 
     self = WB_TWEET_DETAIL_PAGE (user_data);
+    priv = wb_tweet_detail_page_get_instance_private (self);
 
     object = json_node_get_object (element_node);
     comment = wb_comment_new (object);
     comment_row = wb_comment_row_new (comment);
 
-    gtk_box_pack_start (GTK_BOX (self), GTK_WIDGET (comment_row), TRUE, TRUE, 6);
+    gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (comment_row),
+                        FALSE, FALSE, 0);
 
     g_object_unref (comment);
 }
@@ -161,14 +165,16 @@ wb_tweet_detail_page_constructed (GObject *object)
         retweeted_row = wb_tweet_row_new (priv->retweeted_item, NULL, TRUE);
 
         row = wb_tweet_row_new (priv->tweet_item, priv->retweeted_item, FALSE);
-        gtk_box_pack_start (GTK_BOX (self), GTK_WIDGET (row), TRUE, TRUE, 0);
+        gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row),
+                            FALSE, FALSE, 0);
 
         wb_tweet_row_insert_retweeted_item (row, GTK_WIDGET (retweeted_row));
     }
     else
     {
         row = wb_tweet_row_new (priv->tweet_item, NULL, FALSE);
-        gtk_box_pack_start (GTK_BOX (self), GTK_WIDGET (row), TRUE, TRUE, 0);
+        gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row),
+                            FALSE, FALSE, 0);
     }
 
     g_idle_add (G_SOURCE_FUNC (fetch_comments), self);
@@ -271,9 +277,12 @@ wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
 static void
 wb_tweet_detail_page_init (WbTweetDetailPage *self)
 {
-    gtk_box_set_spacing (GTK_BOX (self), 6);
-    gtk_orientable_set_orientation (GTK_ORIENTABLE (self),
-                                    GTK_ORIENTATION_VERTICAL);
+    WbTweetDetailPagePrivate *priv;
+
+    priv = wb_tweet_detail_page_get_instance_private (self);
+
+    priv->main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+    gtk_container_add (GTK_CONTAINER (self), priv->main_box);
 }
 
 WbTweetDetailPage *
