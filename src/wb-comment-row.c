@@ -166,6 +166,8 @@ wb_comment_row_init (WbCommentRow *self)
 
     gtk_widget_set_margin_start (GTK_WIDGET (self), 12);
     gtk_widget_set_margin_end (GTK_WIDGET (self), 12);
+    gtk_widget_set_margin_top (GTK_WIDGET (self), 6);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (self), 6);
 }
 
 /**

@@ -21,6 +21,7 @@
 #include <rest/oauth2-proxy.h>
 
 #include "wb-comment.h"
+#include "wb-comment-list.h"
 #include "wb-comment-row.h"
 #include "wb-image-button.h"
 #include "wb-multi-media-widget.h"
@@ -43,6 +44,7 @@ struct _WbTweetDetailPage
 
 typedef struct
 {
+    GtkWidget *listbox;
     GtkWidget *main_box;
     WbTweetItem *tweet_item;
     WbTweetItem *retweeted_item;
@@ -73,8 +75,7 @@ parse_weibo_comments (JsonArray *array,
     comment = wb_comment_new (object);
     comment_row = wb_comment_row_new (comment);
 
-    gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (comment_row),
-                        FALSE, FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (priv->listbox), GTK_WIDGET (comment_row));
 
     g_object_unref (comment);
 }
@@ -283,6 +284,10 @@ wb_tweet_detail_page_init (WbTweetDetailPage *self)
 
     priv->main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
     gtk_container_add (GTK_CONTAINER (self), priv->main_box);
+
+    priv->listbox = GTK_WIDGET (wb_comment_list_new ());
+    gtk_box_pack_end (GTK_BOX (priv->main_box), priv->listbox,
+                      FALSE, FALSE, 0);
 }
 
 WbTweetDetailPage *
