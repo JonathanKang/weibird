@@ -40,9 +40,13 @@ wb_util_format_time_string (const gchar *time)
     gchar *ret;
     gchar *year;
     gchar *day;
+    gchar * hour;
+    gchar *minute;
     gboolean same_year;
     gboolean same_month;
     gboolean same_day;
+    gboolean same_hour;
+    gboolean same_minute;
     gchar **vector;
     GDateTime *now;
 
@@ -60,12 +64,25 @@ wb_util_format_time_string (const gchar *time)
     {
         day = g_strdup_printf ("%d", g_date_time_get_day_of_month (now));
     }
+    hour = g_strdup_printf ("%d", g_date_time_get_hour (now));
+    minute = g_strdup_printf ("%d", g_date_time_get_minute (now));
 
     same_year = !g_strcmp0 (year, vector[7]);
     same_month = !g_strcmp0 (month_str[g_date_time_get_month (now) - 1], vector[1]);
     same_day = !g_strcmp0 (day, vector[2]);
+    same_hour = !g_strcmp0 (hour, vector[3]);
+    same_minute = !g_strcmp0 (minute, vector[4]);
 
-    if (same_year && same_month && same_day)
+    if (same_year && same_month && same_day && same_hour && same_minute)
+    {
+        ret = g_strdup_printf ("Just Now");
+    }
+    else if (same_year && same_month && same_day && same_hour)
+    {
+        ret = g_strdup_printf ("%d minutes ago",
+                               g_date_time_get_minute (now) - atoi (vector[4]));
+    }
+    else if (same_year && same_month && same_day)
     {
         ret = g_strdup_printf ("%s:%s", vector[3], vector[4]);
     }
@@ -84,6 +101,8 @@ wb_util_format_time_string (const gchar *time)
     g_date_time_unref (now);
     g_free (year);
     g_free (day);
+    g_free (hour);
+    g_free (minute);
     g_strfreev (vector);
 
     return ret;
