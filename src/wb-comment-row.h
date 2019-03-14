@@ -16,24 +16,18 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WB_TWEET_DETAIL_PAGE_H_
-#define WB_TWEET_DETAIL_PAGE_H_
-
 #pragma once
 
 #include <gtk/gtk.h>
 
-#include "wb-tweet-item.h"
+#include "wb-comment.h"
 
 G_BEGIN_DECLS
 
-#define WB_TYPE_TWEET_DETAIL_PAGE (wb_tweet_detail_page_get_type())
+#define WB_TYPE_COMMENT_ROW (wb_comment_row_get_type ())
 
-G_DECLARE_FINAL_TYPE (WbTweetDetailPage, wb_tweet_detail_page, WB, TWEET_DETAIL_PAGE, GtkScrolledWindow)
+G_DECLARE_FINAL_TYPE (WbCommentRow, wb_comment_row, WB, COMMENT_ROW, GtkListBoxRow)
 
-WbTweetDetailPage *wb_tweet_detail_page_new (WbTweetItem *tweet_item,
-                                             WbTweetItem *retweeted_item);
+WbCommentRow *wb_comment_row_new (WbComment *comment);
 
 G_END_DECLS
-
-#endif /* WB_TWEET_DETAIL_PAGE_H_ */

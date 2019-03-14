@@ -17,7 +17,12 @@
  */
 
 #include <gtk/gtk.h>
+#include <json-glib/json-glib.h>
+#include <rest/oauth2-proxy.h>
 
+#include "wb-comment.h"
+#include "wb-comment-list.h"
+#include "wb-comment-row.h"
 #include "wb-image-button.h"
 #include "wb-multi-media-widget.h"
 #include "wb-tweet-detail-page.h"
@@ -34,18 +39,115 @@ enum
 
 struct _WbTweetDetailPage
 {
-		GtkBox parent_instance;
+		GtkScrolledWindow parent_instance;
 };
 
 typedef struct
 {
+    GtkWidget *listbox;
+    GtkWidget *main_box;
     WbTweetItem *tweet_item;
     WbTweetItem *retweeted_item;
 } WbTweetDetailPagePrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (WbTweetDetailPage, wb_tweet_detail_page, GTK_TYPE_BOX)
+G_DEFINE_TYPE_WITH_PRIVATE (WbTweetDetailPage, wb_tweet_detail_page, GTK_TYPE_SCROLLED_WINDOW)
 
+static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
+static const gchar ACCESS_TOKEN[] = "access-token";
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
+
+static void
+parse_weibo_comments (JsonArray *array,
+                      guint index,
+                      JsonNode *element_node,
+                      gpointer user_data)
+{
+    JsonObject *object;
+    WbComment *comment;
+    WbCommentRow *comment_row;
+    WbTweetDetailPage *self;
+    WbTweetDetailPagePrivate *priv;
+
+    self = WB_TWEET_DETAIL_PAGE (user_data);
+    priv = wb_tweet_detail_page_get_instance_private (self);
+
+    object = json_node_get_object (element_node);
+    comment = wb_comment_new (object);
+    comment_row = wb_comment_row_new (comment);
+
+    gtk_container_add (GTK_CONTAINER (priv->listbox), GTK_WIDGET (comment_row));
+
+    g_object_unref (comment);
+}
+
+static void
+fetch_comments (WbTweetDetailPage *self)
+{
+    const gchar *payload;
+    gchar *access_token;
+    goffset payload_length;
+    GError *error = NULL;
+    GSettings *settings;
+    JsonNode *root_node;
+    JsonParser *parser;
+    RestProxy *proxy;
+    RestProxyCall *call;
+    WbTweetDetailPagePrivate *priv;
+
+    priv = wb_tweet_detail_page_get_instance_private (self);
+
+    settings = g_settings_new (SETTINGS_SCHEMA);
+    access_token = g_settings_get_string (settings, ACCESS_TOKEN);
+
+    proxy = oauth2_proxy_new_with_token (APP_KEY, access_token,
+                                         "https://api.weibo.com/oauth2/authorize",
+                                         "https://api.weibo.com", FALSE);
+    call = rest_proxy_new_call (proxy);
+    rest_proxy_call_set_function (call, "2/comments/show.json");
+    rest_proxy_call_set_method (call, "GET");
+    rest_proxy_call_add_param (call, "access_token", access_token);
+    rest_proxy_call_add_param (call, "id", priv->tweet_item->idstr);
+
+    rest_proxy_call_sync (call, &error);
+    if (error != NULL)
+    {
+        g_error ("Cannot make call: %s", error->message);
+        g_error_free (error);
+    }
+
+    payload = rest_proxy_call_get_payload (call);
+    payload_length = rest_proxy_call_get_payload_length (call);
+
+    parser = json_parser_new ();
+    if (!json_parser_load_from_data (parser, payload, payload_length, &error))
+    {
+        g_warning ("json_parser_load_data () failed: %s (%s, %d)",
+                   error->message,
+                   g_quark_to_string (error->domain),
+                   error->code);
+        g_error_free (error);
+    }
+
+    root_node = json_parser_get_root (parser);
+    if (JSON_NODE_HOLDS_OBJECT (root_node))
+    {
+        JsonObject *object;
+
+        object = json_node_get_object (root_node);
+
+        if (json_object_has_member (object, "comments"))
+        {
+            JsonArray *array;
+
+            array = json_object_get_array_member (object, "comments");
+            json_array_foreach_element (array, parse_weibo_comments, self);
+        }
+    }
+
+    g_free (access_token);
+    g_object_unref (parser);
+    g_object_unref (settings);
+}
 
 static void
 wb_tweet_detail_page_constructed (GObject *object)
@@ -64,15 +166,19 @@ wb_tweet_detail_page_constructed (GObject *object)
         retweeted_row = wb_tweet_row_new (priv->retweeted_item, NULL, TRUE);
 
         row = wb_tweet_row_new (priv->tweet_item, priv->retweeted_item, FALSE);
-        gtk_box_pack_start (GTK_BOX (self), GTK_WIDGET (row), TRUE, TRUE, 0);
+        gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row),
+                            FALSE, FALSE, 0);
 
         wb_tweet_row_insert_retweeted_item (row, GTK_WIDGET (retweeted_row));
     }
     else
     {
         row = wb_tweet_row_new (priv->tweet_item, NULL, FALSE);
-        gtk_box_pack_start (GTK_BOX (self), GTK_WIDGET (row), TRUE, TRUE, 0);
+        gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row),
+                            FALSE, FALSE, 0);
     }
+
+    g_idle_add (G_SOURCE_FUNC (fetch_comments), self);
 
     gtk_widget_show_all (GTK_WIDGET (self));
 
@@ -172,9 +278,16 @@ wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
 static void
 wb_tweet_detail_page_init (WbTweetDetailPage *self)
 {
-    gtk_box_set_spacing (GTK_BOX (self), 6);
-    gtk_orientable_set_orientation (GTK_ORIENTABLE (self),
-                                    GTK_ORIENTATION_VERTICAL);
+    WbTweetDetailPagePrivate *priv;
+
+    priv = wb_tweet_detail_page_get_instance_private (self);
+
+    priv->main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+    gtk_container_add (GTK_CONTAINER (self), priv->main_box);
+
+    priv->listbox = GTK_WIDGET (wb_comment_list_new ());
+    gtk_box_pack_end (GTK_BOX (priv->main_box), priv->listbox,
+                      FALSE, FALSE, 0);
 }
 
 WbTweetDetailPage *

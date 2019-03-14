@@ -16,24 +16,30 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WB_TWEET_DETAIL_PAGE_H_
-#define WB_TWEET_DETAIL_PAGE_H_
-
 #pragma once
 
-#include <gtk/gtk.h>
+#include <glib-object.h>
+#include <json-glib/json-glib.h>
 
-#include "wb-tweet-item.h"
+#include "wb-user.h"
 
 G_BEGIN_DECLS
 
-#define WB_TYPE_TWEET_DETAIL_PAGE (wb_tweet_detail_page_get_type())
+struct _WbComment
+{
+    GObject parent_instance;
 
-G_DECLARE_FINAL_TYPE (WbTweetDetailPage, wb_tweet_detail_page, WB, TWEET_DETAIL_PAGE, GtkScrolledWindow)
+    gchar *created_at;
+    gint64 id;
+    gchar *text;
+    gchar *idstr;
+    WbUser *user;
+};
 
-WbTweetDetailPage *wb_tweet_detail_page_new (WbTweetItem *tweet_item,
-                                             WbTweetItem *retweeted_item);
+#define WB_TYPE_COMMENT (wb_comment_get_type ())
+
+G_DECLARE_FINAL_TYPE (WbComment, wb_comment, WB, COMMENT, GObject)
+
+WbComment *wb_comment_new (JsonObject *jobject);
 
 G_END_DECLS
-
-#endif /* WB_TWEET_DETAIL_PAGE_H_ */
