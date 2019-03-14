@@ -170,6 +170,7 @@ wb_tweet_row_constructed (GObject *object)
     /* Post content */
     text_label = gtk_label_new (priv->tweet_item->text);
     gtk_widget_set_halign (text_label, GTK_ALIGN_START);
+    gtk_label_set_xalign (GTK_LABEL (text_label), 0);
     gtk_label_set_line_wrap (GTK_LABEL (text_label), TRUE);
     gtk_box_pack_start (GTK_BOX (priv->main_box), text_label, FALSE, FALSE, 0);
 
