@@ -170,12 +170,11 @@ wb_comment_row_init (WbCommentRow *self)
     priv->grid = gtk_grid_new ();
     gtk_grid_set_column_spacing (GTK_GRID (priv->grid), 6);
     gtk_grid_set_row_spacing (GTK_GRID (priv->grid), 6);
+    gtk_widget_set_margin_start (GTK_WIDGET (priv->grid), 12);
+    gtk_widget_set_margin_end (GTK_WIDGET (priv->grid), 12);
+    gtk_widget_set_margin_top (GTK_WIDGET (priv->grid), 6);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (priv->grid), 6);
     gtk_container_add (GTK_CONTAINER (self), priv->grid);
-
-    gtk_widget_set_margin_start (GTK_WIDGET (self), 12);
-    gtk_widget_set_margin_end (GTK_WIDGET (self), 12);
-    gtk_widget_set_margin_top (GTK_WIDGET (self), 6);
-    gtk_widget_set_margin_bottom (GTK_WIDGET (self), 6);
 }
 
 /**
