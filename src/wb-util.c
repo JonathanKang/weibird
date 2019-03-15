@@ -64,8 +64,24 @@ wb_util_format_time_string (const gchar *time)
     {
         day = g_strdup_printf ("%d", g_date_time_get_day_of_month (now));
     }
-    hour = g_strdup_printf ("%d", g_date_time_get_hour (now));
-    minute = g_strdup_printf ("%d", g_date_time_get_minute (now));
+
+    if (g_date_time_get_hour (now) < 10)
+    {
+        hour = g_strdup_printf ("0%d", g_date_time_get_hour (now));
+    }
+    else
+    {
+        hour = g_strdup_printf ("%d", g_date_time_get_hour (now));
+    }
+
+    if (g_date_time_get_minute (now) < 10)
+    {
+        minute = g_strdup_printf ("0%d", g_date_time_get_minute (now));
+    }
+    else
+    {
+        minute = g_strdup_printf ("%d", g_date_time_get_minute (now));
+    }
 
     same_year = !g_strcmp0 (year, vector[7]);
     same_month = !g_strcmp0 (month_str[g_date_time_get_month (now) - 1], vector[1]);
