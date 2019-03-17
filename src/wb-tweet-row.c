@@ -106,9 +106,6 @@ wb_tweet_row_constructed (GObject *object)
     GtkWidget *source_label;
     GtkWidget *text_label;
     GtkWidget *time_label;
-    GtkWidget *likes_label;
-    GtkWidget *comments_label;
-    GtkWidget *reposts_label;
     WbImageButton *button;
     WbTweetRow *row = WB_TWEET_ROW (object);
     WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (row);
@@ -192,25 +189,48 @@ wb_tweet_row_constructed (GObject *object)
     /* Likes, comments and reposts count */
     if (!priv->retweet)
     {
+        GtkStyleContext *context;
+        GtkWidget *likes_button;
+        GtkWidget *likes_label;
+        GtkWidget *comments_button;
+        GtkWidget *comments_label;
+        GtkWidget *reposts_button;
+        GtkWidget *reposts_label;
+
+        likes_button = gtk_button_new ();
+        context = gtk_widget_get_style_context (likes_button);
+        gtk_style_context_add_class (context, "attitude-buttons");
+
         likes_label = gtk_label_new (NULL);
         markup = g_markup_printf_escaped ("<b>%d</b> Likes",
                                           priv->tweet_item->attitudes_count);
         gtk_label_set_markup (GTK_LABEL (likes_label), markup);
-        gtk_box_pack_start (GTK_BOX (hbox2), likes_label, FALSE, FALSE, 0);
+        gtk_container_add (GTK_CONTAINER (likes_button), likes_label);
+        gtk_box_pack_start (GTK_BOX (hbox2), likes_button, TRUE, TRUE, 0);
         g_free (markup);
+
+        comments_button = gtk_button_new ();
+        context = gtk_widget_get_style_context (comments_button);
+        gtk_style_context_add_class (context, "attitude-buttons");
 
         comments_label = gtk_label_new (NULL);
         markup = g_markup_printf_escaped ("<b>%d</b> Comments",
                                           priv->tweet_item->comments_count);
         gtk_label_set_markup (GTK_LABEL (comments_label), markup);
-        gtk_box_pack_start (GTK_BOX (hbox2), comments_label, FALSE, FALSE, 0);
+        gtk_container_add (GTK_CONTAINER (comments_button), comments_label);
+        gtk_box_pack_start (GTK_BOX (hbox2), comments_button, TRUE, TRUE, 0);
         g_free (markup);
+
+        reposts_button = gtk_button_new ();
+        context = gtk_widget_get_style_context (reposts_button);
+        gtk_style_context_add_class (context, "attitude-buttons");
 
         reposts_label = gtk_label_new (NULL);
         markup = g_markup_printf_escaped ("<b>%d</b> Reposts",
                                           priv->tweet_item->reposts_count);
         gtk_label_set_markup (GTK_LABEL (reposts_label), markup);
-        gtk_box_pack_start (GTK_BOX (hbox2), reposts_label, FALSE, FALSE, 0);
+        gtk_container_add (GTK_CONTAINER (reposts_button), reposts_label);
+        gtk_box_pack_start (GTK_BOX (hbox2), reposts_button, TRUE, TRUE, 0);
         g_free (markup);
 
         gtk_box_pack_start (GTK_BOX (priv->main_box), hbox2, FALSE, FALSE, 0);

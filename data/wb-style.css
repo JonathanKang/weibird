@@ -11,3 +11,12 @@
     outline-width: 0px;
     padding: 0px;
 }
+
+.attitude-buttons {
+    background-image: image(shade(@theme_base_color, 1));
+    border-top-color: rgba(255,255,255,0);
+    border-bottom-color: rgba(255,255,255,0);
+    border-left-color: rgba(255,255,255,0);
+    border-right-color: rgba(255,255,255,0);
+    box-shadow: 0 0px rgba(255,255,255,0);
+}
