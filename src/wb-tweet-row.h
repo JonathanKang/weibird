@@ -28,6 +28,7 @@ G_BEGIN_DECLS
 #define WB_TYPE_TWEET_ROW (wb_tweet_row_get_type ())
 G_DECLARE_FINAL_TYPE (WbTweetRow, wb_tweet_row, WB, TWEET_ROW, GtkListBoxRow)
 
+GtkWidget *wb_tweet_row_get_comment_button (WbTweetRow *row);
 WbTweetItem *wb_tweet_row_get_tweet_item (WbTweetRow *row);
 WbTweetItem *wb_tweet_row_get_retweeted_item (WbTweetRow *row);
 void wb_tweet_row_insert_retweeted_item (WbTweetRow *row,

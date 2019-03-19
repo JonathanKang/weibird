@@ -150,8 +150,126 @@ fetch_comments (WbTweetDetailPage *self)
 }
 
 static void
+wb_tweet_detail_page_add_comment (WbTweetDetailPage *self,
+                                  const gchar *comment)
+{
+    gchar *access_token;
+    GError *error = NULL;
+    GSettings *settings;
+    RestProxy *proxy;
+    RestProxyCall *call;
+    WbTweetDetailPagePrivate *priv;
+
+    priv = wb_tweet_detail_page_get_instance_private (self);
+
+    settings = g_settings_new (SETTINGS_SCHEMA);
+    access_token = g_settings_get_string (settings, ACCESS_TOKEN);
+
+    proxy = oauth2_proxy_new_with_token (APP_KEY, access_token,
+                                         "https://api.weibo.com/oauth2/authorize",
+                                         "https://api.weibo.com", FALSE);
+    call = rest_proxy_new_call (proxy);
+    rest_proxy_call_set_function (call, "2/comments/create.json");
+    rest_proxy_call_set_method (call, "POST");
+    rest_proxy_call_add_param (call, "access_token", access_token);
+    rest_proxy_call_add_param (call, "id", priv->tweet_item->idstr);
+    rest_proxy_call_add_param (call, "comment", comment);
+
+    rest_proxy_call_sync (call, &error);
+    if (error != NULL)
+    {
+        const gchar *payload;
+        gssize payload_length;
+        GError *parser_error = NULL;
+        JsonNode *root_node;
+        JsonParser *parser;
+
+        payload = rest_proxy_call_get_payload (call);
+        payload_length = rest_proxy_call_get_payload_length (call);
+
+        parser = json_parser_new ();
+        if (!json_parser_load_from_data (parser, payload,
+                                         payload_length, &parser_error))
+        {
+            g_warning ("Failed to parse comment data: %s (%s, %d)",
+                       parser_error->message,
+                       g_quark_to_string (parser_error->domain),
+                       parser_error->code);
+            g_error_free (parser_error);
+        }
+
+        root_node = json_parser_get_root (parser);
+        if (JSON_NODE_HOLDS_OBJECT (root_node))
+        {
+            JsonObject *object;
+
+            object = json_node_get_object (root_node);
+
+            g_warning ("Failed to send request: %s (%s, %s)",
+                       json_object_get_string_member (object, "request"),
+                       json_object_get_string_member (object, "error_code"),
+                       json_object_get_string_member (object, "error"));
+        }
+        else
+        {
+            g_warning ("Cannot make call (comments/create): %s", error->message);
+            g_error_free (error);
+        }
+
+        g_object_unref (parser);
+    }
+
+    g_free (access_token);
+    g_object_unref (settings);
+}
+
+static void
+comment_button_clicked_cb (GtkButton *button,
+                           gpointer user_data)
+{
+    const gchar *comment;
+    gint result;
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *comment_entry;
+    GtkWidget *toplevel;
+    WbTweetDetailPage *self;
+
+    self = WB_TWEET_DETAIL_PAGE (user_data);
+
+    toplevel = gtk_widget_get_toplevel (GTK_WIDGET (button));
+
+    dialog = gtk_dialog_new_with_buttons ("Compose Comment",
+                                          GTK_WINDOW (toplevel),
+                                          GTK_DIALOG_MODAL |
+                                          GTK_DIALOG_DESTROY_WITH_PARENT |
+                                          GTK_DIALOG_USE_HEADER_BAR,
+                                          "Send",
+                                          GTK_RESPONSE_OK,
+                                          "Cancel",
+                                          GTK_RESPONSE_CANCEL,
+                                          NULL);
+
+    comment_entry = gtk_entry_new ();
+    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+    gtk_container_add (GTK_CONTAINER (content_area), comment_entry);
+    gtk_widget_show (comment_entry);
+
+    result = gtk_dialog_run (GTK_DIALOG (dialog));
+
+    if (result == GTK_RESPONSE_OK)
+    {
+        comment = gtk_entry_get_text (GTK_ENTRY (comment_entry));
+        wb_tweet_detail_page_add_comment (self, comment);
+    }
+
+    gtk_widget_destroy (dialog);
+}
+
+static void
 wb_tweet_detail_page_constructed (GObject *object)
 {
+    GtkWidget *comment_button;
     WbTweetRow *row;
     WbTweetDetailPage *self;
     WbTweetDetailPagePrivate *priv;
@@ -180,7 +298,15 @@ wb_tweet_detail_page_constructed (GObject *object)
 
     g_idle_add (G_SOURCE_FUNC (fetch_comments), self);
 
+    /* Pass tweet id down to WbCommentList */
+    wb_comment_list_set_tweet_id (WB_COMMENT_LIST (priv->listbox),
+                                  priv->tweet_item->idstr);
+
     gtk_widget_show_all (GTK_WIDGET (self));
+
+    comment_button = wb_tweet_row_get_comment_button (row);
+    g_signal_connect (comment_button, "clicked",
+                      G_CALLBACK (comment_button_clicked_cb), self);
 
     G_OBJECT_CLASS (wb_tweet_detail_page_parent_class)->constructed (object);
 }

@@ -44,6 +44,7 @@ struct _WbTweetRow
 typedef struct
 {
     gboolean retweet;
+    GtkWidget *comment_button;
     GtkWidget *main_box;
     GtkWidget *retweet_box;
     GtkWidget *profile_image;
@@ -55,6 +56,18 @@ typedef struct
 G_DEFINE_TYPE_WITH_PRIVATE (WbTweetRow, wb_tweet_row, GTK_TYPE_LIST_BOX_ROW)
 
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
+
+GtkWidget *
+wb_tweet_row_get_comment_button (WbTweetRow *self)
+{
+    WbTweetRowPrivate *priv;
+
+    g_return_val_if_fail (WB_TWEET_ROW (self), NULL);
+
+    priv = wb_tweet_row_get_instance_private (self);
+
+    return priv->comment_button;
+}
 
 WbTweetItem *
 wb_tweet_row_get_tweet_item (WbTweetRow *self)
@@ -192,7 +205,6 @@ wb_tweet_row_constructed (GObject *object)
         GtkStyleContext *context;
         GtkWidget *likes_button;
         GtkWidget *likes_label;
-        GtkWidget *comments_button;
         GtkWidget *comments_label;
         GtkWidget *reposts_button;
         GtkWidget *reposts_label;
@@ -209,16 +221,17 @@ wb_tweet_row_constructed (GObject *object)
         gtk_box_pack_start (GTK_BOX (hbox2), likes_button, TRUE, TRUE, 0);
         g_free (markup);
 
-        comments_button = gtk_button_new ();
-        context = gtk_widget_get_style_context (comments_button);
+        priv->comment_button = gtk_button_new ();
+        context = gtk_widget_get_style_context (priv->comment_button);
         gtk_style_context_add_class (context, "attitude-buttons");
 
         comments_label = gtk_label_new (NULL);
         markup = g_markup_printf_escaped ("<b>%d</b> Comments",
                                           priv->tweet_item->comments_count);
         gtk_label_set_markup (GTK_LABEL (comments_label), markup);
-        gtk_container_add (GTK_CONTAINER (comments_button), comments_label);
-        gtk_box_pack_start (GTK_BOX (hbox2), comments_button, TRUE, TRUE, 0);
+        gtk_container_add (GTK_CONTAINER (priv->comment_button), comments_label);
+        gtk_box_pack_start (GTK_BOX (hbox2), priv->comment_button,
+                            TRUE, TRUE, 0);
         g_free (markup);
 
         reposts_button = gtk_button_new ();

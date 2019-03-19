@@ -44,6 +44,16 @@ G_DEFINE_TYPE_WITH_PRIVATE (WbCommentRow, wb_comment_row, GTK_TYPE_LIST_BOX_ROW)
 
 static GParamSpec *obj_properties [N_PROPS];
 
+WbComment *
+wb_comment_row_get_comment (WbCommentRow *self)
+{
+    WbCommentRowPrivate *priv;
+
+    priv = wb_comment_row_get_instance_private (self);
+
+    return priv->comment;
+}
+
 static void
 wb_comment_row_constructed (GObject *object)
 {

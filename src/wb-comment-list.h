@@ -20,12 +20,15 @@
 
 #include <gtk/gtk.h>
 
+#include "wb-tweet-item.h"
+
 G_BEGIN_DECLS
 
 #define WB_TYPE_COMMENT_LIST (wb_comment_list_get_type ())
 
 G_DECLARE_FINAL_TYPE (WbCommentList, wb_comment_list, WB, COMMENT_LIST, GtkListBox)
 
+void wb_comment_list_set_tweet_id (WbCommentList *list, const gchar *tweet_id);
 WbCommentList *wb_comment_list_new (void);
 
 G_END_DECLS
