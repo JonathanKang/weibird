@@ -153,9 +153,13 @@ static void
 wb_tweet_detail_page_add_comment (WbTweetDetailPage *self,
                                   const gchar *comment)
 {
+    const gchar *payload;
     gchar *access_token;
+    gssize payload_length;
     GError *error = NULL;
     GSettings *settings;
+    JsonNode *root_node;
+    JsonParser *parser;
     RestProxy *proxy;
     RestProxyCall *call;
     WbTweetDetailPagePrivate *priv;
@@ -178,11 +182,7 @@ wb_tweet_detail_page_add_comment (WbTweetDetailPage *self,
     rest_proxy_call_sync (call, &error);
     if (error != NULL)
     {
-        const gchar *payload;
-        gssize payload_length;
         GError *parser_error = NULL;
-        JsonNode *root_node;
-        JsonParser *parser;
 
         payload = rest_proxy_call_get_payload (call);
         payload_length = rest_proxy_call_get_payload_length (call);
@@ -215,11 +215,42 @@ wb_tweet_detail_page_add_comment (WbTweetDetailPage *self,
             g_warning ("Cannot make call (comments/create): %s", error->message);
             g_error_free (error);
         }
+    }
+    else
+    {
+        payload = rest_proxy_call_get_payload (call);
+        payload_length = rest_proxy_call_get_payload_length (call);
 
-        g_object_unref (parser);
+        parser = json_parser_new ();
+        if (!json_parser_load_from_data (parser, payload,
+                                         payload_length, &error))
+        {
+            g_warning ("Failed to parse comment data: %s (%s, %d)",
+                       error->message,
+                       g_quark_to_string (error->domain),
+                       error->code);
+            g_error_free (error);
+        }
+
+        root_node = json_parser_get_root (parser);
+        if (JSON_NODE_HOLDS_OBJECT (root_node))
+        {
+            JsonObject *object;
+            WbComment *comment;
+            WbCommentRow *comment_row;
+
+            object = json_node_get_object (root_node);
+
+            /* Parse the data and insert a comment row */
+            comment = wb_comment_new (object);
+            comment_row = wb_comment_row_new (comment);
+            gtk_list_box_prepend (GTK_LIST_BOX (priv->listbox),
+                                  GTK_WIDGET (comment_row));
+        }
     }
 
     g_free (access_token);
+    g_object_unref (parser);
     g_object_unref (settings);
 }
 
