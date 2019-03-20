@@ -28,10 +28,17 @@ wb_comment_parse_json_object (WbComment *self,
 {
     JsonObject *user_object;
 
-    self->created_at = g_strdup (json_object_get_string_member (jobject, "created_at"));
-    self->id = json_object_get_int_member (jobject, "id");
-    self->text = g_strdup (json_object_get_string_member (jobject, "text"));
+    self->reply_comment = json_object_has_member (jobject, "reply_comment");
+    self->created_at = g_strdup (json_object_get_string_member (jobject,
+                                                                "created_at"));
     self->idstr = g_strdup (json_object_get_string_member (jobject, "idstr"));
+    self->text = g_strdup (json_object_get_string_member (jobject, "text"));
+
+    self->id = json_object_get_int_member (jobject, "id");
+    if (json_object_has_member (jobject, "rootid"))
+    {
+        self->rootid = json_object_get_int_member (jobject, "rootid");
+    }
 
     if (json_object_has_member (jobject, "user"))
     {
@@ -46,8 +53,8 @@ wb_comment_finalize (GObject *object)
     WbComment *self = WB_COMMENT (object);
 
     g_free (self->created_at);
-    g_free (self->text);
     g_free (self->idstr);
+    g_free (self->text);
     g_object_unref (self->user);
 
     G_OBJECT_CLASS (wb_comment_parent_class)->finalize (object);

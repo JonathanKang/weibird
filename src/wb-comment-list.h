@@ -20,6 +20,7 @@
 
 #include <gtk/gtk.h>
 
+#include "wb-comment-row.h"
 #include "wb-tweet-item.h"
 
 G_BEGIN_DECLS
@@ -29,6 +30,8 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (WbCommentList, wb_comment_list, WB, COMMENT_LIST, GtkListBox)
 
 void wb_comment_list_set_tweet_id (WbCommentList *list, const gchar *tweet_id);
+void wb_comment_list_insert_comment_widget (WbCommentList *list,
+                                            WbCommentRow *comment_widget);
 WbCommentList *wb_comment_list_new (void);
 
 G_END_DECLS

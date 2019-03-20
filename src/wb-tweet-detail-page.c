@@ -57,9 +57,7 @@ static const gchar ACCESS_TOKEN[] = "access-token";
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
 static void
-parse_weibo_comments (JsonArray *array,
-                      guint index,
-                      JsonNode *element_node,
+parse_weibo_comments (gpointer data,
                       gpointer user_data)
 {
     JsonObject *object;
@@ -71,11 +69,12 @@ parse_weibo_comments (JsonArray *array,
     self = WB_TWEET_DETAIL_PAGE (user_data);
     priv = wb_tweet_detail_page_get_instance_private (self);
 
-    object = json_node_get_object (element_node);
+    object = json_node_get_object (data);
     comment = wb_comment_new (object);
     comment_row = wb_comment_row_new (comment);
 
-    gtk_container_add (GTK_CONTAINER (priv->listbox), GTK_WIDGET (comment_row));
+    wb_comment_list_insert_comment_widget (WB_COMMENT_LIST (priv->listbox),
+                                           comment_row);
 
     g_object_unref (comment);
 }
@@ -137,10 +136,23 @@ fetch_comments (WbTweetDetailPage *self)
 
         if (json_object_has_member (object, "comments"))
         {
+            GList *elements;
             JsonArray *array;
 
             array = json_object_get_array_member (object, "comments");
-            json_array_foreach_element (array, parse_weibo_comments, self);
+            elements = json_array_get_elements (array);
+
+            /* All the comments fetched using Weibo API are sorted by descending
+             * time (new to old). While we need to insert older comments first,
+             * so that when we insert newer comments, we can find which comment
+             * it replies to, if it replies to one.
+             * The foreach function of JsonArray doesn't iterate from the last
+             * to the first element. So we need get a list of elements in the array
+             * and reverse it. */
+            elements = g_list_reverse (elements);
+            g_list_foreach (elements, parse_weibo_comments, self);
+
+            g_list_free (elements);
         }
     }
 
@@ -244,8 +256,11 @@ wb_tweet_detail_page_add_comment (WbTweetDetailPage *self,
             /* Parse the data and insert a comment row */
             comment = wb_comment_new (object);
             comment_row = wb_comment_row_new (comment);
-            gtk_list_box_prepend (GTK_LIST_BOX (priv->listbox),
-                                  GTK_WIDGET (comment_row));
+
+            wb_comment_list_insert_comment_widget (WB_COMMENT_LIST (priv->listbox),
+                                                   comment_row);
+
+            g_object_unref (comment);
         }
     }
 

@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gmodule.h>
 #include <gtk/gtk.h>
 #include <json-glib/json-glib.h>
 #include <rest/oauth2-proxy.h>
@@ -33,6 +34,7 @@ struct _WbCommentList
 typedef struct
 {
     const gchar *tweet_id;
+    GHashTable *comments;
 } WbCommentListPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbCommentList, wb_comment_list, GTK_TYPE_LIST_BOX)
@@ -49,6 +51,35 @@ wb_comment_list_set_tweet_id (WbCommentList *self,
     priv = wb_comment_list_get_instance_private (self);
 
     priv->tweet_id = tweet_id;
+}
+
+void
+wb_comment_list_insert_comment_widget (WbCommentList *self,
+                                       WbCommentRow *comment_widget)
+{
+    WbComment *comment;
+    WbCommentListPrivate *priv;
+
+    priv = wb_comment_list_get_instance_private (self);
+
+    comment = wb_comment_row_get_comment (comment_widget);
+    g_hash_table_insert (priv->comments, &comment->id, comment_widget);
+
+    if (comment->reply_comment)
+    {
+        /* This is a comment which replies to another one. */
+        WbCommentRow *root_comment;
+
+        root_comment = g_hash_table_lookup (priv->comments, &comment->rootid);
+
+        wb_comment_row_insert_reply (WB_COMMENT_ROW (root_comment), comment);
+    }
+    else
+    {
+        /* This is not a comment which replies to any other ones,
+         * insert it to the list box directly. */
+        gtk_list_box_prepend (GTK_LIST_BOX (self), GTK_WIDGET (comment_widget));
+    }
 }
 
 static void
@@ -148,7 +179,11 @@ wb_comment_list_add_comment (WbCommentList *self,
             /* Parse the data and insert a comment row */
             comment = wb_comment_new (object);
             comment_row = wb_comment_row_new (comment);
-            gtk_list_box_prepend (GTK_LIST_BOX (self), GTK_WIDGET (comment_row));
+
+            wb_comment_list_insert_comment_widget (WB_COMMENT_LIST (self),
+                                                   comment_row);
+
+            g_object_unref (comment);
         }
     }
 
@@ -227,8 +262,25 @@ listbox_update_header_func (GtkListBoxRow *row,
 }
 
 static void
+wb_comment_list_finalize (GObject *object)
+{
+    WbCommentList *self;
+    WbCommentListPrivate *priv;
+
+    self = WB_COMMENT_LIST (object);
+    priv = wb_comment_list_get_instance_private (self);
+
+    g_hash_table_destroy (priv->comments);
+
+    G_OBJECT_CLASS (wb_comment_list_parent_class)->finalize (object);
+}
+
+static void
 wb_comment_list_class_init (WbCommentListClass *klass)
 {
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+    object_class->finalize = wb_comment_list_finalize;
 }
 
 static void
@@ -238,6 +290,7 @@ wb_comment_list_init (WbCommentList *self)
 
     priv = wb_comment_list_get_instance_private (self);
 
+    priv->comments = g_hash_table_new (g_int64_hash, g_int64_equal);
     priv->tweet_id = NULL;
 
     gtk_list_box_set_header_func (GTK_LIST_BOX (self),

@@ -29,10 +29,12 @@ struct _WbComment
 {
     GObject parent_instance;
 
+    gboolean reply_comment;
     gchar *created_at;
-    gint64 id;
-    gchar *text;
     gchar *idstr;
+    gchar *text;
+    gint64 id;
+    gint64 rootid;
     WbUser *user;
 };
 

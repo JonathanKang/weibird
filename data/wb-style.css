@@ -20,3 +20,8 @@
     border-right-color: rgba(192, 192, 189, 0.5);
     box-shadow: 0 0px rgba(255, 255, 255, 0);
 }
+
+.reply-comments {
+    background-color: alpha(grey, 0.1);
+    border-left: 3px solid alpha(currentColor, 0.4);
+}

@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (WbCommentRow, wb_comment_row, WB, COMMENT_ROW, GtkListBoxRow)
 
 WbComment *wb_comment_row_get_comment (WbCommentRow *row);
+void wb_comment_row_insert_reply (WbCommentRow *row, WbComment *comment);
 WbCommentRow *wb_comment_row_new (WbComment *comment);
 
 G_END_DECLS
