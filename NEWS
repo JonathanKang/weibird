@@ -1,3 +1,15 @@
+Weibird 0.1.5
+=============
+
+* Add flatpak mainfest file
+* Add support for displaying comments in detail page
+* Fix tweet text not aligning to the left sometimes
+* Fix comments aligning to the bottom of detail page
+* Show serveral minutes/hours ago for time label
+* Use buttons for attitude labels
+* Add support for commenting on a status or replying to a comment
+* Various other fixes and improvements
+
 Weibird 0.1.4
 =============
 
