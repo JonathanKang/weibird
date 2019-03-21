@@ -122,14 +122,15 @@ on_message_complete (SoupSession *session,
 
         width = gdk_pixbuf_get_width (priv->pixbuf);
         height = gdk_pixbuf_get_height (priv->pixbuf);
-        scaled_pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
-                                        gdk_pixbuf_get_has_alpha (priv->pixbuf),
-                                        8, priv->width, priv->height);
 
         /* If the image is large enough, cropped the central square part
          * of the image and scale it down to 150px by 150px */
         if (width > priv->width && height > priv->height)
         {
+            scaled_pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
+                                            gdk_pixbuf_get_has_alpha (priv->pixbuf),
+                                            8, priv->width, priv->height);
+
             if (width <= height)
             {
                 scale = (gdouble) priv->width / width;
