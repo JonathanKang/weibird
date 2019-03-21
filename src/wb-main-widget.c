@@ -181,7 +181,10 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         if (error != NULL)
         {
             g_error ("Cannot make call: %s", error->message);
+
             g_error_free (error);
+            g_object_unref (token_call);
+            g_object_unref (token_proxy);
 
             goto ignore_request;
         }
@@ -192,7 +195,10 @@ on_web_view_decide_policy (WebKitWebView *web_view,
             g_error ("Expected status 200 when requesting access token, instead got status %d (%s)",
                      status_code,
                      rest_proxy_call_get_status_message (token_call));
+
             g_error_free (error);
+            g_object_unref (token_call);
+            g_object_unref (token_proxy);
 
             goto ignore_request;
         }
@@ -210,8 +216,11 @@ on_web_view_decide_policy (WebKitWebView *web_view,
                        tokens_error->message,
                        g_quark_to_string (tokens_error->domain),
                        tokens_error->code);
+
             g_error_free (tokens_error);
             g_object_unref (parser);
+            g_object_unref (token_call);
+            g_object_unref (token_proxy);
 
             goto ignore_request;
         }
@@ -220,6 +229,10 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         if (!json_object_has_member (object, "access_token"))
         {
             g_warning ("Did not find access_token in JSON data");
+
+            g_object_unref (parser);
+            g_object_unref (token_call);
+            g_object_unref (token_proxy);
 
             goto ignore_request;
         }
@@ -237,6 +250,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         g_free (uid);
         g_object_unref (parser);
         g_object_unref (settings);
+        g_object_unref (token_call);
+        g_object_unref (token_proxy);
 
         goto default_behaviour;
     }

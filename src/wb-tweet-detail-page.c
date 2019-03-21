@@ -155,7 +155,9 @@ fetch_comments (WbTweetDetailPage *self)
         }
     }
 
+    g_object_unref (call);
     g_object_unref (parser);
+    g_object_unref (proxy);
 }
 
 static void

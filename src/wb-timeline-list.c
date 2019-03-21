@@ -213,7 +213,9 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
         }
     }
 
+    g_object_unref (call);
     g_object_unref (parser);
+    g_object_unref (proxy);
 }
 
 static void

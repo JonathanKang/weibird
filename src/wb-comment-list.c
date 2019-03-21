@@ -185,7 +185,9 @@ wb_comment_list_add_comment (WbCommentList *self,
         }
     }
 
+    g_object_unref (call);
     g_object_unref (parser);
+    g_object_unref (proxy);
 }
 
 static void
