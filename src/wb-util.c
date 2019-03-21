@@ -22,6 +22,11 @@
 #include "wb-timeline-list.h"
 #include "wb-util.h"
 
+static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
+static const gchar ACCESS_TOKEN[] = "access-token";
+static const gchar APP_KEY[] = "app-key";
+static const gchar APP_SECRET[] = "app-secret";
+
 /**
  * wb_util_format_time_string:
  * @time: the time string fetched from Weibo API
@@ -215,4 +220,49 @@ wb_util_scale_image (GdkPixbuf *pixbuf,
     }
 
     return image;
+}
+
+gchar *
+wb_util_get_access_token (void)
+{
+    gchar *access_token;
+    GSettings *settings;
+
+    settings = g_settings_new (SETTINGS_SCHEMA);
+
+    access_token = g_settings_get_string (settings, ACCESS_TOKEN);
+
+    g_object_unref (settings);
+
+    return access_token;
+}
+
+gchar *
+wb_util_get_app_key (void)
+{
+    gchar *app_key;
+    GSettings *settings;
+
+    settings = g_settings_new (SETTINGS_SCHEMA);
+
+    app_key = g_settings_get_string (settings, APP_KEY);
+
+    g_object_unref (settings);
+
+    return app_key;
+}
+
+gchar *
+wb_util_get_app_secret (void)
+{
+    gchar *app_secret;
+    GSettings *settings;
+
+    settings = g_settings_new (SETTINGS_SCHEMA);
+
+    app_secret = g_settings_get_string (settings, APP_SECRET);
+
+    g_object_unref (settings);
+
+    return app_secret;
 }

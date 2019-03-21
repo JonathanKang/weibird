@@ -4,7 +4,17 @@
     <key name="access-token" type="s">
       <summary>Access Token</summary>
       <description>Access Token used to access your Weibo account.</description>
-      <default>''</default>
+      <default>""</default>
+    </key>
+    <key name="app-key" type="s">
+        <summary>App Key</summary>
+        <description>The application's app key.</description>
+        <default>"1450991920"</default>
+    </key>
+    <key name="app-secret" type="s">
+        <summary>App Secret</summary>
+        <description>The application's app secret.</description>
+        <default>"24afe70740825258ca104ee54acf9712"</default>
     </key>
     <key name="expires-in" type="x">
         <summary>Expires in</summary>
@@ -14,7 +24,7 @@
     <key name="uid" type="s">
         <summary>UID</summary>
         <description>User ID.</description>
-        <default>''</default>
+        <default>""</default>
     </key>
   </schema>
 </schemalist>

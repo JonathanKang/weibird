@@ -16,6 +16,7 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <glib.h>
 #include <gtk/gtk.h>
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
@@ -96,8 +97,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
     const gchar *requested_uri;
     const gchar *fragment;
     const gchar *query;
-    gchar *access_token = NULL;
-    gchar *code = NULL;
+    g_autofree gchar *access_token = NULL;
+    g_autofree gchar *code = NULL;
     GHashTable *key_value_pairs;
     SoupURI *uri;
     WebKitNavigationAction *action;
@@ -145,6 +146,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
     if (code != NULL)
     {
         const gchar *payload;
+        g_autofree gchar *app_key = NULL;
+        g_autofree gchar *app_secret = NULL;
         gchar *uid = NULL;
         gint64 expires_in;
         GError *error = NULL;
@@ -157,6 +160,9 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         RestProxy *token_proxy;
         RestProxyCall *token_call;
 
+        app_key = wb_util_get_app_key ();
+        app_secret = wb_util_get_app_secret ();
+
         token_proxy = rest_proxy_new ("https://api.weibo.com/oauth2/access_token",
                                       FALSE);
         token_call = rest_proxy_new_call (token_proxy);
@@ -164,8 +170,8 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         rest_proxy_call_set_method (token_call, "POST");
         rest_proxy_call_add_header (token_call, "Content-Type",
                                     "application/x-www-form-urlencoded");
-        rest_proxy_call_add_param (token_call, "client_id", APP_KEY);
-        rest_proxy_call_add_param (token_call, "client_secret", APP_SECRECT);
+        rest_proxy_call_add_param (token_call, "client_id", app_key);
+        rest_proxy_call_add_param (token_call, "client_secret", app_secret);
         rest_proxy_call_add_param (token_call, "grant_type", "authorization_code");
         rest_proxy_call_add_param (token_call, "redirect_uri",
                                    "https://api.weibo.com/oauth2/default.html");
@@ -238,15 +244,9 @@ on_web_view_decide_policy (WebKitWebView *web_view,
 ignore_request:
     webkit_policy_decision_ignore (decision);
 
-    g_free (access_token);
-    g_free (code);
-
     return TRUE;
 
 default_behaviour:
-    g_free (access_token);
-    g_free (code);
-
     return FALSE;
 }
 
@@ -254,6 +254,7 @@ static void
 on_login_button_clicked (GtkWidget *button,
                          gpointer user_data)
 {
+    g_autofree gchar *app_key = NULL;
     gchar *uri;
     GtkWidget *content_area;
     GtkWidget *dialog;
@@ -283,7 +284,8 @@ on_login_button_clicked (GtkWidget *button,
     content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
     gtk_container_add (GTK_CONTAINER (content_area), web_view);
 
-    proxy = oauth2_proxy_new (APP_KEY,
+    app_key = wb_util_get_app_key ();
+    proxy = oauth2_proxy_new (app_key,
                               "https://api.weibo.com/oauth2/authorize",
                               "https://api.weibo.com", FALSE);
 

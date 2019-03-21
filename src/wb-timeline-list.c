@@ -16,6 +16,7 @@
  *  along with this program.  if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <glib.h>
 #include <gtk/gtk.h>
 #include <json-glib/json-glib.h>
 #include <rest/oauth2-proxy.h>
@@ -44,9 +45,6 @@ typedef struct
 } WbTimelineListPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
-
-static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
-static const gchar ACCESS_TOKEN[] = "access-token";
 
 WbTweetItem *
 wb_timeline_list_get_tweet_item (WbTimelineList *self)
@@ -150,10 +148,10 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
                                     gboolean loading_more)
 {
     const gchar *payload;
-    gchar *access_token;
+    g_autofree gchar *access_token = NULL;
+    g_autofree gchar *app_key = NULL;
     GError *error = NULL;
     goffset payload_length;
-    GSettings *settings;
     JsonNode *root_node;
     JsonParser *parser;
     RestProxy *proxy;
@@ -162,10 +160,10 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
 
     priv = wb_timeline_list_get_instance_private (self);
 
-    settings = g_settings_new (SETTINGS_SCHEMA);
-    access_token = g_settings_get_string (settings, ACCESS_TOKEN);
+    access_token = wb_util_get_access_token ();
+    app_key = wb_util_get_app_key ();
 
-    proxy = oauth2_proxy_new_with_token (APP_KEY, access_token,
+    proxy = oauth2_proxy_new_with_token (app_key, access_token,
                                          "https://api.weibo.com/oauth2/authorize",
                                          "https://api.weibo.com", FALSE);
     call = rest_proxy_new_call (proxy);
@@ -215,9 +213,7 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
         }
     }
 
-    g_free (access_token);
     g_object_unref (parser);
-    g_object_unref (settings);
 }
 
 static void

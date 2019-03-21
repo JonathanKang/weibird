@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <glib.h>
 #include <gmodule.h>
 #include <gtk/gtk.h>
 #include <json-glib/json-glib.h>
@@ -38,9 +39,6 @@ typedef struct
 } WbCommentListPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbCommentList, wb_comment_list, GTK_TYPE_LIST_BOX)
-
-static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
-static const gchar ACCESS_TOKEN[] = "access-token";
 
 void
 wb_comment_list_set_tweet_id (WbCommentList *self,
@@ -88,10 +86,10 @@ wb_comment_list_add_comment (WbCommentList *self,
                              const gchar *comment)
 {
     const gchar *payload;
-    gchar *access_token;
+    g_autofree gchar *access_token = NULL;
+    g_autofree gchar *app_key = NULL;
     gssize payload_length;
     GError *error = NULL;
-    GSettings *settings;
     JsonNode *root_node;
     JsonParser *parser;
     RestProxy *proxy;
@@ -100,10 +98,10 @@ wb_comment_list_add_comment (WbCommentList *self,
 
     priv = wb_comment_list_get_instance_private (self);
 
-    settings = g_settings_new (SETTINGS_SCHEMA);
-    access_token = g_settings_get_string (settings, ACCESS_TOKEN);
+    access_token = wb_util_get_access_token ();
+    app_key = wb_util_get_app_key ();
 
-    proxy = oauth2_proxy_new_with_token (APP_KEY, access_token,
+    proxy = oauth2_proxy_new_with_token (app_key, access_token,
                                          "https://api.weibo.com/oauth2/authorize",
                                          "https://api.weibo.com", FALSE);
     call = rest_proxy_new_call (proxy);
@@ -187,9 +185,7 @@ wb_comment_list_add_comment (WbCommentList *self,
         }
     }
 
-    g_free (access_token);
     g_object_unref (parser);
-    g_object_unref (settings);
 }
 
 static void
