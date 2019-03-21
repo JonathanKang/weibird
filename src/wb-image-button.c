@@ -86,8 +86,8 @@ on_message_complete (SoupSession *session,
                      SoupMessage *msg,
                      gpointer user_data)
 {
+    g_autoptr(GInputStream) stream = NULL;
     GError *error = NULL;
-    GInputStream *stream;
     WbImageButton *self = WB_IMAGE_BUTTON (user_data);
     WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
@@ -166,14 +166,6 @@ on_message_complete (SoupSession *session,
     else
     {
         gtk_image_set_from_pixbuf (GTK_IMAGE (priv->image), priv->pixbuf);
-    }
-
-    g_input_stream_close (stream, NULL, &error);
-    if (error != NULL)
-    {
-        g_warning ("Unable to close the input stream: %s",
-                   error->message);
-        g_clear_error (&error);
     }
 }
 
