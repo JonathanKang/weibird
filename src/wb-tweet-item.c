@@ -82,8 +82,13 @@ wb_tweet_item_parse_json_object (WbTweetItem *self,
 static void
 wb_tweet_item_finalize (GObject *object)
 {
+    gint i;
     WbTweetItem *self = (WbTweetItem *)object;
 
+    for (i = 0; i < self->picuri_array->len; i++)
+    {
+        g_free (g_array_index (self->picuri_array, gchar *, i));
+    }
     g_array_free (self->picuri_array, TRUE);
     g_free (self->created_at);
     g_free (self->idstr);
