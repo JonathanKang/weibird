@@ -70,6 +70,14 @@ wb_comment_list_insert_comment_widget (WbCommentList *self,
 
         root_comment = g_hash_table_lookup (priv->comments, &comment->rootid);
 
+        /* The root comment is somehow not found in the comment list. It
+         * can be caused by the broken Weibo API: Not all the comments
+         * will be available. */
+        if (root_comment == NULL)
+        {
+            return;
+        }
+
         wb_comment_row_insert_reply (WB_COMMENT_ROW (root_comment), comment);
     }
     else
