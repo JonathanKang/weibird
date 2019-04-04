@@ -228,8 +228,14 @@ row_activated_cb (GtkListBox *box,
                                           "Cancel",
                                           GTK_RESPONSE_CANCEL,
                                           NULL);
+    gtk_widget_set_valign (dialog, GTK_ALIGN_START);
 
     comment_entry = gtk_entry_new ();
+    gtk_widget_set_margin_top (comment_entry, 12);
+    gtk_widget_set_margin_bottom (comment_entry, 12);
+    gtk_widget_set_margin_start (comment_entry, 12);
+    gtk_widget_set_margin_end (comment_entry, 12);
+
     content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
     gtk_container_add (GTK_CONTAINER (content_area), comment_entry);
     gtk_widget_show (comment_entry);
