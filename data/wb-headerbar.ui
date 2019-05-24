@@ -2,7 +2,7 @@
     <menu id='primary-menu'>
         <section>
             <item>
-                <attribute name="label">_About Weibo</attribute>
+                <attribute name="label">_About Weibird</attribute>
                 <attribute name="action">app.about</attribute>
             </item>
         </section>
