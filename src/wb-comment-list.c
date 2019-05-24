@@ -25,6 +25,7 @@
 #include "wb-comment.h"
 #include "wb-comment-list.h"
 #include "wb-comment-row.h"
+#include "wb-compose-window.h"
 #include "wb-util.h"
 
 struct _WbCommentList
@@ -35,6 +36,7 @@ struct _WbCommentList
 typedef struct
 {
     const gchar *tweet_id;
+    gchar *current_cid;
     GHashTable *comments;
 } WbCommentListPrivate;
 
@@ -199,56 +201,62 @@ wb_comment_list_add_comment (WbCommentList *self,
 }
 
 static void
+compose_dialog_response_cb (GtkDialog *dialog,
+                            GtkResponseType response_type,
+                            gpointer user_data)
+{
+    switch (response_type)
+    {
+        case GTK_RESPONSE_OK:
+        {
+            const char *comment;
+            GtkWidget *compose_entry;
+            WbCommentList *self;
+            WbCommentListPrivate *priv;
+
+            self = WB_COMMENT_LIST (user_data);
+            priv = wb_comment_list_get_instance_private (self);
+
+            compose_entry = wb_compose_window_get_compose_entry (WB_COMPOSE_WINDOW (dialog));
+            comment = gtk_entry_get_text (GTK_ENTRY (compose_entry));
+            wb_comment_list_add_comment (self, priv->current_cid, comment);
+
+            gtk_widget_destroy (GTK_WIDGET (dialog));
+
+            break;
+        }
+        case GTK_RESPONSE_CANCEL:
+            gtk_widget_destroy (GTK_WIDGET (dialog));
+            break;
+        default:
+            g_assert_not_reached ();
+    }
+}
+
+static void
 row_activated_cb (GtkListBox *box,
                   GtkListBoxRow *row,
                   gpointer user_data)
 {
-    const gchar *comment_str;
-    gint result;
-    GtkWidget *dialog;
-    GtkWidget *content_area;
-    GtkWidget *comment_entry;
     GtkWidget *toplevel;
     WbComment *comment;
+    WbComposeWindow *compose_window;
     WbCommentList *self;
+    WbCommentListPrivate *priv;
 
     self = WB_COMMENT_LIST (box);
-
-    comment = wb_comment_row_get_comment (WB_COMMENT_ROW (row));
+    priv = wb_comment_list_get_instance_private (self);
 
     toplevel = gtk_widget_get_toplevel (GTK_WIDGET (box));
+    comment = wb_comment_row_get_comment (WB_COMMENT_ROW (row));
+    /* Remember which comment we are commenting on */
+    priv->current_cid = g_strdup (comment->idstr);
 
-    dialog = gtk_dialog_new_with_buttons ("Reply to Comment",
-                                          GTK_WINDOW (toplevel),
-                                          GTK_DIALOG_MODAL |
-                                          GTK_DIALOG_DESTROY_WITH_PARENT |
-                                          GTK_DIALOG_USE_HEADER_BAR,
-                                          "Send",
-                                          GTK_RESPONSE_OK,
-                                          "Cancel",
-                                          GTK_RESPONSE_CANCEL,
-                                          NULL);
-    gtk_widget_set_valign (dialog, GTK_ALIGN_START);
+    compose_window = wb_compose_window_new (GTK_WINDOW (toplevel));
+    g_signal_connect (compose_window, "response",
+                      G_CALLBACK (compose_dialog_response_cb), self);
 
-    comment_entry = gtk_entry_new ();
-    gtk_widget_set_margin_top (comment_entry, 12);
-    gtk_widget_set_margin_bottom (comment_entry, 12);
-    gtk_widget_set_margin_start (comment_entry, 12);
-    gtk_widget_set_margin_end (comment_entry, 12);
-
-    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-    gtk_container_add (GTK_CONTAINER (content_area), comment_entry);
-    gtk_widget_show (comment_entry);
-
-    result = gtk_dialog_run (GTK_DIALOG (dialog));
-
-    if (result == GTK_RESPONSE_OK)
-    {
-        comment_str = gtk_entry_get_text (GTK_ENTRY (comment_entry));
-        wb_comment_list_add_comment (self, comment->idstr, comment_str);
-    }
-
-    gtk_widget_destroy (dialog);
+    gtk_widget_show_all (GTK_WIDGET (compose_window));
 }
 
 static void
@@ -282,6 +290,8 @@ wb_comment_list_finalize (GObject *object)
     self = WB_COMMENT_LIST (object);
     priv = wb_comment_list_get_instance_private (self);
 
+    g_free (priv->current_cid);
+
     g_hash_table_destroy (priv->comments);
 
     G_OBJECT_CLASS (wb_comment_list_parent_class)->finalize (object);
@@ -303,6 +313,7 @@ wb_comment_list_init (WbCommentList *self)
     priv = wb_comment_list_get_instance_private (self);
 
     priv->comments = g_hash_table_new (g_int64_hash, g_int64_equal);
+    priv->current_cid = NULL;
     priv->tweet_id = NULL;
 
     gtk_list_box_set_header_func (GTK_LIST_BOX (self),

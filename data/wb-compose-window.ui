@@ -1,0 +1,42 @@
+<interface domain="weibird">
+    <template class="WbComposeWindow" parent="GtkDialog">
+        <property name="default_width">400</property>
+        <property name="destroy_with_parent">True</property>
+        <property name="title">Compose</property>
+        <property name="type_hint">dialog</property>
+        <property name="valign">center</property>
+        <child type="action">
+            <object class="GtkButton" id="cancel_button">
+                <property name="label">Cancel</property>
+                <property name="visible">True</property>
+            </object>
+        </child>
+        <child type="action">
+            <object class="GtkButton" id="send_button">
+                <property name="can-default">True</property>
+                <property name="label">Send</property>
+                <property name="sensitive">False</property>
+                <property name="visible">True</property>
+            </object>
+        </child>
+        <child internal-child="vbox">
+            <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="valign">center</property>
+                <child>
+                    <object class="GtkEntry" id="compose_entry">
+                        <property name="margin_top">12</property>
+                        <property name="margin_bottom">12</property>
+                        <property name="margin_start">12</property>
+                        <property name="margin_end">12</property>
+                        <property name="visible">True</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+        <action-widgets>
+            <action-widget response="cancel">cancel_button</action-widget>
+            <action-widget response="ok" default="true">send_button</action-widget>
+        </action-widgets>
+    </template>
+</interface>

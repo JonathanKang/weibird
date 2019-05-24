@@ -1,5 +1,6 @@
 <gresources>
     <gresource prefix='/com/jonathankang/Weibird'>
+        <file preprocess='xml-stripblanks'>wb-compose-window.ui</file>
         <file preprocess='xml-stripblanks'>wb-headerbar.ui</file>
         <file preprocess='xml-stripblanks'>wb-main-widget.ui</file>
         <file preprocess='xml-stripblanks'>wb-media-dialog.ui</file>

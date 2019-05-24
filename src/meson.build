@@ -3,6 +3,7 @@ sources = files(
     'wb-comment.c',
     'wb-comment-list.c',
     'wb-comment-row.c',
+    'wb-compose-window.c',
     'wb-headerbar.c',
     'wb-main.c',
     'wb-main-widget.c',

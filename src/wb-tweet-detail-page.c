@@ -24,6 +24,7 @@
 #include "wb-comment.h"
 #include "wb-comment-list.h"
 #include "wb-comment-row.h"
+#include "wb-compose-window.h"
 #include "wb-image-button.h"
 #include "wb-multi-media-widget.h"
 #include "wb-tweet-detail-page.h"
@@ -267,52 +268,53 @@ wb_tweet_detail_page_add_comment (WbTweetDetailPage *self,
 }
 
 static void
+compose_dialog_response_cb (GtkDialog *dialog,
+                            GtkResponseType response_type,
+                            gpointer user_data)
+{
+    switch (response_type)
+    {
+        case GTK_RESPONSE_OK:
+        {
+            const gchar *comment;
+            GtkWidget *compose_entry;
+            WbTweetDetailPage *self;
+
+            self = WB_TWEET_DETAIL_PAGE (user_data);
+
+            compose_entry = wb_compose_window_get_compose_entry (WB_COMPOSE_WINDOW (dialog));
+            comment = gtk_entry_get_text (GTK_ENTRY (compose_entry));
+            wb_tweet_detail_page_add_comment (self, comment);
+
+            gtk_widget_destroy (GTK_WIDGET (dialog));
+
+            break;
+        }
+        case GTK_RESPONSE_CANCEL:
+            gtk_widget_destroy (GTK_WIDGET (dialog));
+            break;
+        default:
+            g_assert_not_reached ();
+    }
+}
+
+static void
 comment_button_clicked_cb (GtkButton *button,
                            gpointer user_data)
 {
-    const gchar *comment;
-    gint result;
-    GtkWidget *dialog;
-    GtkWidget *content_area;
-    GtkWidget *comment_entry;
     GtkWidget *toplevel;
+    WbComposeWindow *compose_window;
     WbTweetDetailPage *self;
 
     self = WB_TWEET_DETAIL_PAGE (user_data);
 
     toplevel = gtk_widget_get_toplevel (GTK_WIDGET (button));
 
-    dialog = gtk_dialog_new_with_buttons ("Compose Comment",
-                                          GTK_WINDOW (toplevel),
-                                          GTK_DIALOG_MODAL |
-                                          GTK_DIALOG_DESTROY_WITH_PARENT |
-                                          GTK_DIALOG_USE_HEADER_BAR,
-                                          "Send",
-                                          GTK_RESPONSE_OK,
-                                          "Cancel",
-                                          GTK_RESPONSE_CANCEL,
-                                          NULL);
-    gtk_widget_set_valign (dialog, GTK_ALIGN_START);
+    compose_window = wb_compose_window_new (GTK_WINDOW (toplevel));
+    g_signal_connect (compose_window, "response",
+                      G_CALLBACK (compose_dialog_response_cb), self);
 
-    comment_entry = gtk_entry_new ();
-    gtk_widget_set_margin_top (comment_entry, 12);
-    gtk_widget_set_margin_bottom (comment_entry, 12);
-    gtk_widget_set_margin_start (comment_entry, 12);
-    gtk_widget_set_margin_end (comment_entry, 12);
-
-    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-    gtk_container_add (GTK_CONTAINER (content_area), comment_entry);
-    gtk_widget_show (comment_entry);
-
-    result = gtk_dialog_run (GTK_DIALOG (dialog));
-
-    if (result == GTK_RESPONSE_OK)
-    {
-        comment = gtk_entry_get_text (GTK_ENTRY (comment_entry));
-        wb_tweet_detail_page_add_comment (self, comment);
-    }
-
-    gtk_widget_destroy (dialog);
+    gtk_widget_show_all (GTK_WIDGET (compose_window));
 }
 
 static void
