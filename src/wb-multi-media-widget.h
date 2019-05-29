@@ -28,7 +28,9 @@ G_BEGIN_DECLS
 #define WB_TYPE_MULTI_MEDIA_WIDGET (wb_multi_media_widget_get_type ())
 G_DECLARE_FINAL_TYPE (WbMultiMediaWidget, wb_multi_media_widget, WB, MULTI_MEDIA_WIDGET, GtkGrid)
 
-GtkWidget *wb_multi_media_widget_new (gint n_childs, const GArray *pic_uris);
+void wb_multi_media_widget_populate_images (WbMultiMediaWidget *self,
+                                            const GArray *pic_uris);
+WbMultiMediaWidget *wb_multi_media_widget_new (void);
 
 G_END_DECLS
 

@@ -23,14 +23,6 @@
 #include "wb-multi-media-widget.h"
 #include "wb-util.h"
 
-enum
-{
-    PROP_0,
-    PROP_N_CHILDS,
-    PROP_PIC_URIS,
-    N_PROPS
-};
-
 struct _WbMultiMediaWidget
 {
     /*< private >*/
@@ -39,14 +31,10 @@ struct _WbMultiMediaWidget
 
 typedef struct
 {
-    GArray *pic_uris;
     GArray *images;
-    gint n_childs;
 } WbMultiMediaWidgetPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbMultiMediaWidget, wb_multi_media_widget, GTK_TYPE_GRID)
-
-static GParamSpec *obj_properties [N_PROPS] = { NULL, };
 
 static void
 on_image_clicked (GtkButton *button,
@@ -108,26 +96,28 @@ on_image_clicked (GtkButton *button,
     gtk_widget_show_all (GTK_WIDGET (dialog));
 }
 
-static void
-wb_multi_media_widget_constructed (GObject *object)
+void
+wb_multi_media_widget_populate_images (WbMultiMediaWidget *self,
+                                       const GArray *pic_uris)
 {
     gint i;
+    gint n_childs;
     gint left, top;
     gint width, height;
     WbImageButton *button;
-    WbMultiMediaWidget *self;
     WbMultiMediaWidgetPrivate *priv;
 
-    self = WB_MULTI_MEDIA_WIDGET (object);
     priv = wb_multi_media_widget_get_instance_private (self);
+
+    n_childs = pic_uris->len;
 
     /* Adjust the image size based on how many images there are
      * in a post. */
-    if (priv->n_childs == 1)
+    if (n_childs == 1)
     {
         width = height = 300;
     }
-    else if (priv->n_childs == 2 || priv->n_childs == 4)
+    else if (n_childs == 2 || n_childs == 4)
     {
         width = height = 240;
     }
@@ -136,10 +126,10 @@ wb_multi_media_widget_constructed (GObject *object)
         width = height = 150;
     }
 
-    for (i = 0; i < priv->n_childs; i++)
+    for (i = 0; i < n_childs; i++)
     {
         button = wb_image_button_new (WB_MEDIA_TYPE_IMAGE,
-                                      g_array_index (priv->pic_uris, gchar *, i),
+                                      g_array_index (pic_uris, gchar *, i),
                                       i + 1, width, height);
         g_array_append_val (priv->images, button);
 
@@ -152,7 +142,7 @@ wb_multi_media_widget_constructed (GObject *object)
         }
         else if (i == 2)
         {
-            if (priv->n_childs != 4)
+            if (n_childs != 4)
             {
                 top = 0;
                 left = i;
@@ -165,7 +155,7 @@ wb_multi_media_widget_constructed (GObject *object)
         }
         else if (i >= 3 && i < 6)
         {
-            if (priv->n_childs != 4)
+            if (n_childs != 4)
             {
                 top = 1;
                 left = i - 3;
@@ -184,8 +174,6 @@ wb_multi_media_widget_constructed (GObject *object)
         gtk_grid_attach (GTK_GRID (self), GTK_WIDGET (button),
                          left, top, 1, 1);
     }
-
-    G_OBJECT_CLASS (wb_multi_media_widget_parent_class)->constructed (object);
 }
 
 static void
@@ -202,78 +190,11 @@ wb_multi_media_widget_finalize (GObject *object)
 }
 
 static void
-wb_multi_media_widget_get_property (GObject    *object,
-                                    guint       prop_id,
-                                    GValue     *value,
-                                    GParamSpec *pspec)
-{
-    WbMultiMediaWidget *self;
-    WbMultiMediaWidgetPrivate *priv;
-
-    self = WB_MULTI_MEDIA_WIDGET (object);
-    priv = wb_multi_media_widget_get_instance_private (self);
-
-		switch (prop_id)
-    {
-        case PROP_N_CHILDS:
-            g_value_set_int (value, priv->n_childs);
-            break;
-        case PROP_PIC_URIS:
-            g_value_set_pointer (value, priv->pic_uris);
-            break;
-        default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-    }
-}
-
-static void
-wb_multi_media_widget_set_property (GObject      *object,
-                                    guint         prop_id,
-                                    const GValue *value,
-                                    GParamSpec   *pspec)
-{
-    WbMultiMediaWidget *self;
-    WbMultiMediaWidgetPrivate *priv;
-
-    self = WB_MULTI_MEDIA_WIDGET (object);
-    priv = wb_multi_media_widget_get_instance_private (self);
-
-		switch (prop_id)
-    {
-        case PROP_N_CHILDS:
-            priv->n_childs = g_value_get_int (value);
-            break;
-        case PROP_PIC_URIS:
-            priv->pic_uris = g_value_get_pointer (value);
-            break;
-        default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-    }
-}
-
-static void
 wb_multi_media_widget_class_init(WbMultiMediaWidgetClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
 
-    object_class->constructed = wb_multi_media_widget_constructed;
     object_class->finalize = wb_multi_media_widget_finalize;
-    object_class->get_property = wb_multi_media_widget_get_property;
-    object_class->set_property = wb_multi_media_widget_set_property;
-
-    obj_properties[PROP_N_CHILDS] = g_param_spec_int ("n-childs",
-                                                      "Child Number",
-                                                      "Number of child widgets",
-                                                      1, 9, 1,
-                                                      G_PARAM_READWRITE |
-                                                      G_PARAM_CONSTRUCT_ONLY);
-    obj_properties[PROP_PIC_URIS] = g_param_spec_pointer ("pic-uris",
-                                                          "Picture URIs",
-                                                          "URI for pictures",
-                                                          G_PARAM_READWRITE |
-                                                          G_PARAM_CONSTRUCT_ONLY |
-                                                          G_PARAM_STATIC_STRINGS);
-    g_object_class_install_properties (object_class, N_PROPS, obj_properties);
 }
 
 static void
@@ -296,11 +217,8 @@ wb_multi_media_widget_init (WbMultiMediaWidget *self)
  *
  * Returns: (transfer full): a newly created #WbMultiMediaWidget
  */
-GtkWidget *
-wb_multi_media_widget_new (gint n_childs, const GArray *pic_uris)
+WbMultiMediaWidget *
+wb_multi_media_widget_new (void)
 {
-    return g_object_new (WB_TYPE_MULTI_MEDIA_WIDGET,
-                         "n-childs", n_childs,
-                         "pic-uris", pic_uris,
-                         NULL);
+    return g_object_new (WB_TYPE_MULTI_MEDIA_WIDGET, NULL);
 }

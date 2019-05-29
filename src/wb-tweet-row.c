@@ -115,11 +115,11 @@ wb_tweet_row_constructed (GObject *object)
     GtkWidget *hbox2;
     GtkWidget *vbox;
     GtkWidget *name_label;
-    GtkWidget *pic_grid;
     GtkWidget *source_label;
     GtkWidget *text_label;
     GtkWidget *time_label;
     WbImageButton *button;
+    WbMultiMediaWidget *pic_grid;
     WbTweetRow *row = WB_TWEET_ROW (object);
     WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (row);
 
@@ -188,10 +188,12 @@ wb_tweet_row_constructed (GObject *object)
     /* TODO: Add support for display the original picture individually */
     if (priv->tweet_item->picuri_array->len != 0)
     {
-        pic_grid = wb_multi_media_widget_new (priv->tweet_item->picuri_array->len,
-                                              priv->tweet_item->picuri_array);
-        gtk_widget_set_halign (pic_grid, GTK_ALIGN_CENTER);
-        gtk_box_pack_start (GTK_BOX (priv->main_box), pic_grid, FALSE, FALSE, 0);
+        pic_grid = wb_multi_media_widget_new ();
+        wb_multi_media_widget_populate_images (pic_grid,
+                                               priv->tweet_item->picuri_array);
+        gtk_widget_set_halign (GTK_WIDGET (pic_grid), GTK_ALIGN_CENTER);
+        gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (pic_grid),
+                            FALSE, FALSE, 0);
     }
 
     /* Retweeted post goes here, if there is one. */
