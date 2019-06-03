@@ -133,7 +133,8 @@ wb_multi_media_widget_populate_images (WbMultiMediaWidget *self,
                                       i + 1, width, height);
         g_array_append_val (priv->images, button);
 
-        g_signal_connect (button, "clicked", G_CALLBACK (on_image_clicked), self);
+        g_signal_connect (button, "clicked",
+                          G_CALLBACK (on_image_clicked), self);
 
         if (i < 2)
         {

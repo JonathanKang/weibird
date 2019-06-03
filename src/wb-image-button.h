@@ -32,7 +32,7 @@ typedef enum
 } WbMediaType;
 
 #define WB_TYPE_IMAGE_BUTTON (wb_image_button_get_type ())
-G_DECLARE_FINAL_TYPE (WbImageButton, wb_image_button, WB, IMAGE_BUTTON, GtkButton)
+G_DECLARE_FINAL_TYPE (WbImageButton, wb_image_button, WB, IMAGE_BUTTON, GtkWidget)
 
 gint wb_image_button_get_nth_media (WbImageButton *image_button);
 WbMediaType wb_image_button_get_media_type (WbImageButton *image_button);
