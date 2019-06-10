@@ -24,6 +24,7 @@
 
 #include "wb-enums.h"
 #include "wb-image-button.h"
+#include "wb-util.h"
 
 enum
 {
@@ -61,7 +62,6 @@ typedef struct
     GdkPixbuf *scaled_pixbuf;
     GdkWindow *event_window;
     GtkWidget *image;
-    SoupSession *session;
     WbMediaType type;
 } WbImageButtonPrivate;
 
@@ -384,7 +384,7 @@ wb_image_button_constructed (GObject *object)
     WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
     msg = soup_message_new (SOUP_METHOD_GET, priv->uri);
-    soup_session_queue_message (priv->session, msg,
+    soup_session_queue_message (SOUPSESSION, msg,
                                 on_message_complete, self);
 
     G_OBJECT_CLASS (wb_image_button_parent_class)->constructed (object);
@@ -396,7 +396,6 @@ wb_image_button_finalize (GObject *object)
     WbImageButton *self = WB_IMAGE_BUTTON (object);
     WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
-    g_clear_object (&priv->session);
     g_free (priv->uri);
     if (priv->pixbuf != NULL)
     {
@@ -560,7 +559,6 @@ wb_image_button_init (WbImageButton *self)
     priv->uri = NULL;
     priv->pixbuf = NULL;
     priv->scaled_pixbuf = NULL;
-    priv->session = soup_session_new ();
     priv->surface = NULL;
     priv->layout = gtk_widget_create_pango_layout (GTK_WIDGET (self), "...");
 }

@@ -21,6 +21,7 @@
 
 #include <gtk/gtk.h>
 #include <json-glib/json-glib.h>
+#include <libsoup/soup.h>
 
 #include "wb-timeline-list.h"
 
@@ -29,6 +30,10 @@ G_BEGIN_DECLS
 #define MAX_WIDTH 1000
 #define MAX_HEIGHT 800
 
+SoupSession *SOUPSESSION;
+
+void wb_util_init_soup_session (void);
+void wb_util_finalize_soup_session (void);
 gchar *wb_util_format_time_string (const gchar *time);
 gchar *wb_util_format_source_string (const gchar *source);
 gchar *wb_util_thumbnail_to_original (const gchar *thumbnail);

@@ -21,6 +21,7 @@
 #include "config.h"
 #include "wb-application.h"
 #include "wb-window.h"
+#include "wb-util.h"
 
 struct _WbApplication
 {
@@ -65,6 +66,8 @@ on_quit (GSimpleAction *action,
 {
     GApplication *application;
 
+    wb_util_finalize_soup_session ();
+
     application = G_APPLICATION (user_data);
     g_application_quit (application);
 }
@@ -93,6 +96,8 @@ wb_application_startup (GApplication *application)
     G_APPLICATION_CLASS (wb_application_parent_class)->startup (application);
 
     gtk_window_set_default_icon_name ("com.jonathankang.Weibird");
+
+    wb_util_init_soup_session ();
 }
 
 static void

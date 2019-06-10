@@ -18,6 +18,7 @@
 
 #include <glib.h>
 #include <json-glib/json-glib.h>
+#include <libsoup/soup.h>
 
 #include "wb-timeline-list.h"
 #include "wb-util.h"
@@ -26,6 +27,18 @@ static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
 static const gchar ACCESS_TOKEN[] = "access-token";
 static const gchar APP_KEY[] = "app-key";
 static const gchar APP_SECRET[] = "app-secret";
+
+void
+wb_util_init_soup_session (void)
+{
+    SOUPSESSION = soup_session_new ();
+}
+
+void
+wb_util_finalize_soup_session (void)
+{
+    g_clear_object (&SOUPSESSION);
+}
 
 /**
  * wb_util_format_time_string:
