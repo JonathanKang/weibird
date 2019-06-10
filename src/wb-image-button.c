@@ -98,11 +98,16 @@ static gboolean
 wb_image_button_draw (GtkWidget *widget,
                       cairo_t *cr)
 {
+    gint widget_width;
+    gint widget_height;
     WbImageButton *self;
     WbImageButtonPrivate *priv;
 
     self = WB_IMAGE_BUTTON (widget);
     priv = wb_image_button_get_instance_private (self);
+
+    widget_width = gtk_widget_get_allocated_width (widget);
+    widget_height = gtk_widget_get_allocated_height (widget);
 
     if (priv->surface != NULL && priv->media_loaded)
     {
@@ -111,11 +116,19 @@ wb_image_button_draw (GtkWidget *widget,
     }
     else
     {
+        gdouble layout_x;
+        gdouble layout_y;
+        gint layout_width;
+        gint layout_height;
         GtkStyleContext *context;
 
         context = gtk_widget_get_style_context (widget);
 
-        gtk_render_layout (context, cr, 0, 0, priv->layout);
+        pango_layout_get_size (priv->layout, &layout_width, &layout_height);
+        layout_x = widget_width / 2.0 - layout_width / PANGO_SCALE / 2.0;
+        layout_y = widget_height / 2.0 - layout_height / PANGO_SCALE / 2.0;
+
+        gtk_render_layout (context, cr, layout_x, layout_y, priv->layout);
     }
 
     return GDK_EVENT_PROPAGATE;
