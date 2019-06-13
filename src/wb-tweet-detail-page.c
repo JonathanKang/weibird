@@ -48,6 +48,14 @@ typedef struct
 {
     GtkWidget *listbox;
     GtkWidget *main_box;
+    GtkWidget *name_label;
+    GtkWidget *source_label;
+    GtkWidget *time_label;
+    GtkWidget *content_label;
+    GtkWidget *likes_label;
+    GtkWidget *comments_label;
+    GtkWidget *reposts_label;
+    WbMultiMediaWidget *mm_widget;
     WbTweetItem *tweet_item;
     WbTweetItem *retweeted_item;
 } WbTweetDetailPagePrivate;
@@ -320,32 +328,84 @@ comment_button_clicked_cb (GtkButton *button,
 static void
 wb_tweet_detail_page_constructed (GObject *object)
 {
-    GtkWidget *comment_button;
-    WbTweetRow *row;
+    gchar *created_at;
+    gchar *markup;
     WbTweetDetailPage *self;
     WbTweetDetailPagePrivate *priv;
 
     self = WB_TWEET_DETAIL_PAGE (object);
     priv = wb_tweet_detail_page_get_instance_private (self);
 
-    if (priv->retweeted_item != NULL)
+    if (g_strcmp0 (priv->tweet_item->user->nickname, "") != 0)
     {
-        WbTweetRow *retweeted_row;
-
-        retweeted_row = wb_tweet_row_new (priv->retweeted_item, NULL, TRUE);
-
-        row = wb_tweet_row_new (priv->tweet_item, priv->retweeted_item, FALSE);
-        gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row),
-                            FALSE, FALSE, 0);
-
-        wb_tweet_row_insert_retweeted_item (row, GTK_WIDGET (retweeted_row));
+        gtk_label_set_text (GTK_LABEL (priv->name_label),
+                            priv->tweet_item->user->nickname);
     }
     else
     {
-        row = wb_tweet_row_new (priv->tweet_item, NULL, FALSE);
-        gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row),
-                            FALSE, FALSE, 0);
+        gtk_label_set_text (GTK_LABEL (priv->name_label),
+                            priv->tweet_item->user->name);
     }
+
+    if (g_strcmp0 (priv->tweet_item->source, "") != 0)
+    {
+        gchar *source;
+
+        source = wb_util_format_source_string (priv->tweet_item->source);
+        gtk_label_set_text (GTK_LABEL (priv->source_label), source);
+
+        g_free (source);
+    }
+
+    created_at = wb_util_format_time_string (priv->tweet_item->created_at);
+    gtk_label_set_text (GTK_LABEL (priv->time_label), created_at);
+
+    gtk_label_set_text (GTK_LABEL (priv->content_label), priv->tweet_item->text);
+
+    /* Post image(s) */
+    if (priv->tweet_item->picuri_array->len != 0)
+    {
+        wb_multi_media_widget_populate_images (priv->mm_widget,
+                                               priv->tweet_item->picuri_array);
+        gtk_widget_show_all (GTK_WIDGET (priv->mm_widget));
+    }
+
+    /* Retweet doesn't work here yet. */
+
+    /* Likes, comments and reposts buttons. */
+    markup = g_markup_printf_escaped ("<b>%d</b> Likes",
+                                      priv->tweet_item->attitudes_count);
+    gtk_label_set_markup (GTK_LABEL (priv->likes_label), markup);
+    g_free (markup);
+
+    markup = g_markup_printf_escaped ("<b>%d</b> Comments",
+                                      priv->tweet_item->comments_count);
+    gtk_label_set_markup (GTK_LABEL (priv->comments_label), markup);
+    g_free (markup);
+
+    markup = g_markup_printf_escaped ("<b>%d</b> Reposts",
+                                      priv->tweet_item->reposts_count);
+    gtk_label_set_markup (GTK_LABEL (priv->reposts_label), markup);
+    g_free (markup);
+
+    /* if (priv->retweeted_item != NULL) */
+    /* { */
+    /*     WbTweetRow *retweeted_row; */
+
+    /*     retweeted_row = wb_tweet_row_new (priv->retweeted_item, NULL, TRUE); */
+
+    /*     row = wb_tweet_row_new (priv->tweet_item, priv->retweeted_item, FALSE); */
+    /*     gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row), */
+    /*                         FALSE, FALSE, 0); */
+
+    /*     wb_tweet_row_insert_retweeted_item (row, GTK_WIDGET (retweeted_row)); */
+    /* } */
+    /* else */
+    /* { */
+    /*     row = wb_tweet_row_new (priv->tweet_item, NULL, FALSE); */
+    /*     gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row), */
+    /*                         FALSE, FALSE, 0); */
+    /* } */
 
     g_idle_add (G_SOURCE_FUNC (fetch_comments), self);
 
@@ -355,9 +415,7 @@ wb_tweet_detail_page_constructed (GObject *object)
 
     gtk_widget_show_all (GTK_WIDGET (self));
 
-    comment_button = wb_tweet_row_get_comment_button (row);
-    g_signal_connect (comment_button, "clicked",
-                      G_CALLBACK (comment_button_clicked_cb), self);
+    g_free (created_at);
 
     G_OBJECT_CLASS (wb_tweet_detail_page_parent_class)->constructed (object);
 }
@@ -428,6 +486,7 @@ static void
 wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
     gobject_class->constructed = wb_tweet_detail_page_constructed;
     gobject_class->finalize = wb_tweet_detail_page_finalize;
@@ -450,6 +509,38 @@ wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
                                                                G_PARAM_STATIC_STRINGS);
     g_object_class_install_properties (gobject_class, N_PROPERTIES,
                                        obj_properties);
+
+    gtk_widget_class_set_template_from_resource (widget_class,
+                                                 "/com/jonathankang/Weibird/wb-tweet-detail-page.ui");
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  main_box);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  name_label);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  source_label);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  time_label);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  content_label);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  likes_label);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  comments_label);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  reposts_label);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  mm_widget);
+    gtk_widget_class_bind_template_callback (widget_class,
+                                             comment_button_clicked_cb);
 }
 
 static void
@@ -459,9 +550,7 @@ wb_tweet_detail_page_init (WbTweetDetailPage *self)
 
     priv = wb_tweet_detail_page_get_instance_private (self);
 
-    priv->main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-    gtk_widget_set_valign (GTK_WIDGET (priv->main_box), GTK_ALIGN_START);
-    gtk_container_add (GTK_CONTAINER (self), priv->main_box);
+    gtk_widget_init_template (GTK_WIDGET (self));
 
     priv->listbox = GTK_WIDGET (wb_comment_list_new ());
     gtk_box_pack_end (GTK_BOX (priv->main_box), priv->listbox,
