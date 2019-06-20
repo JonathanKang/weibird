@@ -86,7 +86,7 @@
                     </packing>
                 </child>
                 <child>
-                    <object class="GtkBox" id="buttons_hbox">
+                    <object class="GtkBox" id="buttons_box">
                         <property name="orientation">horizontal</property>
                         <child>
                             <object class="GtkButton" id="like_button">

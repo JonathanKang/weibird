@@ -48,6 +48,8 @@ typedef struct
 {
     GtkWidget *listbox;
     GtkWidget *main_box;
+    GtkWidget *buttons_box;
+    GtkWidget *retweet_box;
     GtkWidget *name_label;
     GtkWidget *source_label;
     GtkWidget *time_label;
@@ -370,8 +372,6 @@ wb_tweet_detail_page_constructed (GObject *object)
         gtk_widget_show_all (GTK_WIDGET (priv->mm_widget));
     }
 
-    /* Retweet doesn't work here yet. */
-
     /* Likes, comments and reposts buttons. */
     markup = g_markup_printf_escaped ("<b>%d</b> Likes",
                                       priv->tweet_item->attitudes_count);
@@ -388,24 +388,19 @@ wb_tweet_detail_page_constructed (GObject *object)
     gtk_label_set_markup (GTK_LABEL (priv->reposts_label), markup);
     g_free (markup);
 
-    /* if (priv->retweeted_item != NULL) */
-    /* { */
-    /*     WbTweetRow *retweeted_row; */
+    /* Retweeted content */
+    if (priv->retweeted_item != NULL)
+    {
+        WbTweetRow *retweeted_row;
 
-    /*     retweeted_row = wb_tweet_row_new (priv->retweeted_item, NULL, TRUE); */
-
-    /*     row = wb_tweet_row_new (priv->tweet_item, priv->retweeted_item, FALSE); */
-    /*     gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row), */
-    /*                         FALSE, FALSE, 0); */
-
-    /*     wb_tweet_row_insert_retweeted_item (row, GTK_WIDGET (retweeted_row)); */
-    /* } */
-    /* else */
-    /* { */
-    /*     row = wb_tweet_row_new (priv->tweet_item, NULL, FALSE); */
-    /*     gtk_box_pack_start (GTK_BOX (priv->main_box), GTK_WIDGET (row), */
-    /*                         FALSE, FALSE, 0); */
-    /* } */
+        retweeted_row = wb_tweet_row_new (priv->retweeted_item, NULL, TRUE);
+        gtk_container_add (GTK_CONTAINER (priv->retweet_box),
+                           GTK_WIDGET (retweeted_row));
+    }
+    else
+    {
+        gtk_widget_set_no_show_all (priv->retweet_box, TRUE);
+    }
 
     g_idle_add (G_SOURCE_FUNC (fetch_comments), self);
 
@@ -515,6 +510,12 @@ wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   WbTweetDetailPage,
                                                   main_box);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  buttons_box);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  retweet_box);
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   WbTweetDetailPage,
                                                   name_label);
