@@ -90,6 +90,9 @@
                 </child>
                 <child>
                     <object class="GtkBox" id="retweet_box">
+                        <style>
+                            <class name="retweet"/>
+                        </style>
                     </object>
                     <packing>
                         <property name="pack-type">start</property>
