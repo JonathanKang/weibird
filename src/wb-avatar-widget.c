@@ -92,6 +92,8 @@ on_message_complete (SoupSession *session,
     }
 
     priv->surface = gdk_cairo_surface_create_from_pixbuf (priv->pixbuf, 0, NULL);
+
+    gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 static gboolean
