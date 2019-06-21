@@ -19,6 +19,13 @@
                         <property name="spacing">6</property>
                         <property name="visible">True</property>
                         <child>
+                            <object class="WbAvatarWidget" id="avatar_widget">
+                            </object>
+                            <packing>
+                                <property name="pack-type">start</property>
+                            </packing>
+                        </child>
+                        <child>
                             <object class="GtkBox">
                                 <property name="orientation">vertical</property>
                                 <property name="visible">True</property>
@@ -41,6 +48,9 @@
                                     </packing>
                                 </child>
                             </object>
+                            <packing>
+                                <property name="pack-type">start</property>
+                            </packing>
                         </child>
                         <child>
                             <object class="GtkLabel" id="time_label">

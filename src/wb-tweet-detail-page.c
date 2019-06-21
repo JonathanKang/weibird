@@ -21,6 +21,7 @@
 #include <json-glib/json-glib.h>
 #include <rest/oauth2-proxy.h>
 
+#include "wb-avatar-widget.h"
 #include "wb-comment.h"
 #include "wb-comment-list.h"
 #include "wb-comment-row.h"
@@ -46,6 +47,7 @@ struct _WbTweetDetailPage
 
 typedef struct
 {
+    GtkWidget *avatar_widget;
     GtkWidget *listbox;
     GtkWidget *main_box;
     GtkWidget *buttons_box;
@@ -338,6 +340,9 @@ wb_tweet_detail_page_constructed (GObject *object)
     self = WB_TWEET_DETAIL_PAGE (object);
     priv = wb_tweet_detail_page_get_instance_private (self);
 
+    wb_avatar_widget_setup (WB_AVATAR_WIDGET (priv->avatar_widget),
+                            priv->tweet_item->user->profile_image_url);
+
     if (g_strcmp0 (priv->tweet_item->user->nickname, "") != 0)
     {
         gtk_label_set_text (GTK_LABEL (priv->name_label),
@@ -507,6 +512,9 @@ wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
 
     gtk_widget_class_set_template_from_resource (widget_class,
                                                  "/com/jonathankang/Weibird/wb-tweet-detail-page.ui");
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  avatar_widget);
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   WbTweetDetailPage,
                                                   main_box);
