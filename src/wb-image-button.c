@@ -54,6 +54,7 @@ typedef struct
     cairo_surface_t *surface;
     PangoLayout *layout;
     gboolean media_loaded;
+    /* Thumbnail quality image uris. */
     gchar *uri;
     gint nth_media;
     gint width;
@@ -391,14 +392,19 @@ wb_image_button_unmap (GtkWidget *widget)
 static void
 wb_image_button_constructed (GObject *object)
 {
+    gchar *mq_uri;
     SoupMessage *msg;
     WbImageButton *self = WB_IMAGE_BUTTON (object);
-
     WbImageButtonPrivate *priv = wb_image_button_get_instance_private (self);
 
-    msg = soup_message_new (SOUP_METHOD_GET, priv->uri);
+    /* Scale middle quality image as thumbnail */
+    mq_uri = wb_util_thumbnail_to_middle (priv->uri);
+
+    msg = soup_message_new (SOUP_METHOD_GET, mq_uri);
     soup_session_queue_message (SOUPSESSION, msg,
                                 on_message_complete, self);
+
+    g_free (mq_uri);
 
     G_OBJECT_CLASS (wb_image_button_parent_class)->constructed (object);
 }

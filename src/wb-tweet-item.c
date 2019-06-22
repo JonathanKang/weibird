@@ -38,7 +38,7 @@ parse_pic_uri (JsonArray *array,
     object = json_node_get_object (element_node);
 
     thumbnail = json_object_get_string_member (object, "thumbnail_pic");
-    uri = wb_util_thumbnail_to_original (thumbnail);
+    uri = g_strdup (thumbnail);
     g_array_append_val (self->picuri_array, uri);
 }
 
