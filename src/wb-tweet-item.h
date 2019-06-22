@@ -38,8 +38,6 @@ struct _WbTweetItem
     gchar *source;
 
     gboolean favourited;
-    gchar *thumbnail_pic;
-    gchar *bmiddle_pic;
     GArray *picuri_array;
 
     gint reposts_count;
