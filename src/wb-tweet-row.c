@@ -21,6 +21,7 @@
 #include <gtk/gtk.h>
 #include <libsoup/soup.h>
 
+#include "wb-avatar-widget.h"
 #include "wb-image-button.h"
 #include "wb-multi-media-widget.h"
 #include "wb-tweet-item.h"
@@ -118,7 +119,7 @@ wb_tweet_row_constructed (GObject *object)
     GtkWidget *source_label;
     GtkWidget *text_label;
     GtkWidget *time_label;
-    WbImageButton *button;
+    WbAvatarWidget *avatar;
     WbMultiMediaWidget *pic_grid;
     WbTweetRow *row = WB_TWEET_ROW (object);
     WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (row);
@@ -130,10 +131,10 @@ wb_tweet_row_constructed (GObject *object)
     if (!priv->retweet)
     {
         /* Profile image (50px by 50px), name, source and time */
-        button = wb_image_button_new (WB_MEDIA_TYPE_AVATAR,
-                                      priv->tweet_item->user->profile_image_url,
-                                      1, 50, 50);
-        priv->profile_image = GTK_WIDGET (button);
+        avatar = wb_avatar_widget_new ();
+        wb_avatar_widget_setup (avatar,
+                                priv->tweet_item->user->profile_image_url);
+        priv->profile_image = GTK_WIDGET (avatar);
         gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
         gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image,
                             FALSE, FALSE, 0);

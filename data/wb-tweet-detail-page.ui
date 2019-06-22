@@ -1,0 +1,165 @@
+<interface domain="weibird">
+    <template class="WbTweetDetailPage" parent="GtkScrolledWindow">
+        <property name="hscrollbar-policy">never</property>
+        <property name="vscrollbar-policy">automatic</property>
+        <property name="visible">True</property>
+        <child>
+            <object class="GtkBox" id="main_box">
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-top">6</property>
+                <property name="margin-bottom">6</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <property name="valign">start</property>
+                <property name="visible">True</property>
+                <child>
+                    <object class="GtkBox" id="header_hbox">
+                        <property name="orientation">horizontal</property>
+                        <property name="spacing">6</property>
+                        <property name="visible">True</property>
+                        <child>
+                            <object class="WbAvatarWidget" id="avatar_widget">
+                            </object>
+                            <packing>
+                                <property name="pack-type">start</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="valign">center</property>
+                                <property name="visible">True</property>
+                                <child>
+                                    <object class="GtkLabel" id="name_label">
+                                        <property name="halign">start</property>
+                                        <property name="visible">True</property>
+                                    </object>
+                                    <packing>
+                                        <property name="pack-type">start</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel" id="source_label">
+                                        <property name="halign">start</property>
+                                        <property name="visible">True</property>
+                                        <style>
+                                            <class name="dim-label"/>
+                                        </style>
+                                    </object>
+                                    <packing>
+                                        <property name="pack-type">start</property>
+                                    </packing>
+                                </child>
+                            </object>
+                            <packing>
+                                <property name="pack-type">start</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="time_label">
+                                <property name="halign">end</property>
+                                <property name="visible">True</property>
+                                <style>
+                                    <class name="dim-label"/>
+                                </style>
+                            </object>
+                            <packing>
+                                <property name="pack-type">end</property>
+                            </packing>
+                        </child>
+                    </object>
+                    <packing>
+                        <property name="pack-type">start</property>
+                    </packing>
+                </child>
+                <child>
+                    <object class="GtkLabel" id="content_label">
+                        <property name="halign">start</property>
+                        <property name="xalign">0</property>
+                        <property name="wrap">True</property>
+                        <property name="visible">True</property>
+                    </object>
+                    <packing>
+                        <property name="pack-type">start</property>
+                    </packing>
+                </child>
+                <child>
+                    <object class="WbMultiMediaWidget" id="mm_widget">
+                        <property name="halign">center</property>
+                    </object>
+                    <packing>
+                        <property name="pack-type">start</property>
+                    </packing>
+                </child>
+                <child>
+                    <object class="GtkBox" id="retweet_box">
+                        <style>
+                            <class name="retweet"/>
+                        </style>
+                    </object>
+                    <packing>
+                        <property name="pack-type">start</property>
+                    </packing>
+                </child>
+                <child>
+                    <object class="GtkBox" id="buttons_box">
+                        <property name="orientation">horizontal</property>
+                        <child>
+                            <object class="GtkButton" id="like_button">
+                                <child>
+                                    <object class="GtkLabel" id="likes_label">
+                                        <property name="visible">True</property>
+                                    </object>
+                                </child>
+                                <style>
+                                    <class name="attitude-buttons"/>
+                                </style>
+                            </object>
+                            <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="pack-type">start</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <object class="GtkButton" id="comment_button">
+                                <signal name="clicked" handler="comment_button_clicked_cb"/>
+                                <child>
+                                    <object class="GtkLabel" id="comments_label">
+                                        <property name="visible">True</property>
+                                    </object>
+                                </child>
+                                <style>
+                                    <class name="attitude-buttons"/>
+                                </style>
+                            </object>
+                            <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="pack-type">start</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <object class="GtkButton" id="repost_button">
+                                <child>
+                                    <object class="GtkLabel" id="reposts_label">
+                                        <property name="visible">True</property>
+                                    </object>
+                                </child>
+                                <style>
+                                    <class name="attitude-buttons"/>
+                                </style>
+                            </object>
+                            <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="pack-type">start</property>
+                            </packing>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

@@ -6,6 +6,7 @@ resource_data = files(
     'wb-main-widget.ui',
     'wb-media-dialog.ui',
     'wb-timeline-list.ui',
+    'wb-tweet-detail-page.ui',
     'wb-window.ui'
 )
 
