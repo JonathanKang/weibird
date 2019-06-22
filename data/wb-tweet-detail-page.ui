@@ -28,6 +28,7 @@
                         <child>
                             <object class="GtkBox">
                                 <property name="orientation">vertical</property>
+                                <property name="valign">center</property>
                                 <property name="visible">True</property>
                                 <child>
                                     <object class="GtkLabel" id="name_label">
@@ -42,6 +43,9 @@
                                     <object class="GtkLabel" id="source_label">
                                         <property name="halign">start</property>
                                         <property name="visible">True</property>
+                                        <style>
+                                            <class name="dim-label"/>
+                                        </style>
                                     </object>
                                     <packing>
                                         <property name="pack-type">start</property>
