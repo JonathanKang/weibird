@@ -31,7 +31,7 @@ struct _WbMultiMediaWidget
 
 typedef struct
 {
-    GArray *images;
+    const GArray *pic_uris;
 } WbMultiMediaWidgetPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbMultiMediaWidget, wb_multi_media_widget, GTK_TYPE_GRID)
@@ -41,13 +41,7 @@ on_image_clicked (GtkButton *button,
                   gpointer user_data)
 {
     gint nth_media;
-    gint width, height;
-    GdkPixbuf *pixbuf;
-    GtkWidget *image;
-    GtkWidget *scrolled;
-    GtkWidget *frame;
     GtkWidget *toplevel;
-    WbMediaType type;
     WbMediaDialog *dialog;
     WbImageButton *image_button;
     WbMultiMediaWidget *mm_widget;
@@ -58,40 +52,12 @@ on_image_clicked (GtkButton *button,
     priv = wb_multi_media_widget_get_instance_private (mm_widget);
 
     nth_media = wb_image_button_get_nth_media (image_button);
-    type = wb_image_button_get_media_type (image_button);
-    pixbuf = wb_image_button_get_pixbuf (image_button);
-
-    /* TODO: Handle clicked signal of the profile image */
-    /* Return directly if it's profile image at the moment */
-    if (type == WB_MEDIA_TYPE_AVATAR)
-    {
-        return;
-    }
-
-    /* Scale the image a bit so that it's not too large */
-    width = gdk_pixbuf_get_width (pixbuf);
-    height = gdk_pixbuf_get_height (pixbuf);
-    image = wb_util_scale_image (pixbuf, &width, &height);
-
-    scrolled = gtk_scrolled_window_new (NULL, NULL);
-    gtk_scrolled_window_set_min_content_height (GTK_SCROLLED_WINDOW (scrolled),
-                                                height < MAX_HEIGHT ? height : MAX_HEIGHT);
-    gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (scrolled),
-                                                height > MAX_HEIGHT ? height : MAX_HEIGHT);
-    gtk_scrolled_window_set_propagate_natural_width (GTK_SCROLLED_WINDOW (scrolled),
-                                                     TRUE);
-    gtk_container_add (GTK_CONTAINER (scrolled), image);
-
-    dialog = wb_media_dialog_new (priv->images, nth_media, scrolled);
-    gtk_window_set_default_size (GTK_WINDOW (dialog),
-                                 width,
-                                 height < MAX_HEIGHT ? height : MAX_HEIGHT);
-    frame = wb_media_dialog_get_frame (dialog);
-    gtk_container_add (GTK_CONTAINER (frame), scrolled);
+    dialog = wb_media_dialog_new (priv->pic_uris, nth_media);
+    /* FIXME: Initialize the dialog in a proper size. */
+    gtk_window_set_default_size (GTK_WINDOW (dialog), 100, 100);
 
     toplevel = gtk_widget_get_toplevel (GTK_WIDGET (button));
     gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (toplevel));
-    gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
 
     gtk_widget_show_all (GTK_WIDGET (dialog));
 }
@@ -108,6 +74,7 @@ wb_multi_media_widget_populate_images (WbMultiMediaWidget *self,
     WbMultiMediaWidgetPrivate *priv;
 
     priv = wb_multi_media_widget_get_instance_private (self);
+    priv->pic_uris = pic_uris;
 
     n_childs = pic_uris->len;
 
@@ -131,7 +98,6 @@ wb_multi_media_widget_populate_images (WbMultiMediaWidget *self,
         button = wb_image_button_new (WB_MEDIA_TYPE_IMAGE,
                                       g_array_index (pic_uris, gchar *, i),
                                       i + 1, width, height);
-        g_array_append_val (priv->images, button);
 
         g_signal_connect (button, "clicked",
                           G_CALLBACK (on_image_clicked), self);
@@ -178,35 +144,13 @@ wb_multi_media_widget_populate_images (WbMultiMediaWidget *self,
 }
 
 static void
-wb_multi_media_widget_finalize (GObject *object)
-{
-    WbMultiMediaWidget *self = WB_MULTI_MEDIA_WIDGET (object);
-    WbMultiMediaWidgetPrivate *priv;
-
-    priv = wb_multi_media_widget_get_instance_private (self);
-
-    g_array_free (priv->images, FALSE);
-
-    G_OBJECT_CLASS (wb_multi_media_widget_parent_class)->finalize (object);
-}
-
-static void
 wb_multi_media_widget_class_init(WbMultiMediaWidgetClass *klass)
 {
-    GObjectClass *object_class = G_OBJECT_CLASS(klass);
-
-    object_class->finalize = wb_multi_media_widget_finalize;
 }
 
 static void
 wb_multi_media_widget_init (WbMultiMediaWidget *self)
 {
-    WbMultiMediaWidgetPrivate *priv;
-
-    priv = wb_multi_media_widget_get_instance_private (self);
-
-    priv->images = g_array_new (FALSE, FALSE, sizeof (WbImageButton *));
-
     gtk_grid_set_column_spacing (GTK_GRID (self), 3);
     gtk_grid_set_row_spacing (GTK_GRID (self), 3);
 }

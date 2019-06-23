@@ -29,7 +29,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (WbMediaDialog, wb_media_dialog, WB, MEDIA_DIALOG, GtkWindow)
 
 GtkWidget *wb_media_dialog_get_frame (WbMediaDialog *dialog);
-WbMediaDialog *wb_media_dialog_new (GArray *images, gint nth_media, GtkWidget *cur_image);
+WbMediaDialog *wb_media_dialog_new (const GArray *pic_uris, gint nth_media);
 
 G_END_DECLS
 
