@@ -36,6 +36,7 @@ void wb_util_init_soup_session (void);
 void wb_util_finalize_soup_session (void);
 gchar *wb_util_format_time_string (const gchar *time);
 gchar *wb_util_format_source_string (const gchar *source);
+gchar *wb_util_thumbnail_to_middle (const gchar *thumbnail);
 gchar *wb_util_thumbnail_to_original (const gchar *thumbnail);
 GtkWidget *wb_util_scale_image (GdkPixbuf *pixbuf, gint *width, gint *height);
 gchar *wb_util_get_access_token (void);

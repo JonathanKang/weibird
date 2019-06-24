@@ -38,7 +38,7 @@ parse_pic_uri (JsonArray *array,
     object = json_node_get_object (element_node);
 
     thumbnail = json_object_get_string_member (object, "thumbnail_pic");
-    uri = wb_util_thumbnail_to_original (thumbnail);
+    uri = g_strdup (thumbnail);
     g_array_append_val (self->picuri_array, uri);
 }
 
@@ -56,13 +56,6 @@ wb_tweet_item_parse_json_object (WbTweetItem *self,
     self->text = g_strdup (json_object_get_string_member (object, "text"));
     self->source = g_strdup (json_object_get_string_member (object, "source"));
     self->favourited = json_object_get_boolean_member (object, "favorited");
-    if (json_object_has_member (object, "thumbnail_pic"))
-    {
-        self->thumbnail_pic = g_strdup (json_object_get_string_member (object,
-                                                                       "thumbnail_pic"));
-        self->bmiddle_pic = g_strdup (json_object_get_string_member (object,
-                                                                     "bmiddle_pic"));
-    }
     self->reposts_count = json_object_get_int_member (object, "reposts_count");
     self->comments_count = json_object_get_int_member (object, "comments_count");
     self->attitudes_count = json_object_get_int_member (object, "attitudes_count");
@@ -94,8 +87,6 @@ wb_tweet_item_finalize (GObject *object)
     g_free (self->idstr);
     g_free (self->text);
     g_free (self->source);
-    g_free (self->thumbnail_pic);
-    g_free (self->bmiddle_pic);
     g_object_unref (self->user);
 
     G_OBJECT_CLASS (wb_tweet_item_parent_class)->finalize (object);

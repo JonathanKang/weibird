@@ -2,8 +2,9 @@
 <interface domain="weibird">
     <template class="WbMediaDialog" parent="GtkWindow">
         <property name="can-focus">False</property>
-        <property name="type-hint">dialog</property>
         <property name="decorated">False</property>
+        <property name="modal">True</property>
+        <property name="type-hint">dialog</property>
         <signal name="button-press-event" handler="button_press_event_cb"/>
         <signal name="key-press-event" handler="key_press_event_cb"/>
         <signal name="enter-notify-event" handler="enter_notify_event_cb"/>
@@ -13,6 +14,11 @@
                 <child>
                     <object class="GtkFrame" id="frame">
                         <property name="shadow-type">none</property>
+                        <child>
+                            <object class="GtkScrolledWindow" id="scrolled">
+                                <property name="propagate-natural-width">True</property>
+                            </object>
+                        </child>
                     </object>
                 </child>
                 <child type="overlay">

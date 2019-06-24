@@ -19,9 +19,9 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "wb-avatar-widget.h"
 #include "wb-comment.h"
 #include "wb-comment-row.h"
-#include "wb-image-button.h"
 #include "wb-util.h"
 
 enum {
@@ -106,13 +106,12 @@ wb_comment_row_constructed (GObject *object)
     GtkWidget *comment_label;
     GtkWidget *name_label;
     GtkWidget *time_label;
-    WbImageButton *avatar;
+    WbAvatarWidget *avatar;
     WbCommentRow *self = WB_COMMENT_ROW (object);
     WbCommentRowPrivate *priv = wb_comment_row_get_instance_private (self);
 
-    avatar = wb_image_button_new (WB_MEDIA_TYPE_AVATAR,
-                                  priv->comment->user->profile_image_url,
-                                  1, 50, 50);
+    avatar = wb_avatar_widget_new ();
+    wb_avatar_widget_setup (avatar, priv->comment->user->profile_image_url);
     gtk_grid_attach (GTK_GRID (priv->grid), GTK_WIDGET (avatar), 0, 0, 1, 1);
 
     if (g_strcmp0 (priv->comment->user->nickname, "") != 0)
