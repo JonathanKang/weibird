@@ -1,3 +1,13 @@
+Weibird 0.1.6
+=============
+
+* Storing app key and secret in GSettings
+* Various memory leak fixes
+* Added support for commenting on a tweet and comment
+* Added custom drawing to support loading animation for image buttons
+* Rewrite WbTweetDetailPage class
+* Improved memory consumption in terms of image loading
+
 Weibird 0.1.5
 =============
 
