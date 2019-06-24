@@ -20,4 +20,17 @@
   <url type="bugtracker">https://github.com/JonathanKang/weibird/issues</url>
   <update_contact>jonathankang@gnome.org</update_contact>
   <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.6" date="2019-06-24">
+      <description>
+        <p>Changes in Weibird 0.1.6</p>
+        <ul>
+          <li>Add support for commenting on a tweet or comment</li>
+          <li>Add loading animation for loading images</li>
+          <li>Improved memory consumption in terms of image loading</li>
+          <li>Various memory leak fixes</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
 </component>
