@@ -37,8 +37,12 @@ struct _WbCommentRow
 
 typedef struct
 {
-    gint reply_count;
     GtkWidget *grid;
+    GtkWidget *avatar;
+    GtkWidget *name_label;
+    GtkWidget *time_label;
+    GtkWidget *comment_label;
+    GtkWidget *reply_listbox;
     WbComment *comment;
 } WbCommentRowPrivate;
 
@@ -60,7 +64,6 @@ void
 wb_comment_row_insert_reply (WbCommentRow *self,
                              WbComment *comment)
 {
-    GtkStyleContext *context;
     GtkWidget *comment_label;
     GtkWidget *name_label;
     GtkWidget *hbox;
@@ -70,11 +73,7 @@ wb_comment_row_insert_reply (WbCommentRow *self,
 
     priv = wb_comment_row_get_instance_private (self);
 
-    priv->reply_count++;
-
     hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
-    context = gtk_widget_get_style_context (hbox);
-    gtk_style_context_add_class (context, "reply-comments");
 
     if (g_strcmp0 (comment->user->nickname, "") != 0)
     {
@@ -94,52 +93,40 @@ wb_comment_row_insert_reply (WbCommentRow *self,
     gtk_box_pack_start (GTK_BOX (hbox), comment_label, FALSE, FALSE, 0);
     gtk_widget_show_all (hbox);
 
-    gtk_grid_attach (GTK_GRID (priv->grid), hbox,
-                     1, priv->reply_count + 1, 2, 1);
+    gtk_container_add (GTK_CONTAINER (priv->reply_listbox), hbox);
+
+    if (gtk_widget_get_visible (priv->reply_listbox) == FALSE)
+    {
+        gtk_widget_show (priv->reply_listbox);
+    }
 }
 
 static void
 wb_comment_row_constructed (GObject *object)
 {
     gchar *created_at;
-    GtkStyleContext *context;
-    GtkWidget *comment_label;
-    GtkWidget *name_label;
-    GtkWidget *time_label;
-    WbAvatarWidget *avatar;
     WbCommentRow *self = WB_COMMENT_ROW (object);
     WbCommentRowPrivate *priv = wb_comment_row_get_instance_private (self);
 
-    avatar = wb_avatar_widget_new ();
-    wb_avatar_widget_setup (avatar, priv->comment->user->profile_image_url);
-    gtk_grid_attach (GTK_GRID (priv->grid), GTK_WIDGET (avatar), 0, 0, 1, 1);
+    wb_avatar_widget_setup (WB_AVATAR_WIDGET (priv->avatar),
+                            priv->comment->user->profile_image_url);
 
     if (g_strcmp0 (priv->comment->user->nickname, "") != 0)
     {
-        name_label = gtk_label_new (priv->comment->user->nickname);
+        gtk_label_set_text (GTK_LABEL (priv->name_label),
+                            priv->comment->user->nickname);
     }
     else
     {
-        name_label = gtk_label_new (priv->comment->user->name);
+        gtk_label_set_text (GTK_LABEL (priv->name_label),
+                            priv->comment->user->name);
     }
-    gtk_widget_set_halign (name_label, GTK_ALIGN_START);
-    gtk_grid_attach (GTK_GRID (priv->grid), GTK_WIDGET (name_label), 1, 0, 1, 1);
 
     created_at = wb_util_format_time_string (priv->comment->created_at);
-    time_label = gtk_label_new (created_at);
-    context = gtk_widget_get_style_context (time_label);
-    gtk_style_context_add_class (context, "dim-label");
-    gtk_widget_set_halign (time_label, GTK_ALIGN_END);
-    gtk_grid_attach (GTK_GRID (priv->grid), GTK_WIDGET (time_label), 2, 0, 1, 1);
+    gtk_label_set_text (GTK_LABEL (priv->time_label), created_at);
+    gtk_label_set_text (GTK_LABEL (priv->comment_label), priv->comment->text);
 
-    comment_label = gtk_label_new (priv->comment->text);
-    gtk_widget_set_halign (comment_label, GTK_ALIGN_START);
-    gtk_widget_set_hexpand (comment_label, TRUE);
-    gtk_label_set_line_wrap (GTK_LABEL (comment_label), TRUE);
-    gtk_grid_attach (GTK_GRID (priv->grid), GTK_WIDGET (comment_label),
-                     1, 1, 2, 1);
-
-    gtk_widget_show_all (GTK_WIDGET (self));
+    g_free (created_at);
 
     G_OBJECT_CLASS (wb_comment_row_parent_class)->constructed (object);
 }
@@ -197,6 +184,7 @@ static void
 wb_comment_row_class_init (WbCommentRowClass *klass)
 {
 		GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
 		object_class->constructed = wb_comment_row_constructed;
 		object_class->finalize = wb_comment_row_finalize;
@@ -211,25 +199,26 @@ wb_comment_row_class_init (WbCommentRowClass *klass)
                                                         G_PARAM_CONSTRUCT_ONLY |
                                                         G_PARAM_STATIC_STRINGS);
     g_object_class_install_properties (object_class, N_PROPS, obj_properties);
+
+    gtk_widget_class_set_template_from_resource (widget_class, "/com/jonathankang/Weibird/wb-comment-row.ui");
+    gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
+                                                  grid);
+    gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
+                                                  avatar);
+    gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
+                                                  name_label);
+    gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
+                                                  time_label);
+    gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
+                                                  comment_label);
+    gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
+                                                  reply_listbox);
 }
 
 static void
 wb_comment_row_init (WbCommentRow *self)
 {
-    WbCommentRowPrivate *priv;
-
-    priv = wb_comment_row_get_instance_private (self);
-
-    priv->reply_count = 0;
-
-    priv->grid = gtk_grid_new ();
-    gtk_grid_set_column_spacing (GTK_GRID (priv->grid), 6);
-    gtk_grid_set_row_spacing (GTK_GRID (priv->grid), 6);
-    gtk_widget_set_margin_start (GTK_WIDGET (priv->grid), 12);
-    gtk_widget_set_margin_end (GTK_WIDGET (priv->grid), 12);
-    gtk_widget_set_margin_top (GTK_WIDGET (priv->grid), 6);
-    gtk_widget_set_margin_bottom (GTK_WIDGET (priv->grid), 6);
-    gtk_container_add (GTK_CONTAINER (self), priv->grid);
+    gtk_widget_init_template (GTK_WIDGET (self));
 }
 
 /**
