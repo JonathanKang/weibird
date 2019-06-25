@@ -1,6 +1,6 @@
 /*
  *  Weibird - View and compose weibo
- *  Copyright (C) 2018-2019 Jonathan Kang <jonathankang@gnome.org>.
+ *  Copyright (C) 2019 Jonathan Kang <jonathankang@gnome.org>.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,33 +16,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WB_HEADERBAR_H_
-#define WB_HEADERBAR_H_
+#pragma once
 
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-/*
- * WbHeaderBarMode:
- * @WB_HEADERBAR_MODE_LIST:
- * @WB_HEADERBAR_MODE_DETAIL:
- *
- * The mode.
- */
-typedef enum
-{
-    WB_HEADERBAR_MODE_LIST,
-    WB_HEADERBAR_MODE_DETAIL,
-    WB_HEADERBAR_MODE_PROFILE
-} WbHeaderbarMode;
+#define WB_TYPE_PROFILE_PAGE (wb_profile_page_get_type ())
 
-#define WB_TYPE_HEADERBAR (wb_headerbar_get_type ())
-G_DECLARE_FINAL_TYPE (WbHeaderbar, wb_headerbar, WB, HEADERBAR, GtkHeaderBar)
+G_DECLARE_FINAL_TYPE (WbProfilePage, wb_profile_page, WB, PROFILE_PAGE, GtkBox)
 
-void wb_headerbar_set_mode (WbHeaderbar *self, WbHeaderbarMode mode);
-WbHeaderbar *wb_headerbar_new (void);
+void wb_profile_page_setup (WbProfilePage *profile_page);
+WbProfilePage *wb_profile_page_new (const gchar *uid);
 
-G_BEGIN_DECLS
-
-#endif /* WB_HEADERBAR_H_ */
+G_END_DECLS

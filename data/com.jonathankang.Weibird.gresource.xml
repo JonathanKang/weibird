@@ -5,6 +5,7 @@
         <file preprocess='xml-stripblanks'>wb-headerbar.ui</file>
         <file preprocess='xml-stripblanks'>wb-main-widget.ui</file>
         <file preprocess='xml-stripblanks'>wb-media-dialog.ui</file>
+        <file preprocess='xml-stripblanks'>wb-profile-page.ui</file>
         <file>wb-style.css</file>
         <file preprocess='xml-stripblanks'>wb-timeline-list.ui</file>
         <file preprocess='xml-stripblanks'>wb-tweet-detail-page.ui</file>

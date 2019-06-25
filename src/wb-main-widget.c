@@ -25,6 +25,7 @@
 
 #include "wb-enums.h"
 #include "wb-main-widget.h"
+#include "wb-profile-page.h"
 #include "wb-timeline-list.h"
 #include "wb-tweet-detail-page.h"
 #include "wb-tweet-row.h"
@@ -360,6 +361,12 @@ notify_mode_cb (GObject *object,
 
                 gtk_stack_add_named (stack, GTK_WIDGET (detail), "detail");
                 gtk_stack_set_visible_child_name (stack, "detail");
+            }
+            break;
+        case WB_MAIN_WIDGET_MODE_PROFILE:
+            {
+                g_print ("profile page\n");
+                gtk_stack_set_visible_child_name (stack, "profile");
             }
             break;
         default:

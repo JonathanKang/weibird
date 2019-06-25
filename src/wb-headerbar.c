@@ -82,6 +82,9 @@ notify_mode_cb (GObject *object,
         case WB_HEADERBAR_MODE_DETAIL:
             gtk_widget_show (priv->back_button);
             break;
+        case WB_HEADERBAR_MODE_PROFILE:
+            gtk_widget_show (priv->back_button);
+            break;
         default:
             g_assert_not_reached ();
             break;

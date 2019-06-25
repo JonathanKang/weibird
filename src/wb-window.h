@@ -26,6 +26,7 @@ G_BEGIN_DECLS
 #define WB_TYPE_WINDOW (wb_window_get_type ())
 G_DECLARE_FINAL_TYPE (WbWindow, wb_window, WB, WINDOW, GtkApplicationWindow)
 
+GtkWidget *wb_window_get_main_widget (WbWindow *window);
 GtkWidget *wb_window_new (GtkApplication *application);
 
 G_END_DECLS

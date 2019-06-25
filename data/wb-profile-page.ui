@@ -1,0 +1,127 @@
+<interface domain="weibird">
+    <template class="WbProfilePage" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <property name="visible">True</property>
+        <child>
+            <object class="GtkBox">
+                <property name="can-focus">False</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-top">6</property>
+                <property name="margin-bottom">6</property>
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <property name="valign">start</property>
+                <property name="visible">True</property>
+                <child>
+                    <object class="WbAvatarWidget" id="avatar">
+                        <property name="can-focus">False</property>
+                        <property name="visible">True</property>
+                    </object>
+                    <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                    </packing>
+                </child>
+                <child>
+                    <object class="GtkBox">
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <property name="valign">center</property>
+                        <property name="visible">True</property>
+                        <child>
+                            <object class="GtkLabel" id="nickname_label">
+                                <property name="can-focus">False</property>
+                                <property name="visible">True</property>
+                            </object>
+                            <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="screenname_label">
+                                <property name="can-focus">False</property>
+                                <property name="visible">True</property>
+                            </object>
+                            <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                            </packing>
+                        </child>
+                    </object>
+                    <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                    </packing>
+                </child>
+            </object>
+            <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+            </packing>
+        </child>
+        <child>
+            <object class="GtkLabel" id="intro_label">
+                <property name="can-focus">False</property>
+                <property name="visible">True</property>
+            </object>
+            <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+            </packing>
+        </child>
+        <child>
+            <object class="GtkBox">
+                <property name="can-focus">False</property>
+                <property name="orientation">horizontal</property>
+                <property name="visible">True</property>
+                <child>
+                    <object class="GtkLabel" id="followings_label">
+                        <property name="can-focus">False</property>
+                        <property name="visible">True</property>
+                    </object>
+                    <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                    </packing>
+                </child>
+                <child>
+                    <object class="GtkLabel" id="followers_label">
+                        <property name="can-focus">False</property>
+                        <property name="visible">True</property>
+                    </object>
+                    <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                    </packing>
+                </child>
+                <child>
+                    <object class="GtkLabel" id="tweets_label">
+                        <property name="can-focus">False</property>
+                        <property name="visible">True</property>
+                    </object>
+                    <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                    </packing>
+                </child>
+            </object>
+            <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+            </packing>
+        </child>
+    </template>
+</interface>

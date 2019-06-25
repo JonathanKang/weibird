@@ -22,12 +22,16 @@
 #include <libsoup/soup.h>
 
 #include "wb-avatar-widget.h"
+#include "wb-enums.h"
 #include "wb-image-button.h"
+#include "wb-main-widget.h"
 #include "wb-multi-media-widget.h"
 #include "wb-name-button.h"
+#include "wb-profile-page.h"
 #include "wb-tweet-item.h"
 #include "wb-tweet-row.h"
 #include "wb-util.h"
+#include "wb-window.h"
 
 enum
 {
@@ -108,6 +112,47 @@ wb_tweet_row_insert_retweeted_item (WbTweetRow *self,
 }
 
 static void
+name_button_clicked_cb (GtkButton *button,
+                        gpointer user_data)
+{
+    GtkWidget *main_widget;
+    GtkWidget *toplevel;
+    WbProfilePage *profile_page;
+    WbTweetRow *row;
+    WbTweetRowPrivate *priv;
+
+    row = WB_TWEET_ROW (user_data);
+    priv = wb_tweet_row_get_instance_private (row);
+
+    toplevel = gtk_widget_get_toplevel (GTK_WIDGET (button));
+    profile_page = wb_profile_page_new (priv->tweet_item->user->idstr);
+    main_widget = wb_window_get_main_widget (WB_WINDOW (toplevel));
+    gtk_stack_add_named (GTK_STACK (main_widget),
+                         GTK_WIDGET (profile_page), "profile");
+
+    if (gtk_widget_is_toplevel (toplevel))
+    {
+        GAction *mode;
+        GEnumClass *eclass;
+        GEnumValue *evalue;
+
+        mode = g_action_map_lookup_action (G_ACTION_MAP (toplevel), "view-mode");
+        eclass = g_type_class_ref (WB_TYPE_MAIN_WIDGET_MODE);
+        evalue = g_enum_get_value (eclass, WB_MAIN_WIDGET_MODE_PROFILE);
+
+        g_action_activate (mode, g_variant_new_string (evalue->value_nick));
+
+        g_type_class_unref (eclass);
+    }
+    else
+    {
+        g_debug ("Widget not in toplevel window, not switching toolbar mode");
+    }
+
+    wb_profile_page_setup (profile_page);
+}
+
+static void
 wb_tweet_row_constructed (GObject *object)
 {
     gchar *created_at;
@@ -154,6 +199,7 @@ wb_tweet_row_constructed (GObject *object)
         name_button = wb_name_button_new ();
         wb_name_button_set_text (name_button, priv->tweet_item->user->name);
     }
+    g_signal_connect (name_button, "clicked", G_CALLBACK (name_button_clicked_cb), row);
     gtk_widget_set_halign (GTK_WIDGET (name_button), GTK_ALIGN_START);
     gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (name_button), TRUE, TRUE, 0);
 

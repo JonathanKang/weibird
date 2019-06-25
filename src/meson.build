@@ -12,6 +12,7 @@ sources = files(
     'wb-media-dialog.c',
     'wb-multi-media-widget.c',
     'wb-name-button.c',
+    'wb-profile-page.c',
     'wb-timeline-list.c',
     'wb-tweet-detail-page.c',
     'wb-tweet-item.c',

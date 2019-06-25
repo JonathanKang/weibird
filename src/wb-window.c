@@ -41,6 +41,19 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbWindow, wb_window, GTK_TYPE_APPLICATION_WINDOW)
 
+GtkWidget *
+wb_window_get_main_widget (WbWindow *self)
+{
+    WbWindowPrivate *priv;
+
+    g_return_val_if_fail (WB_IS_WINDOW (self), NULL);
+    g_print ("get main widget\n");
+
+    priv = wb_window_get_instance_private (self);
+
+    return priv->main_widget;
+}
+
 static void
 on_action_radio (GSimpleAction *action,
                  GVariant *variant,
@@ -108,6 +121,10 @@ on_view_mode (GSimpleAction *action,
         case WB_MAIN_WIDGET_MODE_DETAIL:
             wb_headerbar_set_mode (headerbar, WB_HEADERBAR_MODE_DETAIL);
             wb_main_widget_set_mode (main_widget, WB_MAIN_WIDGET_MODE_DETAIL);
+            break;
+        case WB_MAIN_WIDGET_MODE_PROFILE:
+            wb_headerbar_set_mode (headerbar, WB_HEADERBAR_MODE_PROFILE);
+            wb_main_widget_set_mode (main_widget, WB_MAIN_WIDGET_MODE_PROFILE);
             break;
         default:
             g_assert_not_reached ();

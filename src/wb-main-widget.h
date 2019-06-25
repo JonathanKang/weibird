@@ -29,13 +29,15 @@ G_BEGIN_DECLS
  * WbMainWidgetMode:
  * @WB_MAIN_WIDGET_MODE_LIST:
  * @WB_MAIN_WIDGET_MODE_DETAIL:
+ * @WB_MAIN_WIDGET_MODE_PROFILE:
  *
  * The mode, mirroring the GlEventToolbar mode, used to show events.
  */
 typedef enum
 {
     WB_MAIN_WIDGET_MODE_LIST,
-    WB_MAIN_WIDGET_MODE_DETAIL
+    WB_MAIN_WIDGET_MODE_DETAIL,
+    WB_MAIN_WIDGET_MODE_PROFILE
 } WbMainWidgetMode;
 
 #define WB_TYPE_MAIN_WIDGET (wb_main_widget_get_type())
