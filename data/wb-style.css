@@ -25,3 +25,31 @@
     background-color: alpha(grey, 0.1);
     border-left: 3px solid alpha(currentColor, 0.2);
 }
+
+.name-button {
+    font-weight: bold;
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    border-radius: 0px;
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
+    outline-offset: 0px;
+    padding: 0px;
+    min-height: 0px;
+    margin-bottom: -1px;
+    text-shadow: none;
+}
+
+.name-button:hover {
+    border-bottom: 1px solid currentColor;
+}
+
+.name-button:active {
+    color: inherit;
+    background-color: alpha(currentColor, 0.4);
+}
+
+.name-button:backdrop {
+    background-color: transparent;
+}

@@ -31,7 +31,7 @@
                                 <property name="valign">center</property>
                                 <property name="visible">True</property>
                                 <child>
-                                    <object class="GtkLabel" id="name_label">
+                                    <object class="WbNameButton" id="name_button">
                                         <property name="halign">start</property>
                                         <property name="visible">True</property>
                                     </object>

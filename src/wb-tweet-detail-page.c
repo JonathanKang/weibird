@@ -28,6 +28,7 @@
 #include "wb-compose-window.h"
 #include "wb-image-button.h"
 #include "wb-multi-media-widget.h"
+#include "wb-name-button.h"
 #include "wb-tweet-detail-page.h"
 #include "wb-tweet-row.h"
 #include "wb-util.h"
@@ -52,7 +53,7 @@ typedef struct
     GtkWidget *main_box;
     GtkWidget *buttons_box;
     GtkWidget *retweet_box;
-    GtkWidget *name_label;
+    GtkWidget *name_button;
     GtkWidget *source_label;
     GtkWidget *time_label;
     GtkWidget *content_label;
@@ -345,13 +346,13 @@ wb_tweet_detail_page_constructed (GObject *object)
 
     if (g_strcmp0 (priv->tweet_item->user->nickname, "") != 0)
     {
-        gtk_label_set_text (GTK_LABEL (priv->name_label),
-                            priv->tweet_item->user->nickname);
+        wb_name_button_set_text (WB_NAME_BUTTON (priv->name_button),
+                                 priv->tweet_item->user->nickname);
     }
     else
     {
-        gtk_label_set_text (GTK_LABEL (priv->name_label),
-                            priv->tweet_item->user->name);
+        wb_name_button_set_text (WB_NAME_BUTTON (priv->name_button),
+                                 priv->tweet_item->user->name);
     }
 
     if (g_strcmp0 (priv->tweet_item->source, "") != 0)
@@ -526,7 +527,7 @@ wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
                                                   retweet_box);
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   WbTweetDetailPage,
-                                                  name_label);
+                                                  name_button);
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   WbTweetDetailPage,
                                                   source_label);

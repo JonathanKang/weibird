@@ -24,6 +24,7 @@
 #include "wb-avatar-widget.h"
 #include "wb-image-button.h"
 #include "wb-multi-media-widget.h"
+#include "wb-name-button.h"
 #include "wb-tweet-item.h"
 #include "wb-tweet-row.h"
 #include "wb-util.h"
@@ -115,12 +116,12 @@ wb_tweet_row_constructed (GObject *object)
     GtkWidget *hbox1;
     GtkWidget *hbox2;
     GtkWidget *vbox;
-    GtkWidget *name_label;
     GtkWidget *source_label;
     GtkWidget *text_label;
     GtkWidget *time_label;
     WbAvatarWidget *avatar;
     WbMultiMediaWidget *pic_grid;
+    WbNameButton *name_button;
     WbTweetRow *row = WB_TWEET_ROW (object);
     WbTweetRowPrivate *priv = wb_tweet_row_get_instance_private (row);
 
@@ -145,20 +146,22 @@ wb_tweet_row_constructed (GObject *object)
 
     if (g_strcmp0 (priv->tweet_item->user->nickname, "") != 0)
     {
-        name_label = gtk_label_new (priv->tweet_item->user->nickname);
+        name_button = wb_name_button_new ();
+        wb_name_button_set_text (name_button, priv->tweet_item->user->nickname);
     }
     else
     {
-        name_label = gtk_label_new (priv->tweet_item->user->name);
+        name_button = wb_name_button_new ();
+        wb_name_button_set_text (name_button, priv->tweet_item->user->name);
     }
-    gtk_widget_set_halign (name_label, GTK_ALIGN_START);
-    gtk_box_pack_start (GTK_BOX (vbox), name_label, TRUE, TRUE, 0);
+    gtk_widget_set_halign (GTK_WIDGET (name_button), GTK_ALIGN_START);
+    gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (name_button), TRUE, TRUE, 0);
 
     if (!priv->retweet && g_strcmp0 (priv->tweet_item->source, "") != 0)
     {
         gchar *source;
 
-        gtk_widget_set_valign (name_label, GTK_ALIGN_END);
+        gtk_widget_set_valign (GTK_WIDGET (name_button), GTK_ALIGN_END);
 
         source = wb_util_format_source_string (priv->tweet_item->source);
         source_label = gtk_label_new (source);

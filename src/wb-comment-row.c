@@ -22,6 +22,7 @@
 #include "wb-avatar-widget.h"
 #include "wb-comment.h"
 #include "wb-comment-row.h"
+#include "wb-name-button.h"
 #include "wb-util.h"
 
 enum {
@@ -39,7 +40,7 @@ typedef struct
 {
     GtkWidget *grid;
     GtkWidget *avatar;
-    GtkWidget *name_label;
+    GtkWidget *name_button;
     GtkWidget *time_label;
     GtkWidget *comment_label;
     GtkWidget *reply_listbox;
@@ -65,8 +66,8 @@ wb_comment_row_insert_reply (WbCommentRow *self,
                              WbComment *comment)
 {
     GtkWidget *comment_label;
-    GtkWidget *name_label;
     GtkWidget *hbox;
+    WbNameButton *name_button;
     WbCommentRowPrivate *priv;
 
     g_return_if_fail (WB_COMMENT_ROW (self));
@@ -77,15 +78,17 @@ wb_comment_row_insert_reply (WbCommentRow *self,
 
     if (g_strcmp0 (comment->user->nickname, "") != 0)
     {
-        name_label = gtk_label_new (comment->user->nickname);
+        name_button = wb_name_button_new ();
+        wb_name_button_set_text (name_button, comment->user->nickname);
     }
     else
     {
-        name_label = gtk_label_new (comment->user->name);
+        name_button = wb_name_button_new ();
+        wb_name_button_set_text (name_button, comment->user->name);
     }
-    gtk_widget_set_halign (name_label, GTK_ALIGN_START);
-    gtk_widget_set_valign (name_label, GTK_ALIGN_START);
-    gtk_box_pack_start (GTK_BOX (hbox), name_label, FALSE, FALSE, 0);
+    gtk_widget_set_halign (GTK_WIDGET (name_button), GTK_ALIGN_START);
+    gtk_widget_set_valign (GTK_WIDGET (name_button), GTK_ALIGN_START);
+    gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (name_button), FALSE, FALSE, 0);
 
     comment_label = gtk_label_new (comment->text);
     gtk_widget_set_halign (comment_label, GTK_ALIGN_START);
@@ -113,13 +116,13 @@ wb_comment_row_constructed (GObject *object)
 
     if (g_strcmp0 (priv->comment->user->nickname, "") != 0)
     {
-        gtk_label_set_text (GTK_LABEL (priv->name_label),
-                            priv->comment->user->nickname);
+        wb_name_button_set_text (WB_NAME_BUTTON (priv->name_button),
+                                 priv->comment->user->nickname);
     }
     else
     {
-        gtk_label_set_text (GTK_LABEL (priv->name_label),
-                            priv->comment->user->name);
+        wb_name_button_set_text (WB_NAME_BUTTON (priv->name_button),
+                                 priv->comment->user->name);
     }
 
     created_at = wb_util_format_time_string (priv->comment->created_at);
@@ -206,7 +209,7 @@ wb_comment_row_class_init (WbCommentRowClass *klass)
     gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
                                                   avatar);
     gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
-                                                  name_label);
+                                                  name_button);
     gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
                                                   time_label);
     gtk_widget_class_bind_template_child_private (widget_class, WbCommentRow,
