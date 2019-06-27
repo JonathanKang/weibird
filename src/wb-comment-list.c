@@ -155,7 +155,8 @@ wb_comment_list_add_comment (WbCommentList *self,
         }
         else
         {
-            g_warning ("Cannot make call (comments/reply): %s", error->message);
+            g_warning ("Error calling Weibo API(2/comments/reply): %s",
+                       error->message);
             g_error_free (error);
         }
     }

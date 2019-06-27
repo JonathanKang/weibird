@@ -180,7 +180,7 @@ on_web_view_decide_policy (WebKitWebView *web_view,
         rest_proxy_call_sync (token_call, &error);
         if (error != NULL)
         {
-            g_error ("Cannot make call: %s", error->message);
+            g_error ("Unable to get access token: %s", error->message);
 
             g_error_free (error);
             g_object_unref (token_call);

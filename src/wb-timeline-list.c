@@ -178,7 +178,8 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
     rest_proxy_call_sync (call, &error);
     if (error != NULL)
     {
-        g_error ("Cannot make call: %s", error->message);
+        g_error ("Error calling Weibo API(2/statuses/home_timeline): %s",
+                 error->message);
         g_error_free (error);
     }
 

@@ -123,7 +123,8 @@ fetch_comments (WbTweetDetailPage *self)
     rest_proxy_call_sync (call, &error);
     if (error != NULL)
     {
-        g_error ("Cannot make call: %s", error->message);
+        g_error ("Error calling Weibo API(2/comments/show): %s",
+                 error->message);
         g_error_free (error);
     }
 
@@ -237,7 +238,8 @@ wb_tweet_detail_page_add_comment (WbTweetDetailPage *self,
         }
         else
         {
-            g_warning ("Cannot make call (comments/create): %s", error->message);
+            g_warning ("Error calling Weibo API(2/comments/create): %s",
+                       error->message);
             g_error_free (error);
         }
     }
