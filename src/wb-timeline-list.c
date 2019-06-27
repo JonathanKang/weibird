@@ -27,6 +27,12 @@
 #include "wb-tweet-row.h"
 #include "wb-util.h"
 
+enum
+{
+    LOADED,
+    LAST_SIGNAL
+};
+
 struct _WbTimelineList
 {
     /*< private >*/
@@ -45,6 +51,8 @@ typedef struct
 } WbTimelineListPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbTimelineList, wb_timeline_list, GTK_TYPE_BOX)
+
+static guint signals[LAST_SIGNAL] = { 0 };
 
 WbTweetItem *
 wb_timeline_list_get_tweet_item (WbTimelineList *self)
@@ -143,17 +151,66 @@ parse_weibo_post (JsonArray *array,
     g_object_unref (tweet_item);
 }
 
+static void
+statuses_home_timeline_finished_cb (RestProxyCall *call,
+                                    const GError *error,
+                                    GObject *weak_object,
+                                    gpointer user_data)
+{
+    const gchar *payload;
+    goffset payload_length;
+    GError *err = NULL;
+    JsonNode *root_node;
+    JsonParser *parser;
+    WbTimelineList *self;
+    WbTimelineListPrivate *priv;
+
+    self = WB_TIMELINE_LIST (user_data);
+    priv = wb_timeline_list_get_instance_private (self);
+
+    payload = rest_proxy_call_get_payload (call);
+    payload_length = rest_proxy_call_get_payload_length (call);
+
+    parser = json_parser_new ();
+    if (!json_parser_load_from_data (parser, payload, payload_length, &err))
+    {
+        g_warning ("json_parser_load_from_data () failed: %s (%s, %d)",
+                   err->message,
+                   g_quark_to_string (err->domain),
+                   err->code);
+        g_error_free (err);
+    }
+
+    root_node = json_parser_get_root (parser);
+    if (JSON_NODE_HOLDS_OBJECT (root_node))
+    {
+        JsonObject *object;
+
+        object = json_node_get_object (root_node);
+
+        if (json_object_has_member (object, "statuses"))
+        {
+            JsonArray *array;
+
+            array = json_object_get_array_member (object, "statuses");
+            json_array_foreach_element (array, parse_weibo_post, self);
+
+            priv->batch_fetched++;
+        }
+    }
+
+    g_signal_emit (self, signals[LOADED], 0);
+
+    g_object_unref (parser);
+}
+
 void
 wb_timeline_list_get_home_timeline (WbTimelineList *self,
                                     gboolean loading_more)
 {
-    const gchar *payload;
     g_autofree gchar *access_token = NULL;
     g_autofree gchar *app_key = NULL;
     GError *error = NULL;
-    goffset payload_length;
-    JsonNode *root_node;
-    JsonParser *parser;
     RestProxy *proxy;
     RestProxyCall *call;
     WbTimelineListPrivate *priv;
@@ -175,47 +232,15 @@ wb_timeline_list_get_home_timeline (WbTimelineList *self,
         rest_proxy_call_add_param (call, "max_id", priv->last_idstr);
     }
 
-    rest_proxy_call_sync (call, &error);
-    if (error != NULL)
+    if (!rest_proxy_call_async (call, statuses_home_timeline_finished_cb,
+                                NULL, self, &error))
     {
-        g_error ("Error calling Weibo API(2/statuses/home_timeline): %s",
+        g_error ("API(2/statues/home_timeline) call cancelled: %s",
                  error->message);
         g_error_free (error);
     }
 
-    payload = rest_proxy_call_get_payload (call);
-    payload_length = rest_proxy_call_get_payload_length (call);
-
-    parser = json_parser_new ();
-    if (!json_parser_load_from_data (parser, payload, payload_length, &error))
-    {
-        g_warning ("json_parser_load_from_data () failed: %s (%s, %d)",
-                   error->message,
-                   g_quark_to_string (error->domain),
-                   error->code);
-        g_error_free (error);
-    }
-
-    root_node = json_parser_get_root (parser);
-    if (JSON_NODE_HOLDS_OBJECT (root_node))
-    {
-        JsonObject *object;
-
-        object = json_node_get_object (root_node);
-
-        if (json_object_has_member (object, "statuses"))
-        {
-            JsonArray *array;
-
-            array = json_object_get_array_member (object, "statuses");
-            json_array_foreach_element (array, parse_weibo_post, self);
-
-            priv->batch_fetched++;
-        }
-    }
-
     g_object_unref (call);
-    g_object_unref (parser);
     g_object_unref (proxy);
 }
 
@@ -305,6 +330,16 @@ wb_timeline_list_class_init (WbTimelineListClass *klass)
                                                   WbTimelineList, timeline_list);
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   WbTimelineList, timeline_scrolled);
+
+    signals[LOADED] = g_signal_new ("loaded",
+                                    G_TYPE_FROM_CLASS (klass),
+                                    G_SIGNAL_RUN_LAST,
+                                    0,
+                                    NULL,
+                                    NULL,
+                                    NULL,
+                                    G_TYPE_NONE,
+                                    0);
 }
 
 static void

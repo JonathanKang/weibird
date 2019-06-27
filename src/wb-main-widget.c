@@ -44,6 +44,7 @@ struct _WbMainWidget
 
 typedef struct
 {
+    GtkWidget *loading_label;
     GtkWidget *login_box;
     GtkWidget *timeline;
     WbMainWidgetMode mode;
@@ -321,6 +322,16 @@ on_login_button_clicked (GtkWidget *button,
 }
 
 static void
+timeline_list_loaded_cb (WbMainWidget *self)
+{
+    WbMainWidgetPrivate *priv;
+
+    priv = wb_main_widget_get_instance_private (self);
+
+    gtk_stack_set_visible_child (GTK_STACK (self), priv->timeline);
+}
+
+static void
 notify_mode_cb (GObject *object,
                 GParamSpec *pspec,
                 gpointer user_data)
@@ -457,6 +468,8 @@ wb_main_widget_class_init (WbMainWidgetClass *klass)
                                                   WbMainWidget, login_box);
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   WbMainWidget, timeline);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbMainWidget, loading_label);
 
     gtk_widget_class_bind_template_callback (widget_class, on_login_button_clicked);
 }
@@ -479,19 +492,22 @@ wb_main_widget_init (WbMainWidget *self)
     priv = wb_main_widget_get_instance_private (self);
     list = WB_TIMELINE_LIST (priv->timeline);
 
+    g_signal_connect (self, "notify::mode", G_CALLBACK (notify_mode_cb), NULL);
+    g_signal_connect_swapped (list, "loaded",
+                              G_CALLBACK (timeline_list_loaded_cb), self);
+
+    gtk_stack_set_visible_child (GTK_STACK (self), priv->loading_label);
+
     settings = g_settings_new (SETTINGS_SCHEMA);
     access_token = g_settings_get_string (settings, ACCESS_TOKEN);
     if (g_strcmp0 (access_token, "") != 0)
     {
-        gtk_stack_set_visible_child (GTK_STACK (self), priv->timeline);
         wb_timeline_list_get_home_timeline (list, FALSE);
     }
     else
     {
         gtk_stack_set_visible_child (GTK_STACK (self), priv->login_box);
     }
-
-    g_signal_connect (self, "notify::mode", G_CALLBACK (notify_mode_cb), NULL);
 
     g_free (access_token);
     g_object_unref (settings);
