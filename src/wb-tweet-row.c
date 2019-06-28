@@ -134,7 +134,8 @@ wb_tweet_row_constructed (GObject *object)
         /* Profile image (50px by 50px), name, source and time */
         avatar = wb_avatar_widget_new ();
         wb_avatar_widget_setup (avatar,
-                                priv->tweet_item->user->profile_image_url);
+                                priv->tweet_item->user->profile_image_url,
+                                FALSE);
         priv->profile_image = GTK_WIDGET (avatar);
         gtk_widget_set_halign (priv->profile_image, GTK_ALIGN_START);
         gtk_box_pack_start (GTK_BOX (hbox1), priv->profile_image,

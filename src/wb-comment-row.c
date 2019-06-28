@@ -112,7 +112,8 @@ wb_comment_row_constructed (GObject *object)
     WbCommentRowPrivate *priv = wb_comment_row_get_instance_private (self);
 
     wb_avatar_widget_setup (WB_AVATAR_WIDGET (priv->avatar),
-                            priv->comment->user->profile_image_url);
+                            priv->comment->user->profile_image_url,
+                            FALSE);
 
     if (g_strcmp0 (priv->comment->user->nickname, "") != 0)
     {

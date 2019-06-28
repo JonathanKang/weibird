@@ -33,8 +33,7 @@ struct _WbAvatarWidget
 typedef struct
 {
     cairo_surface_t *surface;
-    gint width;
-    gint height;
+    gint size;
     GdkPixbuf *pixbuf;
     GdkPixbuf *scaled_pixbuf;
     GdkWindow *event_window;
@@ -48,13 +47,13 @@ static void on_message_complete (SoupSession *session,
 
 void
 wb_avatar_widget_setup (WbAvatarWidget *self,
-                        const gchar *uri)
+                        const gchar *uri,
+                        gboolean small)
 {
     SoupMessage *msg;
     WbAvatarWidgetPrivate *priv = wb_avatar_widget_get_instance_private (self);
 
-    priv->width = 50;
-    priv->height = 50;
+    priv->size = small ? 24 : 50;
 
     msg = soup_message_new (SOUP_METHOD_GET, uri);
     soup_session_queue_message (SOUPSESSION, msg,
@@ -100,6 +99,9 @@ static gboolean
 wb_avatar_widget_draw (GtkWidget *widget,
                        cairo_t *cr)
 {
+    gdouble scale;
+    gint width;
+    gint height;
     WbAvatarWidget *self;
     WbAvatarWidgetPrivate *priv;
 
@@ -111,6 +113,13 @@ wb_avatar_widget_draw (GtkWidget *widget,
         return GDK_EVENT_PROPAGATE;
     }
 
+    width = priv->size;
+    height = priv->size;
+    scale = (double) gtk_widget_get_allocated_width (widget) /
+            (double) cairo_image_surface_get_width (priv->surface);
+
+    cairo_rectangle (cr, 0, 0, width, height);
+    cairo_scale (cr, scale, scale);
     cairo_set_source_surface (cr, priv->surface, 0, 0);
     cairo_paint (cr);
 
@@ -134,8 +143,8 @@ wb_avatar_widget_get_preferred_height (GtkWidget *widget,
     self = WB_AVATAR_WIDGET (widget);
     priv = wb_avatar_widget_get_instance_private (self);
 
-    *minimum_height = priv->height;
-    *natural_height = priv->height;
+    *minimum_height = priv->size;
+    *natural_height = priv->size;
 }
 
 static void
@@ -149,8 +158,8 @@ wb_avatar_widget_get_preferred_width (GtkWidget *widget,
     self = WB_AVATAR_WIDGET (widget);
     priv = wb_avatar_widget_get_instance_private (self);
 
-    *minimum_width = priv->width;
-    *natural_width = priv->width;
+    *minimum_width = priv->size;
+    *natural_width = priv->size;
 }
 
 static void

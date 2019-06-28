@@ -26,7 +26,7 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (WbAvatarWidget, wb_avatar_widget, WB, AVATAR_WIDGET, GtkWidget)
 
-void wb_avatar_widget_setup (WbAvatarWidget *self, const gchar *uri);
+void wb_avatar_widget_setup (WbAvatarWidget *self, const gchar *uri, gboolean small);
 WbAvatarWidget *wb_avatar_widget_new (void);
 
 G_END_DECLS

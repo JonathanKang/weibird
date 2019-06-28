@@ -344,7 +344,8 @@ wb_tweet_detail_page_constructed (GObject *object)
     priv = wb_tweet_detail_page_get_instance_private (self);
 
     wb_avatar_widget_setup (WB_AVATAR_WIDGET (priv->avatar_widget),
-                            priv->tweet_item->user->profile_image_url);
+                            priv->tweet_item->user->profile_image_url,
+                            FALSE);
 
     if (g_strcmp0 (priv->tweet_item->user->nickname, "") != 0)
     {
