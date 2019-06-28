@@ -16,8 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gtk/gtk.h>
+#include <json-glib/json-glib.h>
+#include <rest/oauth2-proxy.h>
+
+#include "wb-avatar-widget.h"
 #include "wb-enums.h"
 #include "wb-headerbar.h"
+#include "wb-util.h"
 
 enum
 {
@@ -34,6 +40,8 @@ struct _WbHeaderbar
 
 typedef struct
 {
+    GtkWidget *avatar_image;
+    GtkWidget *account_button;
     GtkWidget *back_button;
     GtkWidget *pri_menu;
     WbHeaderbarMode mode;
@@ -56,6 +64,97 @@ wb_headerbar_set_mode (WbHeaderbar *self,
         priv->mode = mode;
         g_object_notify_by_pspec (G_OBJECT (self), obj_properties[PROP_MODE]);
     }
+}
+
+static void
+users_show_finished_cb (RestProxyCall *call,
+                        const GError *error,
+                        GObject *weak_object,
+                        gpointer user_data)
+{
+    const gchar *payload;
+    goffset payload_length;
+    GError *err = NULL;
+    JsonNode *root_node;
+    JsonParser *parser;
+    WbHeaderbar *self;
+    WbHeaderbarPrivate *priv;
+
+    if (error != NULL)
+    {
+        g_error ("Error calling Weibo API(2/users/show): %s", error->message);
+        return;
+    }
+
+    self = WB_HEADERBAR (user_data);
+    priv = wb_headerbar_get_instance_private (self);
+
+    payload = rest_proxy_call_get_payload (call);
+    payload_length = rest_proxy_call_get_payload_length (call);
+
+    parser = json_parser_new ();
+    if (!json_parser_load_from_data (parser, payload, payload_length, &err))
+    {
+        g_warning ("json_parser_load_from_data () failed: %s (%s, %d)",
+                   err->message,
+                   g_quark_to_string (err->domain),
+                   err->code);
+        g_error_free (err);
+    }
+
+    root_node = json_parser_get_root (parser);
+    if (JSON_NODE_HOLDS_OBJECT (root_node))
+    {
+        JsonObject *object;
+
+        object = json_node_get_object (root_node);
+
+        if (json_object_has_member (object, "profile_image_url"))
+        {
+            const gchar *uri;
+
+            uri = json_object_get_string_member (object, "profile_image_url");
+            wb_avatar_widget_setup (WB_AVATAR_WIDGET (priv->avatar_image),
+                                    uri, TRUE);
+            gtk_widget_show_all (priv->account_button);
+        }
+    }
+
+    g_object_unref (parser);
+}
+
+static void
+wb_headerbar_setup_account_button (WbHeaderbar *self)
+{
+    g_autofree gchar *access_token = NULL;
+    g_autofree gchar *app_key = NULL;
+    g_autofree gchar *uid = NULL;
+    GError *error = NULL;
+    RestProxy *proxy;
+    RestProxyCall *call;
+
+    access_token = wb_util_get_access_token ();
+    app_key = wb_util_get_app_key ();
+    uid = wb_util_get_uid ();
+
+    proxy = oauth2_proxy_new_with_token (app_key, access_token,
+                                         "https://api.weibo.com/oauth2/authorize",
+                                         "https://api.weibo.com", FALSE);
+    call = rest_proxy_new_call (proxy);
+    rest_proxy_call_set_function (call, "2/users/show.json");
+    rest_proxy_call_set_method (call, "GET");
+    rest_proxy_call_add_param (call, "access_token", access_token);
+    rest_proxy_call_add_param (call, "uid", uid);
+
+    if (!rest_proxy_call_async (call, users_show_finished_cb, NULL, self, &error))
+    {
+        g_error ("API(2/users/show) call cancelled: %s",
+                 error->message);
+        g_error_free (error);
+    }
+
+    g_object_unref (call);
+    g_object_unref (proxy);
 }
 
 static void
@@ -154,9 +253,16 @@ wb_headerbar_set_property (GObject *object,
 static void
 wb_headerbar_init (WbHeaderbar *self)
 {
+    /* Ensure GTK+ private types used by the template definition
+     * before calling gtk_widget_init_template()
+     */
+    g_type_ensure (WB_TYPE_AVATAR_WIDGET);
+
     gtk_widget_init_template (GTK_WIDGET (self));
 
     g_signal_connect (self, "notify::mode", G_CALLBACK (notify_mode_cb), NULL);
+
+    wb_headerbar_setup_account_button (self);
 }
 
 static void
@@ -181,6 +287,10 @@ wb_headerbar_class_init (WbHeaderbarClass *klass)
 
     gtk_widget_class_set_template_from_resource (widget_class,
                                                  "/com/jonathankang/Weibird/wb-headerbar.ui");
+    gtk_widget_class_bind_template_child_private (widget_class, WbHeaderbar,
+                                                  avatar_image);
+    gtk_widget_class_bind_template_child_private (widget_class, WbHeaderbar,
+                                                  account_button);
     gtk_widget_class_bind_template_child_private (widget_class, WbHeaderbar,
                                                   back_button);
     gtk_widget_class_bind_template_child_private (widget_class, WbHeaderbar,

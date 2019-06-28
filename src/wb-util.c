@@ -27,6 +27,7 @@ static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
 static const gchar ACCESS_TOKEN[] = "access-token";
 static const gchar APP_KEY[] = "app-key";
 static const gchar APP_SECRET[] = "app-secret";
+static const gchar UID[] = "uid";
 
 void
 wb_util_init_soup_session (void)
@@ -261,6 +262,13 @@ wb_util_scale_image (GdkPixbuf *pixbuf,
     return image;
 }
 
+/**
+ * wb_util_get_access_token:
+ *
+ * This function returns currently logged in user's access token.
+ *
+ * Returns: A newly allocated string
+ */
 gchar *
 wb_util_get_access_token (void)
 {
@@ -276,6 +284,13 @@ wb_util_get_access_token (void)
     return access_token;
 }
 
+/**
+ * wb_util_get_app_key:
+ *
+ * This function returns Weibird's app key.
+ *
+ * Returns: A newly allocated string
+ */
 gchar *
 wb_util_get_app_key (void)
 {
@@ -291,6 +306,13 @@ wb_util_get_app_key (void)
     return app_key;
 }
 
+/**
+ * wb_util_get_app_secret:
+ *
+ * This function returns Weibird's app secret.
+ *
+ * Returns: A newly allocated string
+ */
 gchar *
 wb_util_get_app_secret (void)
 {
@@ -304,4 +326,26 @@ wb_util_get_app_secret (void)
     g_object_unref (settings);
 
     return app_secret;
+}
+
+/**
+ * wb_util_get_uid:
+ *
+ * This function returns currently logged in user's uid.
+ *
+ * Returns: A newly allocated string
+ */
+gchar *
+wb_util_get_uid (void)
+{
+    gchar *uid;
+    GSettings *settings;
+
+    settings = g_settings_new (SETTINGS_SCHEMA);
+
+    uid = g_settings_get_string (settings, UID);
+
+    g_object_unref (settings);
+
+    return uid;
 }

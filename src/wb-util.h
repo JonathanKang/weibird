@@ -42,6 +42,7 @@ GtkWidget *wb_util_scale_image (GdkPixbuf *pixbuf, gint *width, gint *height);
 gchar *wb_util_get_access_token (void);
 gchar *wb_util_get_app_key (void);
 gchar *wb_util_get_app_secret (void);
+gchar *wb_util_get_uid (void);
 
 G_BEGIN_DECLS
 
