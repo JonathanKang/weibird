@@ -168,6 +168,13 @@ statuses_home_timeline_finished_cb (RestProxyCall *call,
     self = WB_TIMELINE_LIST (user_data);
     priv = wb_timeline_list_get_instance_private (self);
 
+    if (error != NULL)
+    {
+        g_error ("Error calling Weibo API(2/statuses/home_timeline): %s",
+                 error->message);
+        return;
+    }
+
     payload = rest_proxy_call_get_payload (call);
     payload_length = rest_proxy_call_get_payload_length (call);
 
