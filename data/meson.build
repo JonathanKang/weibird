@@ -1,6 +1,7 @@
 subdir('icons')
 
 resource_data = files(
+    'wb-comment-row.ui',
     'wb-compose-window.ui',
     'wb-headerbar.ui',
     'wb-main-widget.ui',
