@@ -155,6 +155,7 @@ wb_tweet_row_constructed (GObject *object)
         wb_name_button_set_text (name_button, priv->tweet_item->user->name);
     }
     gtk_widget_set_halign (GTK_WIDGET (name_button), GTK_ALIGN_START);
+    gtk_widget_set_valign (GTK_WIDGET (name_button), GTK_ALIGN_CENTER);
     gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (name_button), TRUE, TRUE, 0);
 
     if (!priv->retweet && g_strcmp0 (priv->tweet_item->source, "") != 0)
