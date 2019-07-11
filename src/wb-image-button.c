@@ -367,7 +367,7 @@ wb_image_button_size_allocate (GtkWidget     *widget,
 
     gtk_widget_set_allocation (widget, allocation);
 
-    if (priv->event_window != NULL)
+    if (priv->event_window != NULL && gtk_widget_get_realized (widget))
     {
 	gdk_window_move_resize (priv->event_window,
 				allocation->x,
