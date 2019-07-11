@@ -356,6 +356,28 @@ wb_image_button_unrealize (GtkWidget *widget)
 }
 
 static void
+wb_image_button_size_allocate (GtkWidget     *widget,
+			       GtkAllocation *allocation)
+{
+    WbImageButton *self;
+    WbImageButtonPrivate *priv;
+
+    self = WB_IMAGE_BUTTON (widget);
+    priv = wb_image_button_get_instance_private (self);
+
+    gtk_widget_set_allocation (widget, allocation);
+
+    if (priv->event_window != NULL)
+    {
+	gdk_window_move_resize (priv->event_window,
+				allocation->x,
+				allocation->y,
+				allocation->width,
+				allocation->height);
+    }
+}
+
+static void
 wb_image_button_map (GtkWidget *widget)
 {
     WbImageButton *self;
@@ -510,6 +532,7 @@ wb_image_button_class_init (WbImageButtonClass *klass)
     widget_class->key_press_event = wb_image_button_key_press_event;
     widget_class->realize = wb_image_button_realize;
     widget_class->unrealize = wb_image_button_unrealize;
+    widget_class->size_allocate = wb_image_button_size_allocate;
     widget_class->map = wb_image_button_map;
     widget_class->unmap = wb_image_button_unmap;
 
