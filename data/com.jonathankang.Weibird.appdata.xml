@@ -6,7 +6,11 @@
   <project_license>GPL-3.0+</project_license>
   <name>Weibird</name>
   <summary>Native GTK+ Weibo client</summary>
-  <description>Weibird is a Weibo client which allows you to view and compose Weibo.</description>
+  <description>
+    <p>
+      Weibird is a Weibo client which allows you to view and compose Weibo.
+    </p>
+  </description>
   <launchable type="desktop-id">com.jonathankang.Weibird.desktop</launchable>
   <screenshots>
     <screenshot type="default">
