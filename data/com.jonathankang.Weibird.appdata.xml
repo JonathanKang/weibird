@@ -21,9 +21,9 @@
   <update_contact>jonathankang@gnome.org</update_contact>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="0.1.7" data="2019-08-06">
+    <release version="0.1.7" date="2019-08-06">
       <description>
-        <p>Changes in Weibird 0.1.7</p>
+        <p>Changes in Weibird 0.1.7:</p>
         <ul>
           <li>Improved error logging</li>
           <li>Added loading indicator on application startup</li>
@@ -35,7 +35,7 @@
     </release>
     <release version="0.1.6" date="2019-06-24">
       <description>
-        <p>Changes in Weibird 0.1.6</p>
+        <p>Changes in Weibird 0.1.6:</p>
         <ul>
           <li>Add support for commenting on a tweet or comment</li>
           <li>Add loading animation for loading images</li>
