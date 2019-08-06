@@ -1,4 +1,4 @@
-project('weibird', 'c', version : '0.1.7')
+project('weibird', 'c', version : '0.1.8')
 
 wb_name = meson.project_name()
 wb_version = meson.project_version()
