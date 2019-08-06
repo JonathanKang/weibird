@@ -1,3 +1,12 @@
+Weibird 0.1.7
+=============
+
+* Improved error logging
+* Added a loading indicator on application startup
+* Fix images not clickable from Federico Mena Quintero
+* Make content label in details page selectable
+* General fixes and improvements
+
 Weibird 0.1.6
 =============
 
