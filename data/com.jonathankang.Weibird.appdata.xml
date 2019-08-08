@@ -11,6 +11,7 @@
       Weibird is a Weibo client which allows you to view and compose Weibo.
     </p>
   </description>
+  <developer_name>亢松川(Jonathan Kang)</developer_name>
   <launchable type="desktop-id">com.jonathankang.Weibird.desktop</launchable>
   <screenshots>
     <screenshot type="default">
@@ -27,19 +28,18 @@
   <releases>
     <release version="0.1.9" date="2019-08-06">
       <description>
-        <p>
-          <ul>
-            <li>Fix broken appdata for flathub build.</li>
-          </ul>
-        </p>
+        <p>Changes in Weibird 0.1.9:</p>
+        <ul>
+          <li>Fix broken appdata for flathub build.</li>
+        </ul>
       </description>
     </release>
     <release version="0.1.8" date="2019-08-06">
       <description>
         <p>Changes in Weibird 0.1.8:</p>
-          <ul>
-            <li>Fix broken appdata.</li>
-          </ul>
+        <ul>
+          <li>Fix broken appdata.</li>
+        </ul>
       </description>
     </release>
     <release version="0.1.7" date="2019-08-06">
