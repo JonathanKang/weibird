@@ -53,6 +53,120 @@ wb_comment_list_set_tweet_id (WbCommentList *self,
     priv->tweet_id = tweet_id;
 }
 
+static void
+parse_weibo_comments (gpointer data,
+                      gpointer user_data)
+{
+    JsonObject *object;
+    WbComment *comment;
+    WbCommentRow *comment_row;
+    WbCommentList *self = WB_COMMENT_LIST (user_data);
+
+    object = json_node_get_object (data);
+    comment = wb_comment_new (object);
+    comment_row = wb_comment_row_new (comment);
+
+    wb_comment_list_insert_comment_widget (self, comment_row);
+
+    g_object_unref (comment);
+}
+
+static void
+comments_show_finished_cb (RestProxyCall *call,
+                           const GError *error,
+                           GObject *weak_object,
+                           gpointer user_data)
+{
+    const gchar *payload;
+    goffset payload_length;
+    GError *err = NULL;
+    JsonParser *parser;
+    JsonNode *root_node;
+    WbCommentList *self;
+
+    if (error != NULL)
+    {
+        g_error ("Error calling Weibo API(2/comments/show): %s",
+                 error->message);
+        return;
+    }
+
+    self = WB_COMMENT_LIST (user_data);
+
+    payload = rest_proxy_call_get_payload (call);
+    payload_length = rest_proxy_call_get_payload_length (call);
+
+    parser = json_parser_new ();
+    if (!json_parser_load_from_data (parser, payload, payload_length, &err))
+    {
+        g_warning ("json_parser_load_data () failed: %s (%s, %d)",
+                   err->message,
+                   g_quark_to_string (err->domain),
+                   err->code);
+        g_error_free (err);
+    }
+
+    root_node = json_parser_get_root (parser);
+    if (JSON_NODE_HOLDS_OBJECT (root_node))
+    {
+        JsonObject *object;
+
+        object = json_node_get_object (root_node);
+
+        if (json_object_has_member (object, "comments"))
+        {
+            GList *elements;
+            JsonArray *array;
+
+            array = json_object_get_array_member (object, "comments");
+            elements = json_array_get_elements (array);
+
+            /* All the comments fetched using Weibo API are sorted by descending
+             * time (new to old). While we need to insert older comments first,
+             * so that when we insert newer comments, we can find which comment
+             * it replies to, if it replies to one.
+             * The foreach function of JsonArray doesn't iterate from the last
+             * to the first element. So we need get a list of elements in the array
+             * and reverse it. */
+            elements = g_list_reverse (elements);
+            g_list_foreach (elements, parse_weibo_comments, self);
+
+            g_list_free (elements);
+        }
+    }
+
+    g_object_unref (parser);
+}
+
+void
+wb_comment_list_load_comments (WbCommentList *self,
+                               const gchar *idstr)
+{
+    g_autofree gchar *access_token = NULL;
+    g_autofree gchar *app_key = NULL;
+    g_autoptr (GError) error = NULL;
+    RestProxy *proxy;
+    RestProxyCall *call;
+
+    access_token = wb_util_get_access_token ();
+    app_key = wb_util_get_app_key ();
+
+    proxy = oauth2_proxy_new_with_token (app_key, access_token,
+                                         "https://api.weibo.com/oauth2/authorize",
+                                         "https://api.weibo.com", FALSE);
+    call = rest_proxy_new_call (proxy);
+    rest_proxy_call_set_function (call, "2/comments/show.json");
+    rest_proxy_call_set_method (call, "GET");
+    rest_proxy_call_add_param (call, "access_token", access_token);
+    rest_proxy_call_add_param (call, "id", idstr);
+
+    rest_proxy_call_async (call, comments_show_finished_cb,
+                           NULL, self, &error);
+
+    g_object_unref (call);
+    g_object_unref (proxy);
+}
+
 void
 wb_comment_list_insert_comment_widget (WbCommentList *self,
                                        WbCommentRow *comment_widget)

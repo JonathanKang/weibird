@@ -70,112 +70,6 @@ G_DEFINE_TYPE_WITH_PRIVATE (WbTweetDetailPage, wb_tweet_detail_page, GTK_TYPE_SC
 static GParamSpec *obj_properties[N_PROPERTIES] = { NULL, };
 
 static void
-parse_weibo_comments (gpointer data,
-                      gpointer user_data)
-{
-    JsonObject *object;
-    WbComment *comment;
-    WbCommentRow *comment_row;
-    WbTweetDetailPage *self;
-    WbTweetDetailPagePrivate *priv;
-
-    self = WB_TWEET_DETAIL_PAGE (user_data);
-    priv = wb_tweet_detail_page_get_instance_private (self);
-
-    object = json_node_get_object (data);
-    comment = wb_comment_new (object);
-    comment_row = wb_comment_row_new (comment);
-
-    wb_comment_list_insert_comment_widget (WB_COMMENT_LIST (priv->listbox),
-                                           comment_row);
-
-    g_object_unref (comment);
-}
-
-static void
-fetch_comments (WbTweetDetailPage *self)
-{
-    const gchar *payload;
-    g_autofree gchar *access_token = NULL;
-    g_autofree gchar *app_key = NULL;
-    goffset payload_length;
-    GError *error = NULL;
-    JsonNode *root_node;
-    JsonParser *parser;
-    RestProxy *proxy;
-    RestProxyCall *call;
-    WbTweetDetailPagePrivate *priv;
-
-    priv = wb_tweet_detail_page_get_instance_private (self);
-
-    access_token = wb_util_get_access_token ();
-    app_key = wb_util_get_app_key ();
-
-    proxy = oauth2_proxy_new_with_token (app_key, access_token,
-                                         "https://api.weibo.com/oauth2/authorize",
-                                         "https://api.weibo.com", FALSE);
-    call = rest_proxy_new_call (proxy);
-    rest_proxy_call_set_function (call, "2/comments/show.json");
-    rest_proxy_call_set_method (call, "GET");
-    rest_proxy_call_add_param (call, "access_token", access_token);
-    rest_proxy_call_add_param (call, "id", priv->tweet_item->idstr);
-
-    rest_proxy_call_sync (call, &error);
-    if (error != NULL)
-    {
-        g_error ("Error calling Weibo API(2/comments/show): %s",
-                 error->message);
-        g_error_free (error);
-    }
-
-    payload = rest_proxy_call_get_payload (call);
-    payload_length = rest_proxy_call_get_payload_length (call);
-
-    parser = json_parser_new ();
-    if (!json_parser_load_from_data (parser, payload, payload_length, &error))
-    {
-        g_warning ("json_parser_load_data () failed: %s (%s, %d)",
-                   error->message,
-                   g_quark_to_string (error->domain),
-                   error->code);
-        g_error_free (error);
-    }
-
-    root_node = json_parser_get_root (parser);
-    if (JSON_NODE_HOLDS_OBJECT (root_node))
-    {
-        JsonObject *object;
-
-        object = json_node_get_object (root_node);
-
-        if (json_object_has_member (object, "comments"))
-        {
-            GList *elements;
-            JsonArray *array;
-
-            array = json_object_get_array_member (object, "comments");
-            elements = json_array_get_elements (array);
-
-            /* All the comments fetched using Weibo API are sorted by descending
-             * time (new to old). While we need to insert older comments first,
-             * so that when we insert newer comments, we can find which comment
-             * it replies to, if it replies to one.
-             * The foreach function of JsonArray doesn't iterate from the last
-             * to the first element. So we need get a list of elements in the array
-             * and reverse it. */
-            elements = g_list_reverse (elements);
-            g_list_foreach (elements, parse_weibo_comments, self);
-
-            g_list_free (elements);
-        }
-    }
-
-    g_object_unref (call);
-    g_object_unref (parser);
-    g_object_unref (proxy);
-}
-
-static void
 wb_tweet_detail_page_add_comment (WbTweetDetailPage *self,
                                   const gchar *comment)
 {
@@ -410,8 +304,8 @@ wb_tweet_detail_page_constructed (GObject *object)
         gtk_widget_set_no_show_all (priv->retweet_box, TRUE);
     }
 
-    g_idle_add (G_SOURCE_FUNC (fetch_comments), self);
-
+    wb_comment_list_load_comments (WB_COMMENT_LIST (priv->listbox),
+                                   priv->tweet_item->idstr);
     /* Pass tweet id down to WbCommentList */
     wb_comment_list_set_tweet_id (WB_COMMENT_LIST (priv->listbox),
                                   priv->tweet_item->idstr);
