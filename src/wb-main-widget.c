@@ -329,6 +329,10 @@ timeline_list_loaded_cb (WbMainWidget *self)
     priv = wb_main_widget_get_instance_private (self);
 
     gtk_stack_set_visible_child (GTK_STACK (self), priv->timeline);
+
+    /* Set transition type only for navigating between list and detail view */
+    gtk_stack_set_transition_type (GTK_STACK (self),
+                                   GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 }
 
 static void
@@ -352,10 +356,9 @@ notify_mode_cb (GObject *object,
 
             if (child)
             {
+                gtk_stack_set_visible_child (stack, priv->timeline);
                 gtk_container_remove (GTK_CONTAINER (stack), child);
             }
-
-            gtk_stack_set_visible_child (stack, priv->timeline);
             break;
         case WB_MAIN_WIDGET_MODE_DETAIL:
             {
