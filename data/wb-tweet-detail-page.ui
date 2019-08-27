@@ -161,6 +161,27 @@
                         </child>
                     </object>
                 </child>
+                <child>
+                    <object class="GtkStack" id="comments_section">
+                        <child>
+                            <object class="GtkLabel">
+                                <property name="label">Loading…</property>
+                                <property name="visible">True</property>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="no_comments_label">
+                                <property name="label">No Comments Available</property>
+                                <property name="visible">True</property>
+                            </object>
+                        </child>
+                    </object>
+                    <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="pack-type">start</property>
+                    </packing>
+                </child>
             </object>
         </child>
     </template>

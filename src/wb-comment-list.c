@@ -28,6 +28,14 @@
 #include "wb-compose-window.h"
 #include "wb-util.h"
 
+enum
+{
+    PROP_0,
+    LOADED,
+    NO_COMMENTS,
+    LAST_SIGNAL
+};
+
 struct _WbCommentList
 {
 		GtkListBox parent_instance;
@@ -41,6 +49,8 @@ typedef struct
 } WbCommentListPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (WbCommentList, wb_comment_list, GTK_TYPE_LIST_BOX)
+
+static guint signals[LAST_SIGNAL] = { 0 };
 
 void
 wb_comment_list_set_tweet_id (WbCommentList *self,
@@ -113,7 +123,11 @@ comments_show_finished_cb (RestProxyCall *call,
 
         object = json_node_get_object (root_node);
 
-        if (json_object_has_member (object, "comments"))
+        if (json_object_get_int_member (object, "total_number") == 0)
+        {
+            g_signal_emit (self, signals[NO_COMMENTS], 0, NULL);
+        }
+        else
         {
             GList *elements;
             JsonArray *array;
@@ -130,6 +144,8 @@ comments_show_finished_cb (RestProxyCall *call,
              * and reverse it. */
             elements = g_list_reverse (elements);
             g_list_foreach (elements, parse_weibo_comments, self);
+
+            g_signal_emit (self, signals[LOADED], 0, NULL);
 
             g_list_free (elements);
         }
@@ -418,6 +434,25 @@ wb_comment_list_class_init (WbCommentListClass *klass)
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
     object_class->finalize = wb_comment_list_finalize;
+
+    signals[LOADED] = g_signal_new ("loaded",
+                                    G_TYPE_FROM_CLASS (klass),
+                                    G_SIGNAL_RUN_LAST,
+                                    0,
+                                    NULL,
+                                    NULL,
+                                    NULL,
+                                    G_TYPE_NONE,
+                                    0);
+    signals[NO_COMMENTS] = g_signal_new ("no-comments",
+                                         G_TYPE_FROM_CLASS (klass),
+                                         G_SIGNAL_RUN_LAST,
+                                         0,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         G_TYPE_NONE,
+                                         0);
 }
 
 static void

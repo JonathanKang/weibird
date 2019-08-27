@@ -49,6 +49,7 @@ struct _WbTweetDetailPage
 typedef struct
 {
     GtkWidget *avatar_widget;
+    GtkWidget *comments_section;
     GtkWidget *listbox;
     GtkWidget *main_box;
     GtkWidget *buttons_box;
@@ -59,6 +60,7 @@ typedef struct
     GtkWidget *content_label;
     GtkWidget *likes_label;
     GtkWidget *comments_label;
+    GtkWidget *no_comments_label;
     GtkWidget *reposts_label;
     WbMultiMediaWidget *mm_widget;
     WbTweetItem *tweet_item;
@@ -224,6 +226,34 @@ comment_button_clicked_cb (GtkButton *button,
                       G_CALLBACK (compose_dialog_response_cb), self);
 
     gtk_widget_show_all (GTK_WIDGET (compose_window));
+}
+
+static void
+comments_loaded_cb (WbCommentList *listbox,
+                    gpointer user_data)
+{
+    WbTweetDetailPage *self;
+    WbTweetDetailPagePrivate *priv;
+
+    self = WB_TWEET_DETAIL_PAGE (user_data);
+    priv = wb_tweet_detail_page_get_instance_private (self);
+
+    gtk_stack_set_visible_child (GTK_STACK (priv->comments_section),
+                                 priv->listbox);
+}
+
+static void
+no_comments_cb (WbCommentList *listbox,
+                gpointer user_data)
+{
+    WbTweetDetailPage *self;
+    WbTweetDetailPagePrivate *priv;
+
+    self = WB_TWEET_DETAIL_PAGE (user_data);
+    priv = wb_tweet_detail_page_get_instance_private (self);
+
+    gtk_stack_set_visible_child (GTK_STACK (priv->comments_section),
+                                 priv->no_comments_label);
 }
 
 static void
@@ -445,6 +475,12 @@ wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
     gtk_widget_class_bind_template_child_private (widget_class,
                                                   WbTweetDetailPage,
                                                   mm_widget);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  comments_section);
+    gtk_widget_class_bind_template_child_private (widget_class,
+                                                  WbTweetDetailPage,
+                                                  no_comments_label);
     gtk_widget_class_bind_template_callback (widget_class,
                                              comment_button_clicked_cb);
 }
@@ -452,15 +488,20 @@ wb_tweet_detail_page_class_init (WbTweetDetailPageClass *klass)
 static void
 wb_tweet_detail_page_init (WbTweetDetailPage *self)
 {
+    WbCommentList *clist;
     WbTweetDetailPagePrivate *priv;
 
     priv = wb_tweet_detail_page_get_instance_private (self);
 
     gtk_widget_init_template (GTK_WIDGET (self));
 
-    priv->listbox = GTK_WIDGET (wb_comment_list_new ());
-    gtk_box_pack_end (GTK_BOX (priv->main_box), priv->listbox,
-                      FALSE, FALSE, 0);
+    clist = wb_comment_list_new ();
+    g_signal_connect (clist, "loaded", G_CALLBACK (comments_loaded_cb), self);
+    g_signal_connect (clist, "no-comments", G_CALLBACK (no_comments_cb), self);
+
+    priv->listbox = GTK_WIDGET (clist);
+    gtk_stack_add_named (GTK_STACK (priv->comments_section),
+                         priv->listbox, "comments");
 }
 
 WbTweetDetailPage *
