@@ -23,6 +23,8 @@
 #include "wb-timeline-list.h"
 #include "wb-util.h"
 
+SoupSession *SOUPSESSION;
+
 static const gchar SETTINGS_SCHEMA[] = "com.jonathankang.Weibird";
 static const gchar ACCESS_TOKEN[] = "access-token";
 static const gchar APP_KEY[] = "app-key";
