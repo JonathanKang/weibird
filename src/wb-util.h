@@ -30,7 +30,7 @@ G_BEGIN_DECLS
 #define MAX_WIDTH 1000
 #define MAX_HEIGHT 800
 
-SoupSession *SOUPSESSION;
+extern SoupSession *SOUPSESSION;
 
 void wb_util_init_soup_session (void);
 void wb_util_finalize_soup_session (void);
